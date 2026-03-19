@@ -66,7 +66,7 @@ export default function Navbar() {
                   Moj nalog
                 </Link>
                 <Link
-                  to="/ads/create"
+                  to="/dashboard/ads/create"
                   className="bg-brand-red hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition"
                 >
                   + Oglas

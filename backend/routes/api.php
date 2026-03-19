@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\MakeController;
 use App\Http\Controllers\Api\CityController;
 use App\Http\Controllers\Api\EquipmentController;
 use App\Http\Controllers\Api\PackageController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\CategoryController;
 
 // ═══════════════════════════════════════════
 // JAVNE RUTE (bez autentifikacije)
@@ -29,9 +31,10 @@ Route::get('/ads/{slug}', [AdController::class, 'show']);
 
 // Filteri (dropdownovi na frontendu)
 Route::get('/makes',              [MakeController::class, 'index']);
-Route::get('/makes/{id}/models',  [MakeController::class, 'models']);
+Route::get('/makes/{make}/models', [MakeController::class, 'models']);
 Route::get('/cities',             [CityController::class, 'index']);
 Route::get('/equipment',          [EquipmentController::class, 'index']);
+Route::get('/categories',         [CategoryController::class, 'index']);
 
 // Recenzije korisnika (javno vidljive)
 Route::get('/users/{userId}/reviews', [ReviewController::class, 'index']);
@@ -84,6 +87,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/packages/purchase', [PackageController::class, 'purchase']);
     Route::get('/my-packages',        [PackageController::class, 'myPackages']);
+
+    // Javni profil prodavca
+    Route::get('/users/{id}', [UserController::class, 'show']);
+    Route::get('/users/{id}/ads', [UserController::class, 'ads']);
 
     // ═══════════════════════════════════════
     // ADMIN RUTE

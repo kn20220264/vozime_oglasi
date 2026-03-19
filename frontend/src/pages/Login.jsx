@@ -3,16 +3,19 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from '../api/axios';
 import toast from 'react-hot-toast';
+import useAuthStore from '../store/authStore'; 
 
 export default function Login() {
     const navigate = useNavigate();
     const qc = useQueryClient();
+    const setUser = useAuthStore((s) => s.setUser); // ← dodaj ovo
     const [form, setForm] = useState({ email: '', password: '' });
 
     const mutation = useMutation({
         mutationFn: () => axios.post('/login', form),
         onSuccess: (res) => {
             localStorage.setItem('token', res.data.token);
+            setUser(res.data.user); // ← dodaj ovo
             qc.invalidateQueries(['me']);
             toast.success(`Dobrodošli, ${res.data.user.name}!`);
             navigate('/dashboard');

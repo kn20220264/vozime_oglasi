@@ -27,7 +27,7 @@ export default function Home() {
 
     const { data: models } = useQuery({
         queryKey: ['models', filters.make_id],
-        queryFn: () => axios.get(`/models?make_id=${filters.make_id}`).then(r => r.data),
+        queryFn: () => axios.get(`/makes/${filters.make_id}/models`).then(r => r.data),
         enabled: !!filters.make_id
     });
 
@@ -48,7 +48,7 @@ export default function Home() {
 
     const { data: stats } = useQuery({
         queryKey: ['stats'],
-        queryFn: () => axios.get('/stats').then(r => r.data)
+        queryFn: () => axios.get('/admin/stats').then(r => r.data)
     });
 
     const set = (key, val) => setFilters(p => ({

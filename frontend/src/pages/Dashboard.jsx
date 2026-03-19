@@ -1,313 +1,82 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom';
-import axios from '../api/axios';
-import toast from 'react-hot-toast';
+import { NavLink, Outlet, Navigate } from "react-router-dom";
+import useAuthStore from "../store/authStore";
 
-const tabs = [
-    { id: 'ads',      label: 'Moji oglasi',   icon: '🚗' },
-    { id: 'favorites',label: 'Favoriti',       icon: '❤️' },
-    { id: 'messages', label: 'Poruke',         icon: '✉️' },
-    { id: 'profile',  label: 'Profil',         icon: '👤' },
+const navItems = [
+  { to: "/dashboard", label: "Pregled", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6", end: true },
+  { to: "/dashboard/ads", label: "Aktivni oglasi", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" },
+  { to: "/dashboard/ads/create", label: "Objavi oglas", icon: "M12 4v16m8-8H4", highlight: true },
+  { to: "/dashboard/favorites", label: "Oglasi koje pratim", icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" },
+  { to: "/dashboard/saved-searches", label: "Sacuvane pretrage", icon: "M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" },
+  { to: "/dashboard/messages", label: "Poruke", icon: "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" },
+  { to: "/dashboard/notifications", label: "Obavjestenja", icon: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.437L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" },
+  { to: "/dashboard/reviews", label: "Ocjene", icon: "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" },
+  { to: "/dashboard/packages", label: "Krediti / Paketi", icon: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" },
+  { to: "/dashboard/profile", label: "Podesavanja", icon: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" },
 ];
 
-const statusBadge = {
-    active:   'bg-green-100 text-green-700',
-    pending:  'bg-yellow-100 text-yellow-700',
-    inactive: 'bg-gray-100 text-gray-500',
-    sold:     'bg-blue-100 text-blue-700',
-    rejected: 'bg-red-100 text-red-600',
-    expired:  'bg-orange-100 text-orange-600',
-};
-const statusLabel = {
-    active: 'Aktivan', pending: 'Na čekanju', inactive: 'Neaktivan',
-    sold: 'Prodano', rejected: 'Odbijen', expired: 'Istekao'
-};
-
 export default function Dashboard() {
-    const [activeTab, setActiveTab] = useState('ads');
-    const navigate = useNavigate();
-    const qc = useQueryClient();
+ const { user, token, isLoading } = useAuthStore();
 
-    const { data: user } = useQuery({
-        queryKey: ['me'],
-        queryFn: () => axios.get('/me').then(r => r.data)
-    });
+if (isLoading && token && !user) return null; 
+if (!token) return <Navigate to="/login" replace />;
 
-    const { data: myAds, isLoading: adsLoading } = useQuery({
-        queryKey: ['my-ads'],
-        queryFn: () => axios.get('/my-ads').then(r => r.data),
-        enabled: activeTab === 'ads'
-    });
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="flex gap-8">
 
-    const { data: favorites } = useQuery({
-        queryKey: ['favorites'],
-        queryFn: () => axios.get('/favorites').then(r => r.data),
-        enabled: activeTab === 'favorites'
-    });
-
-    const { data: messages } = useQuery({
-        queryKey: ['messages'],
-        queryFn: () => axios.get('/messages').then(r => r.data),
-        enabled: activeTab === 'messages'
-    });
-
-    const deleteMutation = useMutation({
-        mutationFn: (id) => axios.delete(`/ads/${id}`),
-        onSuccess: () => {
-            toast.success('Oglas obrisan.');
-            qc.invalidateQueries(['my-ads']);
-        }
-    });
-
-    const toggleMutation = useMutation({
-        mutationFn: (id) => axios.patch(`/ads/${id}/toggle`),
-        onSuccess: () => qc.invalidateQueries(['my-ads'])
-    });
-
-    const stats = [
-        { label: 'Aktivnih oglasa', value: myAds?.filter(a => a.status === 'active').length ?? '-', icon: '🚗', color: 'blue' },
-        { label: 'Ukupno pregleda', value: myAds?.reduce((s, a) => s + (a.views_count || 0), 0) ?? '-', icon: '👁', color: 'purple' },
-        { label: 'Favorita',        value: favorites?.length ?? '-', icon: '❤️', color: 'red' },
-        { label: 'Novih poruka',    value: messages?.filter(m => !m.read_at)?.length ?? '-', icon: '✉️', color: 'green' },
-    ];
-
-    return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Header korisnika */}
-            <div className="bg-white border-b">
-                <div className="max-w-6xl mx-auto px-4 py-5 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-bold">
-                            {user?.name?.[0]?.toUpperCase()}
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-gray-900">{user?.name}</h1>
-                            <p className="text-sm text-gray-500 capitalize">{user?.email} · {user?.role}</p>
-                        </div>
-                    </div>
-                    <Link
-                        to="/ads/create"
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition flex items-center gap-2"
-                    >
-                        + Novi oglas
-                    </Link>
-                </div>
+        {/* Sidebar */}
+        <aside className="w-64 flex-shrink-0">
+          {/* User info */}
+          <div className="bg-white rounded-2xl p-4 shadow-sm mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                {user.avatar ? (
+                  <img src={`http://localhost:8000/storage/${user.avatar}`} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-xl font-bold text-gray-400">{user.name?.[0]}</span>
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="font-bold text-[#12142D] truncate">{user.name}</p>
+                <p className="text-xs text-gray-400 capitalize">{user.role}</p>
+              </div>
             </div>
+          </div>
 
-            <div className="max-w-6xl mx-auto px-4 py-6">
-                {/* Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    {stats.map(s => (
-                        <div key={s.label} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-                            <div className="text-2xl mb-1">{s.icon}</div>
-                            <div className="text-2xl font-bold text-gray-900">{s.value}</div>
-                            <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Tabs */}
-                <div className="flex gap-1 bg-white p-1 rounded-2xl shadow-sm border border-gray-100 mb-6 w-fit">
-                    {tabs.map(t => (
-                        <button
-                            key={t.id}
-                            onClick={() => setActiveTab(t.id)}
-                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition
-                                ${activeTab === t.id ? 'bg-blue-600 text-white shadow' : 'text-gray-600 hover:bg-gray-50'}`}
-                        >
-                            {t.icon} {t.label}
-                        </button>
-                    ))}
-                </div>
-
-                {/* TAB: Moji oglasi */}
-                {activeTab === 'ads' && (
-                    <div className="space-y-3">
-                        {adsLoading && <p className="text-center text-gray-400 py-10">Učitavanje...</p>}
-                        {!adsLoading && !myAds?.length && (
-                            <div className="bg-white rounded-2xl p-12 text-center shadow-sm">
-                                <div className="text-5xl mb-3">🚗</div>
-                                <p className="text-gray-500 mb-4">Nemate objavljenih oglasa.</p>
-                                <Link to="/ads/create" className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-blue-700 transition">
-                                    Objavi prvi oglas
-                                </Link>
-                            </div>
-                        )}
-                        {myAds?.map(ad => (
-                            <div key={ad.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 flex overflow-hidden hover:shadow-md transition">
-                                {/* Slika */}
-                                <div className="w-40 h-32 flex-shrink-0 bg-gray-100">
-                                    <img
-                                        src={ad.primary_image
-                                            ? `http://localhost:8000/storage/${ad.primary_image.path}`
-                                            : '/placeholder-car.jpg'}
-                                        className="w-full h-full object-cover"
-                                        alt={ad.title}
-                                    />
-                                </div>
-                                {/* Info */}
-                                <div className="flex-1 p-4 flex flex-col justify-between">
-                                    <div className="flex items-start justify-between">
-                                        <div>
-                                            <h3 className="font-semibold text-gray-900 hover:text-blue-600">
-                                                <Link to={`/ads/${ad.slug}`}>{ad.title}</Link>
-                                            </h3>
-                                            <p className="text-sm text-gray-500 mt-0.5">
-                                                {ad.year} · {ad.mileage?.toLocaleString()} km · {ad.city?.name}
-                                            </p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-lg font-bold text-blue-600">{ad.price?.toLocaleString()} €</p>
-                                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusBadge[ad.status]}`}>
-                                                {statusLabel[ad.status]}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center justify-between mt-2">
-                                        <p className="text-xs text-gray-400">👁 {ad.views_count} pregleda · {new Date(ad.created_at).toLocaleDateString('sr-ME')}</p>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => toggleMutation.mutate(ad.id)}
-                                                className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 transition"
-                                            >
-                                                {ad.status === 'active' ? 'Deaktiviraj' : 'Aktiviraj'}
-                                            </button>
-                                            <Link
-                                                to={`/ads/${ad.slug}/edit`}
-                                                className="text-xs px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition font-medium"
-                                            >
-                                                Uredi
-                                            </Link>
-                                            <button
-                                                onClick={() => {
-                                                    if (confirm('Obrisati oglas?')) deleteMutation.mutate(ad.id);
-                                                }}
-                                                className="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition font-medium"
-                                            >
-                                                Obriši
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {/* TAB: Favoriti */}
-                {activeTab === 'favorites' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {!favorites?.length && (
-                            <div className="col-span-3 text-center py-12 bg-white rounded-2xl shadow-sm">
-                                <div className="text-5xl mb-3">❤️</div>
-                                <p className="text-gray-500">Niste sačuvali nijedan oglas u favorite.</p>
-                            </div>
-                        )}
-                        {favorites?.map(fav => (
-                            <Link key={fav.id} to={`/ads/${fav.ad?.slug}`}
-                                className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
-                                <img
-                                    src={fav.ad?.primary_image
-                                        ? `http://localhost:8000/storage/${fav.ad.primary_image.path}`
-                                        : '/placeholder-car.jpg'}
-                                    className="w-full h-40 object-cover"
-                                    alt={fav.ad?.title}
-                                />
-                                <div className="p-3">
-                                    <p className="font-semibold text-sm truncate">{fav.ad?.title}</p>
-                                    <p className="text-blue-600 font-bold mt-1">{fav.ad?.price?.toLocaleString()} €</p>
-                                    <p className="text-xs text-gray-400">{fav.ad?.year} · {fav.ad?.mileage?.toLocaleString()} km</p>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                )}
-
-                {/* TAB: Poruke */}
-                {activeTab === 'messages' && (
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        {!messages?.length && (
-                            <div className="text-center py-12">
-                                <div className="text-5xl mb-3">✉️</div>
-                                <p className="text-gray-500">Nemate poruka.</p>
-                            </div>
-                        )}
-                        {messages?.map(msg => (
-                            <div key={msg.id}
-                                className={`flex items-start gap-4 p-4 border-b last:border-0 hover:bg-gray-50 transition
-                                    ${!msg.read_at ? 'bg-blue-50' : ''}`}>
-                                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600 flex-shrink-0">
-                                    {msg.sender?.name?.[0]}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center justify-between">
-                                        <p className="font-semibold text-sm">{msg.sender?.name}</p>
-                                        <p className="text-xs text-gray-400">{new Date(msg.created_at).toLocaleDateString('sr-ME')}</p>
-                                    </div>
-                                    <p className="text-xs text-blue-500 mb-1">Re: {msg.ad?.title}</p>
-                                    <p className="text-sm text-gray-600 truncate">{msg.body}</p>
-                                </div>
-                                {!msg.read_at && <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-2" />}
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {/* TAB: Profil */}
-                {activeTab === 'profile' && (
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 max-w-xl">
-                        <h2 className="font-bold text-lg mb-5">Moj profil</h2>
-                        <ProfileForm user={user} />
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-}
-
-function ProfileForm({ user }) {
-    const qc = useQueryClient();
-    const [form, setForm] = useState({
-        name: user?.name || '',
-        phone: user?.phone || '',
-    });
-
-    const mutation = useMutation({
-        mutationFn: () => axios.put('/profile', form),
-        onSuccess: () => {
-            toast.success('Profil ažuriran!');
-            qc.invalidateQueries(['me']);
-        }
-    });
-
-    return (
-        <div className="space-y-4">
-            {[
-                { label: 'Ime i prezime', key: 'name', type: 'text' },
-                { label: 'Telefon', key: 'phone', type: 'tel' },
-            ].map(f => (
-                <div key={f.key}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{f.label}</label>
-                    <input
-                        type={f.type}
-                        value={form[f.key]}
-                        onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
-                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                </div>
+          {/* Nav */}
+          <nav className="bg-white rounded-2xl shadow-sm overflow-hidden">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-3 text-sm font-medium transition border-l-2 ${
+                    item.highlight
+                      ? isActive
+                        ? "border-[#FF0026] bg-red-50 text-[#FF0026]"
+                        : "border-transparent text-[#FF0026] hover:bg-red-50"
+                      : isActive
+                      ? "border-[#FF0026] bg-red-50 text-[#FF0026]"
+                      : "border-transparent text-gray-600 hover:bg-gray-50 hover:text-[#12142D]"
+                  }`
+                }
+              >
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+                </svg>
+                {item.label}
+              </NavLink>
             ))}
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input disabled value={user?.email || ''} className="w-full border border-gray-100 bg-gray-50 rounded-xl px-4 py-2.5 text-sm text-gray-400" />
-            </div>
-            <button
-                onClick={() => mutation.mutate()}
-                disabled={mutation.isPending}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition"
-            >
-                {mutation.isPending ? 'Čuvanje...' : 'Sačuvaj izmjene'}
-            </button>
-        </div>
-    );
+          </nav>
+        </aside>
+
+        {/* Main content */}
+        <main className="flex-1 min-w-0">
+          <Outlet />
+        </main>
+
+      </div>
+    </div>
+  );
 }
