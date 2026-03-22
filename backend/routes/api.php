@@ -58,10 +58,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Oglasi
     Route::post('/ads',                    [AdController::class, 'store']);
-    Route::put('/ads/{id}',                [AdController::class, 'update']);
+    Route::put('/ads/{ad}',                [AdController::class, 'update']);
     Route::delete('/ads/{id}',             [AdController::class, 'destroy']);
     Route::get('/my-ads',                  [AdController::class, 'myAds']);
-    Route::post('/ads/{id}/mark-sold',     [AdController::class, 'markSold']);
+    Route::post('/ads/{ad}/mark-sold',     [AdController::class, 'markAsSold']);
+    Route::get('/ads/{id}/edit',           [AdController::class, 'edit']);
 
     // Omiljeni
     Route::get('/favorites',              [FavoriteController::class, 'index']);
@@ -83,7 +84,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Sačuvane pretrage
     Route::get('/saved-searches',        [SavedSearchController::class, 'index']);
     Route::post('/saved-searches',       [SavedSearchController::class, 'store']);
-    Route::delete('/saved-searches/{id}',[SavedSearchController::class, 'destroy']);
+    Route::delete('/saved-searches/{id}', [SavedSearchController::class, 'destroy']);
 
     Route::post('/packages/purchase', [PackageController::class, 'purchase']);
     Route::get('/my-packages',        [PackageController::class, 'myPackages']);
@@ -104,6 +105,4 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/reports',                     [AdminController::class, 'reports']);
         Route::put('/reports/{id}/resolve',        [AdminController::class, 'resolveReport']);
     });
-
-
 });

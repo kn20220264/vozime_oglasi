@@ -16,26 +16,29 @@ const STATUS_LABELS = {
 export default function MyAds() {
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
+  const [deletingId, setDeletingId] = useState(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["my-ads", page],
     queryFn: async () => {
       const r = await axios.get(`/my-ads?page=${page}&per_page=10`);
-      console.log("MY ADS RESPONSE:", r.data);
       return r.data;
     },
     staleTime: 0,
   });
 
-  console.log("DATA:", data, "ADS:", data?.data, "LOADING:", isLoading);
-
   const deleteMutation = useMutation({
     mutationFn: (id) => axios.delete(`/ads/${id}`),
     onSuccess: () => {
       toast.success("Oglas obrisan.");
+      setDeletingId(null);
       qc.invalidateQueries(["my-ads"]);
     },
-    onError: () => toast.error("Greška pri brisanju."),
+    onError: (err) => {
+      const msg = err?.response?.data?.message ?? "Greška pri brisanju.";
+      toast.error(msg);
+      setDeletingId(null);
+    },
   });
 
   const markSoldMutation = useMutation({
@@ -45,6 +48,12 @@ export default function MyAds() {
       qc.invalidateQueries(["my-ads"]);
     },
   });
+
+  const handleDelete = (id) => {
+    if (!window.confirm("Sigurno želiš obrisati ovaj oglas?")) return;
+    setDeletingId(id);
+    deleteMutation.mutate(id);
+  };
 
   const ads = data?.data ?? [];
   const meta = data?.meta;
@@ -87,11 +96,14 @@ export default function MyAds() {
             label: ad.status,
             cls: "bg-gray-100 text-gray-500",
           };
+          const isDeleting = deletingId === ad.id;
 
           return (
             <div
               key={ad.id}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 p-4 hover:shadow-md transition"
+              className={`bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 p-4 hover:shadow-md transition ${
+                isDeleting ? "opacity-50 pointer-events-none" : ""
+              }`}
             >
               <div className="w-24 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
                 {imgUrl ? (
@@ -109,13 +121,18 @@ export default function MyAds() {
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <p className="font-bold text-[#12142D] truncate">{ad.title}</p>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${status.cls}`}>
+                  <p className="font-bold text-[#12142D] truncate">
+                    {ad.title}
+                  </p>
+                  <span
+                    className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${status.cls}`}
+                  >
                     {status.label}
                   </span>
                 </div>
                 <p className="text-sm text-gray-500">
-                  {ad.price?.toLocaleString()} € · {ad.city?.name} · {ad.year} · {ad.mileage?.toLocaleString()} km
+                  {ad.price?.toLocaleString()} € · {ad.city?.name} · {ad.year} ·{" "}
+                  {ad.mileage?.toLocaleString()} km
                 </p>
                 <p className="text-xs text-gray-400 mt-0.5">
                   {ad.views_count ?? 0} pregleda · Objavljeno {ad.created_at}
@@ -129,6 +146,13 @@ export default function MyAds() {
                 >
                   Pregled
                 </Link>
+                {/* NOVO — Uredi */}
+                <Link
+                  to={`/dashboard/ads/${ad.slug}/edit`}
+                  className="text-xs px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-semibold transition text-center"
+                >
+                  Uredi
+                </Link>
                 {ad.status === "active" && (
                   <button
                     onClick={() => markSoldMutation.mutate(ad.id)}
@@ -138,12 +162,11 @@ export default function MyAds() {
                   </button>
                 )}
                 <button
-                  onClick={() => {
-                    if (confirm("Obrisati oglas?")) deleteMutation.mutate(ad.id);
-                  }}
-                  className="text-xs px-3 py-1.5 bg-red-50 hover:bg-red-100 text-[#FF0026] rounded-lg font-semibold transition"
+                  onClick={() => handleDelete(ad.id)}
+                  disabled={isDeleting}
+                  className="text-xs px-3 py-1.5 bg-red-50 hover:bg-red-100 text-[#FF0026] rounded-lg font-semibold transition disabled:opacity-50"
                 >
-                  Obriši
+                  {isDeleting ? "Briše se..." : "Obriši"}
                 </button>
               </div>
             </div>

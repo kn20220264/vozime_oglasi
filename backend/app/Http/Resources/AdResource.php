@@ -1,72 +1,66 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
+use App\Http\Resources\AdResource;
+use App\Models\Favorite;
+use App\Models\Ad;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 
-class AdResource extends JsonResource
+class FavoriteController extends Controller
 {
-    // Ova klasa se koristi za LISTU oglasa (/api/ads)
-    // Vraća samo podatke koji su potrebni za karticu oglasa
-    // NE vraća sve detalje — to radi AdDetailResource
-    // Razlog: ako lista ima 50 oglasa, ne trebamo slati 50x cijeli oglas sa svom opremom i slikama
-
-    public function toArray(Request $request): array
+    // GET /api/favorites
+    public function index(Request $request)
     {
-        return [
-            'id'           => $this->id,
-            'slug'         => $this->slug,
-            'title'        => $this->title,
-            'price'        => $this->price,
-            'price_negotiable' => $this->price_negotiable,
-            'currency'     => $this->currency,
-            'year'         => $this->year,
-            'mileage'      => $this->mileage,
-            'fuel_type'    => $this->fuel_type,
-            'transmission' => $this->transmission,
-            'body_type'    => $this->body_type,
-            'power_kw'     => $this->power_kw,
-            'condition'    => $this->condition,
-            'damage'       => $this->damage,
-            'featured'     => $this->featured,
-            'views_count'  => $this->views_count,
-            'created_at'   => $this->created_at->diffForHumans(), // "prije 2 dana"
+        $favorites = Favorite::with(['ad.make', 'ad.vehicleModel', 'ad.primaryImage', 'ad.city'])
+            ->where('user_id', $request->user()->id)
+            ->orderByDesc('created_at')
+            ->paginate(20);
 
-            // Samo ime grada — ne trebamo koordinate u listi
-            'city' => $this->whenLoaded('city', fn() => [
-                'id'   => $this->city->id,
-                'name' => $this->city->name,
+        return response()->json([
+            'data' => $favorites->map(fn($fav) => [
+                'id'         => $fav->id,
+                'created_at' => $fav->created_at,
+                'ad'         => new AdResource($fav->ad),
             ]),
+            'meta' => [
+                'current_page' => $favorites->currentPage(),
+                'last_page'    => $favorites->lastPage(),
+                'total'        => $favorites->total(),
+            ],
+        ]);
+    }
 
-            // Samo ime marke
-            'make' => $this->whenLoaded('make', fn() => [
-                'id'   => $this->make->id,
-                'name' => $this->make->name,
-            ]),
+    // POST /api/favorites/{adId}
+    public function toggle(Request $request, int $adId)
+    {
+        Ad::findOrFail($adId);
 
-            // Samo ime modela
-            'model' => $this->whenLoaded('vehicleModel', fn() => [
-                'id'   => $this->vehicleModel->id,
-                'name' => $this->vehicleModel->name,
-            ]),
+        $existing = Favorite::where('user_id', $request->user()->id)
+            ->where('ad_id', $adId)
+            ->first();
 
-            // Samo naslovna slika — jedna, ne cijeli niz
-            'primary_image' => $this->whenLoaded('primaryImage', fn() =>
-                $this->primaryImage
-                    ? asset('storage/' . $this->primaryImage->path)
-                    : null
-            ),
+        if ($existing) {
+            $existing->delete();
+            return response()->json(['message' => 'Uklonjeno iz omiljenih.', 'favorited' => false]);
+        }
 
-            // Ime i avatar prodavca — kupac treba znati ko prodaje
-            'seller' => $this->whenLoaded('user', fn() => [
-                'id'     => $this->user->id,
-                'name'   => $this->user->name,
-                'role'   => $this->user->role,
-                'avatar' => $this->user->avatar
-                    ? asset('storage/' . $this->user->avatar)
-                    : null,
-            ]),
-        ];
+        Favorite::create([
+            'user_id' => $request->user()->id,
+            'ad_id'   => $adId,
+        ]);
+
+        return response()->json(['message' => 'Dodano u omiljene.', 'favorited' => true]);
+    }
+
+    // GET /api/favorites/{adId}/check
+    public function check(Request $request, int $adId)
+    {
+        $favorited = Favorite::where('user_id', $request->user()->id)
+            ->where('ad_id', $adId)
+            ->exists();
+
+        return response()->json(['favorited' => $favorited]);
     }
 }

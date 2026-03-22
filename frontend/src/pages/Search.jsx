@@ -50,23 +50,28 @@ export default function Search() {
 
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    const { data: makes } = useQuery({
+    const { data: makesRaw } = useQuery({
         queryKey: ['makes'],
         queryFn: () => axios.get('/makes').then(r => r.data.data),
         staleTime: Infinity,
     });
 
-    const { data: models } = useQuery({
+    const { data: modelsRaw } = useQuery({
         queryKey: ['models', filters.make_id],
         queryFn: () => axios.get(`/makes/${filters.make_id}/models`).then(r => r.data.data),
         enabled: !!filters.make_id,
     });
 
-    const { data: cities } = useQuery({
+    const { data: citiesRaw } = useQuery({
         queryKey: ['cities'],
         queryFn: () => axios.get('/cities').then(r => r.data.data),
         staleTime: Infinity,
     });
+
+    // Osiguravamo da su uvijek array — nikad ne puca .map
+    const makes  = Array.isArray(makesRaw)  ? makesRaw  : [];
+    const models = Array.isArray(modelsRaw) ? modelsRaw : [];
+    const cities = Array.isArray(citiesRaw) ? citiesRaw : [];
 
     const { data: results, isLoading } = useQuery({
         queryKey: ['search', filters],
@@ -315,13 +320,13 @@ function FilterSidebar({ filters, set, makes, models, cities, applyFilters, rese
                 <select value={filters.make_id} onChange={e => set('make_id', e.target.value)}
                     className="filter-select">
                     <option value="">Svi proizvođači</option>
-                    {makes?.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                    {makes.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
                 </select>
                 <select value={filters.model_id} onChange={e => set('model_id', e.target.value)}
                     disabled={!filters.make_id}
                     className="filter-select mt-2 disabled:bg-gray-50 disabled:text-gray-400">
                     <option value="">Svi modeli</option>
-                    {models?.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                    {models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
                 </select>
             </FilterSection>
 
@@ -462,7 +467,7 @@ function FilterSidebar({ filters, set, makes, models, cities, applyFilters, rese
                 <select value={filters.city_id} onChange={e => set('city_id', e.target.value)}
                     className="filter-select">
                     <option value="">Svi gradovi</option>
-                    {cities?.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
             </FilterSection>
 

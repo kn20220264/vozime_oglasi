@@ -8,12 +8,15 @@ class UpdateAdRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Provjeri da li oglas pripada prijavljenom korisniku
-        // $this->route('ad') dohvata {ad} parametar iz URL-a
+        // Nakon što ruta postane {ad}, route model binding daje objekat
         $ad = $this->route('ad');
-        return auth()->check() && $ad->user_id === auth()->id();
-    }
+        if (!$ad) return false;
 
+        return auth()->check() && (
+            $ad->user_id === auth()->id() ||
+            in_array(auth()->user()->role, ['admin', 'moderator'])
+        );
+    }
     public function rules(): array
     {
         // Jedina razlika od StoreAdRequest je 'sometimes'
@@ -93,7 +96,7 @@ class UpdateAdRequest extends FormRequest
             'images.*.mimes'         => 'Dozvoljeni formati su: JPG, PNG, WEBP.',
             'images.*.max'           => 'Svaka slika ne smije biti veća od 5MB.',
             'delete_images.*.exists' => 'Jedna od slika za brisanje ne postoji.',
-            'primary_image_id.exists'=> 'Odabrana naslovna slika ne postoji.',
+            'primary_image_id.exists' => 'Odabrana naslovna slika ne postoji.',
         ];
     }
 }

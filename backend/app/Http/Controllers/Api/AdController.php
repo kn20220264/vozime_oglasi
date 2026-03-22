@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
+
 class AdController extends Controller
 {
     // ==========================================
@@ -100,7 +101,7 @@ class AdController extends Controller
         if ($request->filled('q')) {
             $query->where(function ($q) use ($request) {
                 $q->where('title', 'like', '%' . $request->q . '%')
-                  ->orWhere('description', 'like', '%' . $request->q . '%');
+                    ->orWhere('description', 'like', '%' . $request->q . '%');
             });
         }
 
@@ -113,7 +114,7 @@ class AdController extends Controller
         if (in_array($sortBy, $allowedSorts)) {
             // Istaknuti oglasi uvijek idu prvi, bez obzira na sort
             $query->orderBy('featured', 'desc')
-                  ->orderBy($sortBy, $sortDir);
+                ->orderBy($sortBy, $sortDir);
         }
 
         // PAGINACIJA — 20 oglasa po stranici, isto kao polovniautomobili
@@ -155,22 +156,28 @@ class AdController extends Controller
     // ==========================================
     public function show(string $slug): JsonResponse
     {
-        $ad = Ad::with([
+        $query = Ad::with([
             'city',
             'make',
             'vehicleModel',
             'category',
-            'images',          // sve slike za galeriju
-            'equipment',       // sva oprema
-            'user.profile',    // prodavac + podaci o firmi ako je dealer
-            'favorites',       // za is_favorited
-        ])
-        ->where('slug', $slug)
-        ->where('status', 'active')
-        ->firstOrFail();
+            'images',
+            'equipment',
+            'user.profile',
+            'favorites',
+        ])->where('slug', $slug);
 
-        // Povećaj broj pregleda za 1
-        // Koristimo increment() umjesto update() — sigurnije pri istovremenim requestima
+        // Aktivni oglasi su vidljivi svima
+        // Pending/inactive/rejected oglasi su vidljivi samo vlasniku, adminu i moderatoru
+        $ad = $query->where(function ($q) {
+            $q->where('status', 'active')
+                ->orWhere(function ($q2) {
+                    if (auth()->check()) {
+                        $q2->where('user_id', auth()->id());
+                    }
+                });
+        })->firstOrFail();
+
         $ad->increment('views_count');
 
         return response()->json([
@@ -289,38 +296,47 @@ class AdController extends Controller
 
         return response()->json([
             'message' => 'Oglas je uspješno izmijenjen.',
-            'data'    => new AdDetailResource($ad),
         ]);
     }
+
+
+    public function edit(Request $request, $id): JsonResponse
+    {
+        $ad = Ad::with(['city', 'make', 'vehicleModel', 'images', 'equipment', 'category'])
+            ->findOrFail($id);
+
+        if ($ad->user_id !== $request->user()->id && !in_array($request->user()->role, ['admin', 'moderator'])) {
+            return response()->json(['message' => 'Nemate dozvolu.'], 403);
+        }
+
+        return response()->json(['data' => new AdDetailResource($ad)]);
+    }
+
+
+
 
     // ==========================================
     // DESTROY — obriši oglas
     // DELETE /api/ads/{ad}
     // ==========================================
- public function destroy(Ad $ad): JsonResponse
-{
-    /** @var \App\Models\User $user */
-    $user = auth()->user();
+    public function destroy(Request $request, $id)
+    {
+        $user = $request->user();
+        $ad = Ad::findOrFail($id);
 
-    if ($ad->user_id !== auth()->id() && !$user->isAdmin()) {
-        return response()->json([
-            'message' => 'Nemate dozvolu za brisanje ovog oglasa.',
-        ], 403);
-    }
+        // Samo vlasnik, admin ili moderator može obrisati
+        if ($ad->user_id !== $user->id && !in_array($user->role, ['admin', 'moderator'])) {
+            return response()->json(['message' => 'Nemate dozvolu za ovu akciju.'], 403);
+        }
 
-        DB::transaction(function () use ($ad) {
-            // Obriši sve slike sa diska
-            foreach ($ad->images as $image) {
-                Storage::disk('public')->delete($image->path);
-            }
+        // Obriši slike sa diska
+        foreach ($ad->images as $image) {
+            Storage::disk('public')->delete($image->path);
+        }
 
-            // Obriši oglas — cascade briše slike, opremu, favourite iz baze
-            $ad->delete();
-        });
+        $ad->delete();
 
-        return response()->json([
-            'message' => 'Oglas je uspješno obrisan.',
-        ]);
+        return response()->json(['message' => 'Oglas obrisan.']);
     }
 
     // ==========================================
@@ -331,7 +347,9 @@ class AdController extends Controller
     {
         $ads = Ad::with(['city', 'make', 'vehicleModel', 'primaryImage'])
             ->where('user_id', auth()->id())
-            ->when($request->filled('status'), fn($q) =>
+            ->when(
+                $request->filled('status'),
+                fn($q) =>
                 $q->where('status', $request->status)
             )
             ->orderBy('created_at', 'desc')

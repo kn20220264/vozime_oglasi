@@ -14,6 +14,8 @@ import Register from "./pages/Register";
 import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 import MyAds from "./pages/dashboard/MyAds";
+import EditAd from "./pages/dashboard/EditAd";
+import Favorites from "./pages/dashboard/Favorites";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -67,6 +69,8 @@ export default function App() {
                 <Route index element={<DashboardHome />} />
                 <Route path="ads" element={<MyAds />} />
                 <Route path="ads/create" element={<CreateAd />} />
+               <Route path="/dashboard/ads/:slug/edit" element={<EditAd />} />
+               <Route path="favorites" element={<Favorites />} />
               </Route>
 
               {/* Admin */}

@@ -74,11 +74,11 @@ class Ad extends Model
     protected static function boot()
     {
         parent::boot();
+
         static::creating(function ($ad) {
-            $ad->slug = Str::slug($ad->title) . '-' . uniqid();
+            $ad->slug = \Illuminate\Support\Str::slug($ad->title) . '-' . uniqid();
         });
     }
-
     // Oglas pripada jednom korisniku
     public function user()
     {

@@ -19,14 +19,11 @@ export default function AdDetail() {
   });
 
   const favMutation = useMutation({
-    mutationFn: () =>
-      ad?.is_favorited
-        ? api.delete(`/favorites/${ad.id}`)
-        : api.post("/favorites", { ad_id: ad.id }),
-    onSuccess: () => {
+    mutationFn: () => api.post(`/favorites/${ad.id}`),
+    onSuccess: (res) => {
       queryClient.invalidateQueries(["ad", slug]);
       toast.success(
-        ad?.is_favorited ? "Uklonjeno iz omiljenih" : "Dodano u omiljene"
+        res.data.favorited ? "Dodano u omiljene" : "Uklonjeno iz omiljenih",
       );
     },
   });
@@ -63,7 +60,10 @@ export default function AdDetail() {
     return (
       <div className="max-w-6xl mx-auto px-4 py-20 text-center">
         <p className="text-2xl text-gray-400">Oglas nije pronadjen</p>
-        <Link to="/ads" className="mt-4 inline-block text-[#FF0026] font-semibold">
+        <Link
+          to="/ads"
+          className="mt-4 inline-block text-[#FF0026] font-semibold"
+        >
           Nazad na oglase
         </Link>
       </div>
@@ -74,14 +74,18 @@ export default function AdDetail() {
     : [{ url: "https://placehold.co/800x500/e5e7eb/9ca3af?text=Nema+slike" }];
 
   const getImageSrc = (img) => {
-    if (!img?.url) return "https://placehold.co/800x500/e5e7eb/9ca3af?text=Nema+slike";
+    if (!img?.url)
+      return "https://placehold.co/800x500/e5e7eb/9ca3af?text=Nema+slike";
     if (img.url.startsWith("http")) return img.url;
     return `http://localhost:8000${img.url}`;
   };
 
   const specs = [
     { label: "Godiste", value: ad.year },
-    { label: "Kilometraza", value: ad.mileage ? `${Number(ad.mileage).toLocaleString()} km` : null },
+    {
+      label: "Kilometraza",
+      value: ad.mileage ? `${Number(ad.mileage).toLocaleString()} km` : null,
+    },
     { label: "Gorivo", value: ad.fuel_type },
     { label: "Mjenjac", value: ad.transmission },
     { label: "Karoserija", value: ad.body_type },
@@ -115,17 +119,19 @@ export default function AdDetail() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="text-sm text-gray-400 mb-4 flex items-center gap-2">
-        <Link to="/" className="hover:text-[#FF0026]">Pocetna</Link>
+        <Link to="/" className="hover:text-[#FF0026]">
+          Pocetna
+        </Link>
         <span>/</span>
-        <Link to="/ads" className="hover:text-[#FF0026]">Oglasi</Link>
+        <Link to="/ads" className="hover:text-[#FF0026]">
+          Oglasi
+        </Link>
         <span>/</span>
         <span className="text-gray-600 truncate">{ad.title}</span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
         <div className="lg:col-span-2 space-y-6">
-
           <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
             <div className="relative bg-gray-100 aspect-video">
               <img
@@ -133,7 +139,8 @@ export default function AdDetail() {
                 alt={ad.title}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  e.target.src = "https://placehold.co/800x500/e5e7eb/9ca3af?text=Nema+slike";
+                  e.target.src =
+                    "https://placehold.co/800x500/e5e7eb/9ca3af?text=Nema+slike";
                 }}
               />
               {ad.featured && (
@@ -154,7 +161,8 @@ export default function AdDetail() {
                       src={getImageSrc(img)}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        e.target.src = "https://placehold.co/80x56/e5e7eb/9ca3af?text=x";
+                        e.target.src =
+                          "https://placehold.co/80x56/e5e7eb/9ca3af?text=x";
                       }}
                     />
                   </button>
@@ -166,9 +174,12 @@ export default function AdDetail() {
           <div className="bg-white rounded-2xl p-6 shadow-sm">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
-                <h1 className="text-2xl font-black text-[#12142D]">{ad.title}</h1>
+                <h1 className="text-2xl font-black text-[#12142D]">
+                  {ad.title}
+                </h1>
                 <p className="text-sm text-gray-400 mt-1">
-                  {ad.city?.name} · {ad.views_count} pregleda · objavljeno {ad.created_ago}
+                  {ad.city?.name} · {ad.views_count} pregleda · objavljeno{" "}
+                  {ad.created_ago}
                 </p>
               </div>
               <div className="text-right">
@@ -176,26 +187,35 @@ export default function AdDetail() {
                   {Number(ad.price).toLocaleString()} EUR
                 </p>
                 {ad.price_negotiable && (
-                  <p className="text-sm text-green-600 font-semibold">po dogovoru</p>
+                  <p className="text-sm text-green-600 font-semibold">
+                    po dogovoru
+                  </p>
                 )}
               </div>
             </div>
           </div>
 
           <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-[#12142D] mb-4">Specifikacije</h2>
+            <h2 className="text-lg font-bold text-[#12142D] mb-4">
+              Specifikacije
+            </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {specs.map((s, i) => (
                 <div key={i} className="bg-gray-50 rounded-xl p-3">
                   <p className="text-xs text-gray-400 mb-0.5">{s.label}</p>
-                  <p className="text-sm font-semibold text-[#12142D] capitalize">{s.value}</p>
+                  <p className="text-sm font-semibold text-[#12142D] capitalize">
+                    {s.value}
+                  </p>
                 </div>
               ))}
             </div>
             {boolSpecs.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100">
                 {boolSpecs.map((s, i) => (
-                  <span key={i} className="text-sm bg-green-50 text-green-700 px-3 py-1 rounded-full font-medium">
+                  <span
+                    key={i}
+                    className="text-sm bg-green-50 text-green-700 px-3 py-1 rounded-full font-medium"
+                  >
                     {s.label}
                   </span>
                 ))}
@@ -214,13 +234,16 @@ export default function AdDetail() {
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {items.map((item, i) => (
-                        <span key={i} className="text-sm bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full">
+                        <span
+                          key={i}
+                          className="text-sm bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full"
+                        >
                           {item}
                         </span>
                       ))}
                     </div>
                   </div>
-                ) : null
+                ) : null,
               )}
             </div>
           )}
@@ -247,12 +270,14 @@ export default function AdDetail() {
         </div>
 
         <div className="space-y-4">
-
           <div className="bg-white rounded-2xl p-5 shadow-sm">
             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">
               Prodavac
             </h3>
-            <Link to={`/users/${ad.seller?.id}`} className="flex items-center gap-3 group">
+            <Link
+              to={`/users/${ad.seller?.id}`}
+              className="flex items-center gap-3 group"
+            >
               <div className="w-12 h-12 rounded-full bg-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center">
                 {ad.seller?.avatar ? (
                   <img
@@ -269,23 +294,31 @@ export default function AdDetail() {
                 <p className="font-bold text-[#12142D] group-hover:text-[#FF0026] transition">
                   {ad.seller?.name}
                 </p>
-                <p className="text-xs text-gray-400 capitalize">{ad.seller?.role}</p>
+                <p className="text-xs text-gray-400 capitalize">
+                  {ad.seller?.role}
+                </p>
               </div>
             </Link>
 
             {ad.seller?.phone && (
               <div className="mt-3 pt-3 border-t border-gray-100">
-                <p className="text-sm font-semibold text-[#12142D]">Tel: {ad.seller.phone}</p>
+                <p className="text-sm font-semibold text-[#12142D]">
+                  Tel: {ad.seller.phone}
+                </p>
               </div>
             )}
 
             {ad.seller?.company && (
               <div className="mt-3 pt-3 border-t border-gray-100 space-y-1">
                 {ad.seller.company.address && (
-                  <p className="text-xs text-gray-500">Adresa: {ad.seller.company.address}</p>
+                  <p className="text-xs text-gray-500">
+                    Adresa: {ad.seller.company.address}
+                  </p>
                 )}
                 {ad.seller.company.working_hours && (
-                  <p className="text-xs text-gray-500">Radno vrijeme: {ad.seller.company.working_hours}</p>
+                  <p className="text-xs text-gray-500">
+                    Radno vrijeme: {ad.seller.company.working_hours}
+                  </p>
                 )}
                 {ad.seller.company.website && (
                   <a
@@ -380,12 +413,13 @@ export default function AdDetail() {
               {ad.seller?.member_since && (
                 <div className="flex justify-between text-sm pt-2 border-t border-gray-100">
                   <span className="text-gray-400">Clan od</span>
-                  <span className="font-semibold">{ad.seller.member_since}</span>
+                  <span className="font-semibold">
+                    {ad.seller.member_since}
+                  </span>
                 </div>
               )}
             </div>
           </div>
-
         </div>
       </div>
     </div>
