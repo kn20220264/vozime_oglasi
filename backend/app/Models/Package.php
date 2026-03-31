@@ -4,25 +4,25 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Report extends Model
+class Package extends Model
 {
     protected $fillable = [
-        'user_id',
-        'ad_id',
-        'reason',
+        'name',
+        'price',
+        'duration_days',
+        'max_images',
+        'featured',
         'description',
-        'status',
+        'is_active',
     ];
 
-    // Prijava pripada korisniku koji je prijavio
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+    protected $casts = [
+        'featured'  => 'boolean',
+        'is_active' => 'boolean',
+    ];
 
-    // Prijava je vezana za oglas
-    public function ad()
+    public function userPackages()
     {
-        return $this->belongsTo(Ad::class);
+        return $this->hasMany(UserPackage::class);
     }
 }

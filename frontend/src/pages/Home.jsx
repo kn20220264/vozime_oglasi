@@ -20,21 +20,24 @@ export default function Home() {
         year_from: '', fuel_type: '', body_type: '', city_id: '',
     });
 
-    const { data: makes } = useQuery({
+    const { data: makesData } = useQuery({
         queryKey: ['makes'],
         queryFn: () => axios.get('/makes').then(r => r.data)
     });
+    const makes = makesData?.data ?? [];
 
-    const { data: models } = useQuery({
+    const { data: modelsData } = useQuery({
         queryKey: ['models', filters.make_id],
         queryFn: () => axios.get(`/makes/${filters.make_id}/models`).then(r => r.data),
         enabled: !!filters.make_id
     });
+    const models = modelsData?.data ?? [];
 
-    const { data: cities } = useQuery({
+    const { data: citiesData } = useQuery({
         queryKey: ['cities'],
         queryFn: () => axios.get('/cities').then(r => r.data)
     });
+    const cities = citiesData?.data ?? [];
 
     const { data: featuredAds } = useQuery({
         queryKey: ['featured-ads'],
@@ -44,11 +47,6 @@ export default function Home() {
     const { data: latestAds } = useQuery({
         queryKey: ['latest-ads'],
         queryFn: () => axios.get('/ads?sort=latest&per_page=12').then(r => r.data)
-    });
-
-    const { data: stats } = useQuery({
-        queryKey: ['stats'],
-        queryFn: () => axios.get('/admin/stats').then(r => r.data)
     });
 
     const set = (key, val) => setFilters(p => ({
@@ -70,7 +68,6 @@ export default function Home() {
 
             {/* ===== HERO ===== */}
             <section className="bg-[#12142D] relative overflow-hidden">
-                {/* Dekorativni pozadinski element */}
                 <div className="absolute inset-0 opacity-5">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-[#FF0026] rounded-full -translate-y-1/2 translate-x-1/2" />
                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#FFEA00] rounded-full translate-y-1/2 -translate-x-1/2" />
@@ -90,7 +87,6 @@ export default function Home() {
 
                     {/* Search box */}
                     <div className="bg-white rounded-2xl p-5 shadow-2xl max-w-4xl mx-auto">
-                        {/* Prva linija filtera */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
                             <select
                                 value={filters.make_id}
@@ -98,7 +94,7 @@ export default function Home() {
                                 className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] bg-white col-span-2 md:col-span-1"
                             >
                                 <option value="">Svi proizvođači</option>
-                                {makes?.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                                {makes.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
                             </select>
 
                             <select
@@ -108,7 +104,7 @@ export default function Home() {
                                 className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] bg-white disabled:bg-gray-50 disabled:text-gray-400 col-span-2 md:col-span-1"
                             >
                                 <option value="">Svi modeli</option>
-                                {models?.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                                {models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
                             </select>
 
                             <select
@@ -132,7 +128,6 @@ export default function Home() {
                             </select>
                         </div>
 
-                        {/* Druga linija filtera */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                             <select
                                 value={filters.fuel_type}
@@ -160,7 +155,7 @@ export default function Home() {
                                 className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] bg-white"
                             >
                                 <option value="">Svi gradovi</option>
-                                {cities?.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                             </select>
 
                             <button
@@ -171,7 +166,6 @@ export default function Home() {
                             </button>
                         </div>
 
-                        {/* Quick links */}
                         <div className="flex flex-wrap gap-2 pt-3 border-t border-gray-100">
                             <span className="text-xs text-gray-400 mr-1 self-center">Popularno:</span>
                             {['VW Golf', 'BMW', 'Mercedes', 'Audi', 'Toyota', 'Elektro vozila'].map(tag => (
@@ -184,26 +178,6 @@ export default function Home() {
                                 </button>
                             ))}
                         </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ===== STATISTIKE ===== */}
-            <section className="bg-[#1B2B5A] py-6">
-                <div className="max-w-6xl mx-auto px-4">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                        {[
-                            { label: 'Aktivnih oglasa', value: stats?.total_ads?.toLocaleString() ?? '1.200+', icon: '🚗' },
-                            { label: 'Registrovanih korisnika', value: stats?.total_users?.toLocaleString() ?? '850+', icon: '👤' },
-                            { label: 'Prodatih vozila', value: stats?.sold_ads?.toLocaleString() ?? '430+', icon: '✅' },
-                            { label: 'Auto placeva', value: stats?.total_dealers?.toLocaleString() ?? '45+', icon: '🏢' },
-                        ].map(s => (
-                            <div key={s.label} className="text-white">
-                                <div className="text-2xl mb-1">{s.icon}</div>
-                                <div className="text-2xl md:text-3xl font-black text-[#FFEA00]">{s.value}</div>
-                                <div className="text-xs text-[#6674A3] mt-0.5">{s.label}</div>
-                            </div>
-                        ))}
                     </div>
                 </div>
             </section>
@@ -230,7 +204,7 @@ export default function Home() {
                 </section>
             )}
 
-            {/* ===== KATEGORIJE po tipu karoserije ===== */}
+            {/* ===== KATEGORIJE ===== */}
             <section className="bg-gray-50 py-10">
                 <div className="max-w-6xl mx-auto px-4">
                     <div className="flex items-center gap-3 mb-6">
@@ -243,7 +217,7 @@ export default function Home() {
                             { type: 'sedan',     label: 'Sedan',     emoji: '🚗' },
                             { type: 'hatchback', label: 'Hatchback', emoji: '🚘' },
                             { type: 'karavan',   label: 'Karavan',   emoji: '🚐' },
-                            { type: 'coupe',     label: 'Kupé',      emoji: '🏎️' },
+                            { type: 'coupe',     label: 'Kupé',      emoji: '🎏' },
                             { type: 'kabrio',    label: 'Kabrio',    emoji: '🏖️' },
                             { type: 'van',       label: 'Van',       emoji: '🚌' },
                             { type: 'pickup',    label: 'Pickup',    emoji: '🛻' },
@@ -280,6 +254,11 @@ export default function Home() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {latestAds?.data?.map(ad => <AdCard key={ad.id} ad={ad} />)}
                 </div>
+                {!latestAds?.data?.length && (
+                    <div className="text-center py-16 text-gray-400">
+                        <p className="text-lg">Nema aktivnih oglasa.</p>
+                    </div>
+                )}
                 <div className="text-center mt-8">
                     <button
                         onClick={() => navigate('/search')}
@@ -338,7 +317,7 @@ export default function Home() {
                             <span className="text-[#FFEA00] font-bold">OGLASI</span>
                         </div>
                         <p className="text-[#6674A3] text-xs text-center">
-                            © {new Date().getFullYear()} VozimeOglasi — Oglasnik vozila za Crnu Goru
+                            © {new Date().getFullYear()} VozimeOglasi – Oglasnik vozila za Crnu Goru
                         </p>
                         <div className="flex gap-4 text-xs text-[#6674A3]">
                             <button className="hover:text-white transition">Uslovi korišćenja</button>

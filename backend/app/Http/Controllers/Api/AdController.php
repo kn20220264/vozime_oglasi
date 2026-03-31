@@ -334,6 +334,11 @@ class AdController extends Controller
             Storage::disk('public')->delete($image->path);
         }
 
+        $ad->load('favorites.user');
+        foreach ($ad->favorites as $favorite) {
+            $favorite->user->notify(new \App\Notifications\FavoriteAdRemoved($ad));
+        }
+
         $ad->delete();
 
         return response()->json(['message' => 'Oglas obrisan.']);

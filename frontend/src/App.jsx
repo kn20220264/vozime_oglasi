@@ -16,6 +16,9 @@ import NotFound from "./pages/NotFound";
 import MyAds from "./pages/dashboard/MyAds";
 import EditAd from "./pages/dashboard/EditAd";
 import Favorites from "./pages/dashboard/Favorites";
+import Profile from "./pages/dashboard/Profile";
+import DealerStats from "./pages/dashboard/DealerStats";
+import ModeratorPanel from "./pages/ModeratorPanel";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -69,8 +72,10 @@ export default function App() {
                 <Route index element={<DashboardHome />} />
                 <Route path="ads" element={<MyAds />} />
                 <Route path="ads/create" element={<CreateAd />} />
-               <Route path="/dashboard/ads/:slug/edit" element={<EditAd />} />
-               <Route path="favorites" element={<Favorites />} />
+                <Route path="ads/:slug/edit" element={<EditAd />} />
+                <Route path="favorites" element={<Favorites />} />
+                <Route path="profile" element={<Profile />} />
+                <Route path="stats" element={<DealerStats />} />
               </Route>
 
               {/* Admin */}
@@ -80,6 +85,15 @@ export default function App() {
                   <AdminRoute>
                     <AdminPanel />
                   </AdminRoute>
+                }
+              />
+
+              <Route
+                path="/moderator/*"
+                element={
+                  <PrivateRoute>
+                    <ModeratorPanel />
+                  </PrivateRoute>
                 }
               />
 

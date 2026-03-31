@@ -1,66 +1,43 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Resources;
 
-use App\Http\Controllers\Controller;
-use App\Http\Resources\AdResource;
-use App\Models\Favorite;
-use App\Models\Ad;
-use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
-class FavoriteController extends Controller
+class AdResource extends JsonResource
 {
-    // GET /api/favorites
-    public function index(Request $request)
+    public function toArray($request): array
     {
-        $favorites = Favorite::with(['ad.make', 'ad.vehicleModel', 'ad.primaryImage', 'ad.city'])
-            ->where('user_id', $request->user()->id)
-            ->orderByDesc('created_at')
-            ->paginate(20);
-
-        return response()->json([
-            'data' => $favorites->map(fn($fav) => [
-                'id'         => $fav->id,
-                'created_at' => $fav->created_at,
-                'ad'         => new AdResource($fav->ad),
-            ]),
-            'meta' => [
-                'current_page' => $favorites->currentPage(),
-                'last_page'    => $favorites->lastPage(),
-                'total'        => $favorites->total(),
+        return [
+            'id'               => $this->id,
+            'title'            => $this->title,
+            'slug'             => $this->slug,
+            'price'            => $this->price,
+            'currency'         => $this->currency,
+            'price_negotiable' => $this->price_negotiable,
+            'year'             => $this->year,
+            'mileage'          => $this->mileage,
+            'fuel_type'        => $this->fuel_type,
+            'transmission'     => $this->transmission,
+            'body_type'        => $this->body_type,
+            'power_kw'         => $this->power_kw,
+            'engine_cc'        => $this->engine_cc,
+            'condition'        => $this->condition,
+            'damage'           => $this->damage,
+            'status'           => $this->status,
+            'views_count'      => $this->views_count,
+            'featured'         => $this->featured,
+            'primary_image'    => $this->primaryImage
+                                    ? '/storage/' . $this->primaryImage->path
+                                    : null,
+            'make'             => $this->make?->name,
+            'model'            => $this->vehicleModel?->name,
+            'city'             => $this->city?->name,
+            'user'             => [
+                'id'   => $this->user?->id,
+                'name' => $this->user?->name,
             ],
-        ]);
-    }
-
-    // POST /api/favorites/{adId}
-    public function toggle(Request $request, int $adId)
-    {
-        Ad::findOrFail($adId);
-
-        $existing = Favorite::where('user_id', $request->user()->id)
-            ->where('ad_id', $adId)
-            ->first();
-
-        if ($existing) {
-            $existing->delete();
-            return response()->json(['message' => 'Uklonjeno iz omiljenih.', 'favorited' => false]);
-        }
-
-        Favorite::create([
-            'user_id' => $request->user()->id,
-            'ad_id'   => $adId,
-        ]);
-
-        return response()->json(['message' => 'Dodano u omiljene.', 'favorited' => true]);
-    }
-
-    // GET /api/favorites/{adId}/check
-    public function check(Request $request, int $adId)
-    {
-        $favorited = Favorite::where('user_id', $request->user()->id)
-            ->where('ad_id', $adId)
-            ->exists();
-
-        return response()->json(['favorited' => $favorited]);
+            'created_at'       => $this->created_at,
+        ];
     }
 }
