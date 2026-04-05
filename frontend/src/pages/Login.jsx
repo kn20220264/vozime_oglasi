@@ -8,14 +8,13 @@ import useAuthStore from "../store/authStore";
 export default function Login() {
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const setUser = useAuthStore((s) => s.setUser); // ← dodaj ovo
+  const login = useAuthStore((s) => s.login);// ← dodaj ovo
   const [form, setForm] = useState({ email: "", password: "" });
 
   const mutation = useMutation({
     mutationFn: () => axios.post("/login", form),
     onSuccess: (res) => {
-      localStorage.setItem("token", res.data.token);
-      setUser(res.data.user);
+      login(res.data.user, res.data.token);
       qc.invalidateQueries(["me"]);
       toast.success(`Dobrodošli, ${res.data.user.name}!`);
 

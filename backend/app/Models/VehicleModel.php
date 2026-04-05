@@ -7,23 +7,27 @@ use Illuminate\Database\Eloquent\Model;
 class VehicleModel extends Model
 {
     protected $fillable = [
-        'make_id',
-        'name',
-        'slug',
-        'year_from',
-        'year_to',
-        'is_active',
+        'make_id', 'parent_id', 'name', 'slug',
+        'year_from', 'year_to', 'is_active',
     ];
 
-    // Relacija: model vozila pripada jednoj marki
-    // npr. "Serija 3" pripada "BMW"
     public function make()
     {
         return $this->belongsTo(Make::class);
     }
 
-    // Relacija: jedan model vozila ima mnogo oglasa
-    // npr. svi oglasi za "Golf" su vezani za ovaj model
+    // Podmodeli (konkretni modeli unutar serije)
+    public function children()
+    {
+        return $this->hasMany(VehicleModel::class, 'parent_id');
+    }
+
+    // Serija/klasa kojoj pripada
+    public function parent()
+    {
+        return $this->belongsTo(VehicleModel::class, 'parent_id');
+    }
+
     public function ads()
     {
         return $this->hasMany(Ad::class, 'model_id');

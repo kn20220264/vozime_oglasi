@@ -10,6 +10,7 @@ class AdResource extends JsonResource
     {
         return [
             'id'               => $this->id,
+            'ad_code'          => $this->ad_code,
             'title'            => $this->title,
             'slug'             => $this->slug,
             'price'            => $this->price,

@@ -5,13 +5,15 @@ import axios from '../api/axios';
 import toast from 'react-hot-toast';
 
 const NAV = [
-    { to: '/admin',          label: '📊 Pregled'   },
-    { to: '/admin/ads',      label: '🚗 Oglasi'    },
-    { to: '/admin/users',    label: '👥 Korisnici' },
-    { to: '/admin/reports',  label: '🚩 Prijave'   },
-    { to: '/admin/makes',    label: '🏭 Marke'     },
-    { to: '/admin/cities',   label: '📍 Gradovi'   },
-    { to: '/admin/packages', label: '📦 Paketi'    },
+    { to: '/admin',             label: '📊 Pregled'    },
+    { to: '/admin/ads',         label: '🚗 Oglasi'     },
+    { to: '/admin/users',       label: '👥 Korisnici'  },
+    { to: '/admin/reports',     label: '🚩 Prijave'    },
+    { to: '/admin/makes',       label: '🏭 Marke'      },
+    { to: '/admin/models',      label: '🔧 Modeli'     },
+    { to: '/admin/categories',  label: '📂 Kategorije' },
+    { to: '/admin/cities',      label: '📍 Gradovi'    },
+    { to: '/admin/packages',    label: '📦 Paketi'     },
 ];
 
 export default function AdminPanel() {
@@ -43,12 +45,14 @@ export default function AdminPanel() {
             <main className="flex-1 p-6 overflow-auto">
                 <Routes>
                     <Route index          element={<AdminOverview />} />
-                    <Route path="ads"     element={<AdminAds />} />
-                    <Route path="users"   element={<AdminUsers />} />
-                    <Route path="reports" element={<AdminReports />} />
-                    <Route path="makes"   element={<AdminMakes />} />
-                    <Route path="cities"  element={<AdminCities />} />
-                    <Route path="packages" element={<AdminPackages />} />
+                    <Route path="ads"        element={<AdminAds />} />
+                    <Route path="users"      element={<AdminUsers />} />
+                    <Route path="reports"    element={<AdminReports />} />
+                    <Route path="makes"      element={<AdminMakes />} />
+                    <Route path="models"     element={<AdminModels />} />
+                    <Route path="categories" element={<AdminCategories />} />
+                    <Route path="cities"     element={<AdminCities />} />
+                    <Route path="packages"   element={<AdminPackages />} />
                 </Routes>
             </main>
         </div>
@@ -593,6 +597,291 @@ function AdminCities() {
                                 <button onClick={() => startEdit(city)}
                                     className="text-xs px-2 py-1 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition">✏️</button>
                                 <button onClick={() => window.confirm('Obrisati grad?') && deleteMutation.mutate(city.id)}
+                                    className="text-xs px-2 py-1 bg-red-50 text-[#FF0026] rounded-lg hover:bg-red-100 transition">🗑</button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════
+// MODELI
+// ═══════════════════════════════════════
+
+function AdminModels() {
+    const qc = useQueryClient();
+    const [selectedMakeId, setSelectedMakeId] = useState('');
+    const [form, setForm] = useState({ name: '', year_from: '', year_to: '' });
+    const [editing, setEditing] = useState(null);
+
+    const { data: makes } = useQuery({
+        queryKey: ['admin-makes'],
+        queryFn: () => axios.get('/admin/makes').then(r => r.data),
+    });
+
+    const { data: models, isLoading } = useQuery({
+        queryKey: ['admin-models', selectedMakeId],
+        queryFn: () => axios.get(`/admin/models?make_id=${selectedMakeId}`).then(r => r.data),
+        enabled: !!selectedMakeId,
+    });
+
+    const saveMutation = useMutation({
+        mutationFn: (data) => editing
+            ? axios.put(`/admin/models/${editing.id}`, data)
+            : axios.post('/admin/models', { ...data, make_id: selectedMakeId }),
+        onSuccess: () => {
+            toast.success(editing ? 'Model ažuriran.' : 'Model dodan.');
+            qc.invalidateQueries({ queryKey: ['admin-models', selectedMakeId] });
+            setForm({ name: '', year_from: '', year_to: '' });
+            setEditing(null);
+        },
+        onError: (e) => toast.error(e.response?.data?.message ?? 'Greška.'),
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: (id) => axios.delete(`/admin/models/${id}`),
+        onSuccess: () => {
+            toast.success('Model obrisan.');
+            qc.invalidateQueries({ queryKey: ['admin-models', selectedMakeId] });
+        },
+    });
+
+    const startEdit = (model) => {
+        setEditing(model);
+        setForm({ name: model.name, year_from: model.year_from ?? '', year_to: model.year_to ?? '' });
+    };
+    const cancelEdit = () => { setEditing(null); setForm({ name: '', year_from: '', year_to: '' }); };
+
+    return (
+        <div>
+            <h1 className="text-xl font-black text-[#12142D] mb-5">Upravljanje modelima</h1>
+
+            {/* Odabir marke */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
+                <label className="block text-sm font-bold text-gray-600 mb-2">Odaberi marku</label>
+                <select
+                    value={selectedMakeId}
+                    onChange={e => { setSelectedMakeId(e.target.value); setEditing(null); setForm({ name: '', year_from: '', year_to: '' }); }}
+                    className="w-full max-w-xs border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#FF0026]"
+                >
+                    <option value="">— Odaberi marku —</option>
+                    {makes?.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                </select>
+            </div>
+
+            {selectedMakeId && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Forma */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                        <h2 className="font-black text-[#12142D] mb-4">
+                            {editing ? 'Uredi model' : `Dodaj model`}
+                        </h2>
+                        <div className="space-y-3">
+                            <input
+                                value={form.name}
+                                onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+                                placeholder="Naziv modela (npr. Golf)"
+                                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]"
+                            />
+                            <div className="flex gap-2">
+                                <input
+                                    type="number"
+                                    value={form.year_from}
+                                    onChange={e => setForm(p => ({ ...p, year_from: e.target.value }))}
+                                    placeholder="Godina od"
+                                    className="w-1/2 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]"
+                                />
+                                <input
+                                    type="number"
+                                    value={form.year_to}
+                                    onChange={e => setForm(p => ({ ...p, year_to: e.target.value }))}
+                                    placeholder="Godina do"
+                                    className="w-1/2 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]"
+                                />
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => saveMutation.mutate(form)}
+                                    disabled={!form.name || saveMutation.isPending}
+                                    className="flex-1 bg-[#FF0026] hover:bg-red-700 text-white font-bold py-2 rounded-xl text-sm transition disabled:opacity-50"
+                                >
+                                    {saveMutation.isPending ? 'Čuvanje...' : editing ? 'Sačuvaj' : 'Dodaj'}
+                                </button>
+                                {editing && (
+                                    <button onClick={cancelEdit} className="px-4 py-2 border border-gray-200 rounded-xl text-sm text-gray-500 hover:bg-gray-50 transition">
+                                        Otkaži
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Lista modela */}
+                    <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div className="px-5 py-4 border-b border-gray-100">
+                            <h2 className="font-black text-[#12142D]">
+                                Modeli ({models?.length ?? 0})
+                            </h2>
+                        </div>
+                        <div className="divide-y divide-gray-50 max-h-[500px] overflow-y-auto">
+                            {isLoading && <p className="text-center py-8 text-gray-400">Učitavanje...</p>}
+                            {!isLoading && !models?.length && (
+                                <p className="text-center py-8 text-gray-400">Nema modela za ovu marku.</p>
+                            )}
+                            {models?.map(model => (
+                                <div key={model.id} className="flex items-center justify-between px-5 py-3 hover:bg-gray-50">
+                                    <div>
+                                        <p className="font-semibold text-sm text-[#12142D]">{model.name}</p>
+                                        <p className="text-xs text-gray-400">
+                                            {model.year_from && model.year_to
+                                                ? `${model.year_from} – ${model.year_to}`
+                                                : model.year_from
+                                                ? `od ${model.year_from}`
+                                                : '—'}
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button onClick={() => startEdit(model)}
+                                            className="text-xs px-2 py-1 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition">✏️</button>
+                                        <button onClick={() => window.confirm('Obrisati model?') && deleteMutation.mutate(model.id)}
+                                            className="text-xs px-2 py-1 bg-red-50 text-[#FF0026] rounded-lg hover:bg-red-100 transition">🗑</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════
+// KATEGORIJE
+// ═══════════════════════════════════════
+
+function AdminCategories() {
+    const qc = useQueryClient();
+    const [form, setForm] = useState({ name: '', icon: '', order: '' });
+    const [editing, setEditing] = useState(null);
+
+    const { data: categories, isLoading } = useQuery({
+        queryKey: ['admin-categories'],
+        queryFn: () => axios.get('/categories').then(r => r.data),
+    });
+
+    const saveMutation = useMutation({
+        mutationFn: (data) => editing
+            ? axios.put(`/admin/categories/${editing.id}`, data)
+            : axios.post('/admin/categories', data),
+        onSuccess: () => {
+            toast.success(editing ? 'Kategorija ažurirana.' : 'Kategorija dodana.');
+            qc.invalidateQueries({ queryKey: ['admin-categories'] });
+            setForm({ name: '', icon: '', order: '' });
+            setEditing(null);
+        },
+        onError: (e) => toast.error(e.response?.data?.message ?? 'Greška.'),
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: (id) => axios.delete(`/admin/categories/${id}`),
+        onSuccess: () => {
+            toast.success('Kategorija obrisana.');
+            qc.invalidateQueries({ queryKey: ['admin-categories'] });
+        },
+    });
+
+    const toggleActiveMutation = useMutation({
+        mutationFn: (id) => axios.put(`/admin/categories/${id}/toggle`),
+        onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-categories'] }),
+    });
+
+    const startEdit = (cat) => {
+        setEditing(cat);
+        setForm({ name: cat.name, icon: cat.icon ?? '', order: cat.order ?? '' });
+    };
+    const cancelEdit = () => { setEditing(null); setForm({ name: '', icon: '', order: '' }); };
+
+    const cats = categories?.data ?? [];
+
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Forma */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                <h2 className="font-black text-[#12142D] mb-4">{editing ? 'Uredi kategoriju' : 'Dodaj kategoriju'}</h2>
+                <div className="space-y-3">
+                    <input
+                        value={form.name}
+                        onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+                        placeholder="Naziv kategorije"
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]"
+                    />
+                    <input
+                        value={form.icon}
+                        onChange={e => setForm(p => ({ ...p, icon: e.target.value }))}
+                        placeholder="Ikona (npr. car, truck, boat)"
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]"
+                    />
+                    <input
+                        type="number"
+                        value={form.order}
+                        onChange={e => setForm(p => ({ ...p, order: e.target.value }))}
+                        placeholder="Redosljed prikaza (1, 2, 3...)"
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]"
+                    />
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => saveMutation.mutate(form)}
+                            disabled={!form.name || saveMutation.isPending}
+                            className="flex-1 bg-[#FF0026] hover:bg-red-700 text-white font-bold py-2 rounded-xl text-sm transition disabled:opacity-50"
+                        >
+                            {saveMutation.isPending ? 'Čuvanje...' : editing ? 'Sačuvaj' : 'Dodaj'}
+                        </button>
+                        {editing && (
+                            <button onClick={cancelEdit} className="px-4 py-2 border border-gray-200 rounded-xl text-sm text-gray-500 hover:bg-gray-50 transition">
+                                Otkaži
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Lista */}
+            <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="px-5 py-4 border-b border-gray-100">
+                    <h2 className="font-black text-[#12142D]">Sve kategorije ({cats.length})</h2>
+                </div>
+                <div className="divide-y divide-gray-50 max-h-[600px] overflow-y-auto">
+                    {isLoading && <p className="text-center py-8 text-gray-400">Učitavanje...</p>}
+                    {cats.map(cat => (
+                        <div key={cat.id} className="flex items-center justify-between px-5 py-3 hover:bg-gray-50">
+                            <div className="flex items-center gap-3">
+                                <span className="text-gray-400 text-xs font-mono w-5 text-center">{cat.order}</span>
+                                <div>
+                                    <p className="font-semibold text-sm text-[#12142D]">{cat.name}</p>
+                                    <p className="text-xs text-gray-400">{cat.icon ?? '—'}</p>
+                                </div>
+                                {!cat.is_active && (
+                                    <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded">Neaktivna</span>
+                                )}
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => toggleActiveMutation.mutate(cat.id)}
+                                    className={`text-xs px-2 py-1 rounded-lg transition font-medium ${
+                                        cat.is_active
+                                            ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
+                                            : 'bg-green-50 text-green-700 hover:bg-green-100'
+                                    }`}
+                                >
+                                    {cat.is_active ? 'Deaktiviraj' : 'Aktiviraj'}
+                                </button>
+                                <button onClick={() => startEdit(cat)}
+                                    className="text-xs px-2 py-1 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition">✏️</button>
+                                <button onClick={() => window.confirm('Obrisati kategoriju?') && deleteMutation.mutate(cat.id)}
                                     className="text-xs px-2 py-1 bg-red-50 text-[#FF0026] rounded-lg hover:bg-red-100 transition">🗑</button>
                             </div>
                         </div>

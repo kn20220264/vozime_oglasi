@@ -1,7 +1,7 @@
 <?php
-
+ 
 namespace App\Models;
-
+ 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use App\Models\Equipment;
@@ -14,7 +14,7 @@ use App\Models\City;
 use App\Models\Favorite;
 use App\Models\Message;
 use App\Models\Report;
-
+ 
 class Ad extends Model
 {
     protected $fillable = [
@@ -25,6 +25,7 @@ class Ad extends Model
         'city_id',
         'title',
         'slug',
+        'ad_code',
         'description',
         'price',
         'currency',
@@ -57,89 +58,79 @@ class Ad extends Model
         'featured_until',
         'expires_at',
     ];
-
+ 
     protected $casts = [
         'price_negotiable' => 'boolean',
         'has_service_book' => 'boolean',
-        'has_warranty' => 'boolean',
+        'has_warranty'     => 'boolean',
         'accepts_exchange' => 'boolean',
-        'import' => 'boolean',
-        'featured' => 'boolean',
+        'import'           => 'boolean',
+        'featured'         => 'boolean',
         'registered_until' => 'date',
-        'featured_until' => 'datetime',
-        'expires_at' => 'datetime',
+        'featured_until'   => 'datetime',
+        'expires_at'       => 'datetime',
     ];
-
-    // Automatski kreira slug od naslova
+ 
     protected static function boot()
     {
         parent::boot();
-
+ 
         static::creating(function ($ad) {
-            $ad->slug = \Illuminate\Support\Str::slug($ad->title) . '-' . uniqid();
+            $ad->slug    = Str::slug($ad->title) . '-' . uniqid();
+            $ad->ad_code = 'VM-' . strtoupper(Str::random(6));
         });
     }
-    // Oglas pripada jednom korisniku
+ 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-
-    // Oglas pripada jednoj kategoriji
+ 
     public function category()
     {
         return $this->belongsTo(VehicleCategory::class, 'category_id');
     }
-
-    // Oglas pripada jednoj marki
+ 
     public function make()
     {
         return $this->belongsTo(Make::class);
     }
-
-    // Oglas pripada jednom modelu vozila
+ 
     public function vehicleModel()
     {
         return $this->belongsTo(VehicleModel::class, 'model_id');
     }
-
-    // Oglas pripada jednom gradu
+ 
     public function city()
     {
         return $this->belongsTo(City::class);
     }
-
-    // Oglas ima mnogo slika
+ 
     public function images()
     {
         return $this->hasMany(AdImage::class);
     }
-
-    // Oglas ima jednu primarnu sliku
+ 
     public function primaryImage()
     {
         return $this->hasOne(AdImage::class)->where('is_primary', true);
     }
-
-    // Oglas ima mnogo opreme (Many-to-Many)
+ 
     public function equipment()
     {
         return $this->belongsToMany(Equipment::class, 'ad_equipment');
     }
-
-    // Oglas ima mnogo favorita
+ 
     public function favorites()
     {
         return $this->hasMany(Favorite::class);
     }
-
-    // Oglas ima mnogo poruka
+ 
     public function messages()
     {
         return $this->hasMany(Message::class);
     }
-
-    // Oglas ima mnogo prijava
+ 
     public function reports()
     {
         return $this->hasMany(Report::class);

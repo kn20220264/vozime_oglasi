@@ -1,18 +1,19 @@
 <?php
- 
+
 namespace App\Http\Controllers\Api;
- 
+
 use App\Http\Controllers\Controller;
 use App\Models\Ad;
 use App\Models\User;
 use App\Models\Report;
 use App\Models\Make;
 use App\Models\VehicleModel;
+use App\Models\VehicleCategory;
 use App\Models\City;
 use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
- 
+
 class AdminController extends Controller
 {
     public function __construct()
@@ -25,7 +26,7 @@ class AdminController extends Controller
             return $next($request);
         });
     }
- 
+
     // Provjera je li admin (za admin-only akcije)
     private function requireAdmin(Request $request)
     {
@@ -33,11 +34,11 @@ class AdminController extends Controller
             abort(403, 'Samo admin može izvršiti ovu akciju.');
         }
     }
- 
+
     // ═══════════════════════════════════════
     // STATISTIKE
     // ═══════════════════════════════════════
- 
+
     public function stats()
     {
         return response()->json([
@@ -48,160 +49,160 @@ class AdminController extends Controller
             'total_dealers'   => User::where('role', 'dealer')->count(),
             'pending_reports' => Report::where('status', 'pending')->count(),
             'ads_by_fuel'     => Ad::where('status', 'active')
-                                   ->selectRaw('fuel_type, count(*) as count')
-                                   ->groupBy('fuel_type')->get(),
+                ->selectRaw('fuel_type, count(*) as count')
+                ->groupBy('fuel_type')->get(),
             'ads_by_city'     => Ad::where('status', 'active')
-                                   ->selectRaw('city_id, count(*) as count')
-                                   ->with('city:id,name')
-                                   ->groupBy('city_id')
-                                   ->orderByDesc('count')
-                                   ->limit(10)->get(),
+                ->selectRaw('city_id, count(*) as count')
+                ->with('city:id,name')
+                ->groupBy('city_id')
+                ->orderByDesc('count')
+                ->limit(10)->get(),
             'ads_per_month'   => Ad::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, count(*) as count')
-                                   ->groupBy('month')
-                                   ->orderBy('month')
-                                   ->limit(12)->get(),
+                ->groupBy('month')
+                ->orderBy('month')
+                ->limit(12)->get(),
         ]);
     }
- 
+
     // ═══════════════════════════════════════
     // OGLASI
     // ═══════════════════════════════════════
- 
+
     public function ads(Request $request)
     {
         $ads = Ad::with(['user', 'make', 'vehicleModel', 'city', 'primaryImage'])
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->orderByDesc('created_at')
             ->paginate(25);
- 
+
         return response()->json($ads);
     }
- 
+
     public function updateAdStatus(Request $request, int $id)
     {
         $request->validate([
             'status' => 'required|in:active,inactive,rejected,pending',
         ]);
- 
+
         $ad = Ad::findOrFail($id);
         $ad->update(['status' => $request->status]);
- 
+
         return response()->json(['message' => 'Status oglasa ažuriran.', 'ad' => $ad]);
     }
- 
+
     public function deleteAd(Request $request, int $id)
     {
         $this->requireAdmin($request);
         $ad = Ad::findOrFail($id);
         $ad->delete();
- 
+
         return response()->json(['message' => 'Oglas obrisan.']);
     }
- 
+
     // ═══════════════════════════════════════
     // KORISNICI
     // ═══════════════════════════════════════
- 
+
     public function users(Request $request)
     {
         $this->requireAdmin($request);
- 
+
         $users = User::with('profile')
             ->when($request->role, fn($q) => $q->where('role', $request->role))
             ->orderByDesc('created_at')
             ->paginate(25);
- 
+
         return response()->json($users);
     }
- 
+
     public function toggleUserActive(Request $request, int $id)
     {
         $this->requireAdmin($request);
- 
+
         $user = User::findOrFail($id);
         $user->update(['is_active' => !$user->is_active]);
- 
+
         return response()->json([
             'message'   => $user->is_active ? 'Korisnik aktiviran.' : 'Korisnik deaktiviran.',
             'is_active' => $user->is_active,
         ]);
     }
- 
+
     public function updateUserRole(Request $request, int $id)
     {
         $this->requireAdmin($request);
- 
+
         $request->validate([
             'role' => 'required|in:user,dealer,moderator,admin',
         ]);
- 
+
         $user = User::findOrFail($id);
         $user->update(['role' => $request->role]);
- 
+
         return response()->json(['message' => 'Uloga korisnika ažurirana.', 'user' => $user]);
     }
- 
+
     // ═══════════════════════════════════════
     // PRIJAVE
     // ═══════════════════════════════════════
- 
+
     public function reports(Request $request)
     {
         $reports = Report::with(['user', 'ad'])
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->orderByDesc('created_at')
             ->paginate(25);
- 
+
         return response()->json($reports);
     }
- 
+
     public function resolveReport(int $id)
     {
         $report = Report::findOrFail($id);
         $report->update(['status' => 'resolved']);
- 
+
         return response()->json(['message' => 'Prijava riješena.']);
     }
- 
+
     // ═══════════════════════════════════════
     // MARKE
     // ═══════════════════════════════════════
- 
+
     public function makes(Request $request)
     {
         $this->requireAdmin($request);
         return response()->json(Make::orderBy('name')->get());
     }
- 
+
     public function storeMake(Request $request)
     {
         $this->requireAdmin($request);
- 
+
         $request->validate([
             'name'    => 'required|string|max:100|unique:makes,name',
             'country' => 'nullable|string|max:100',
         ]);
- 
+
         $make = Make::create([
             'name'      => $request->name,
             'slug'      => Str::slug($request->name),
             'country'   => $request->country,
             'is_active' => true,
         ]);
- 
+
         return response()->json(['message' => 'Marka dodana.', 'make' => $make], 201);
     }
- 
+
     public function updateMake(Request $request, int $id)
     {
         $this->requireAdmin($request);
- 
+
         $request->validate([
             'name'      => 'required|string|max:100|unique:makes,name,' . $id,
             'country'   => 'nullable|string|max:100',
             'is_active' => 'boolean',
         ]);
- 
+
         $make = Make::findOrFail($id);
         $make->update([
             'name'      => $request->name,
@@ -209,21 +210,21 @@ class AdminController extends Controller
             'country'   => $request->country,
             'is_active' => $request->boolean('is_active', true),
         ]);
- 
+
         return response()->json(['message' => 'Marka ažurirana.', 'make' => $make]);
     }
- 
+
     public function deleteMake(Request $request, int $id)
     {
         $this->requireAdmin($request);
         Make::findOrFail($id)->delete();
         return response()->json(['message' => 'Marka obrisana.']);
     }
- 
+
     // ═══════════════════════════════════════
     // MODELI
     // ═══════════════════════════════════════
- 
+
     public function models(Request $request)
     {
         $this->requireAdmin($request);
@@ -233,18 +234,18 @@ class AdminController extends Controller
             ->get();
         return response()->json($models);
     }
- 
+
     public function storeModel(Request $request)
     {
         $this->requireAdmin($request);
- 
+
         $request->validate([
             'make_id'   => 'required|exists:makes,id',
             'name'      => 'required|string|max:100',
             'year_from' => 'nullable|integer|min:1900|max:2100',
             'year_to'   => 'nullable|integer|min:1900|max:2100',
         ]);
- 
+
         $model = VehicleModel::create([
             'make_id'   => $request->make_id,
             'name'      => $request->name,
@@ -253,21 +254,21 @@ class AdminController extends Controller
             'year_to'   => $request->year_to,
             'is_active' => true,
         ]);
- 
+
         return response()->json(['message' => 'Model dodan.', 'model' => $model], 201);
     }
- 
+
     public function updateModel(Request $request, int $id)
     {
         $this->requireAdmin($request);
- 
+
         $request->validate([
             'name'      => 'required|string|max:100',
             'year_from' => 'nullable|integer|min:1900|max:2100',
             'year_to'   => 'nullable|integer|min:1900|max:2100',
             'is_active' => 'boolean',
         ]);
- 
+
         $model = VehicleModel::findOrFail($id);
         $model->update([
             'name'      => $request->name,
@@ -275,38 +276,38 @@ class AdminController extends Controller
             'year_to'   => $request->year_to,
             'is_active' => $request->boolean('is_active', true),
         ]);
- 
+
         return response()->json(['message' => 'Model ažuriran.', 'model' => $model]);
     }
- 
+
     public function deleteModel(Request $request, int $id)
     {
         $this->requireAdmin($request);
         VehicleModel::findOrFail($id)->delete();
         return response()->json(['message' => 'Model obrisan.']);
     }
- 
+
     // ═══════════════════════════════════════
     // GRADOVI
     // ═══════════════════════════════════════
- 
+
     public function cities(Request $request)
     {
         $this->requireAdmin($request);
         return response()->json(City::orderBy('name')->get());
     }
- 
+
     public function storeCity(Request $request)
     {
         $this->requireAdmin($request);
- 
+
         $request->validate([
             'name'      => 'required|string|max:100|unique:cities,name',
             'region'    => 'nullable|string|max:100',
             'latitude'  => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
         ]);
- 
+
         $city = City::create([
             'name'      => $request->name,
             'region'    => $request->region,
@@ -315,14 +316,14 @@ class AdminController extends Controller
             'longitude' => $request->longitude,
             'is_active' => true,
         ]);
- 
+
         return response()->json(['message' => 'Grad dodan.', 'city' => $city], 201);
     }
- 
+
     public function updateCity(Request $request, int $id)
     {
         $this->requireAdmin($request);
- 
+
         $request->validate([
             'name'      => 'required|string|max:100|unique:cities,name,' . $id,
             'region'    => 'nullable|string|max:100',
@@ -330,34 +331,34 @@ class AdminController extends Controller
             'longitude' => 'nullable|numeric',
             'is_active' => 'boolean',
         ]);
- 
+
         $city = City::findOrFail($id);
         $city->update($request->only(['name', 'region', 'latitude', 'longitude', 'is_active']));
- 
+
         return response()->json(['message' => 'Grad ažuriran.', 'city' => $city]);
     }
- 
+
     public function deleteCity(Request $request, int $id)
     {
         $this->requireAdmin($request);
         City::findOrFail($id)->delete();
         return response()->json(['message' => 'Grad obrisan.']);
     }
- 
+
     // ═══════════════════════════════════════
     // PAKETI
     // ═══════════════════════════════════════
- 
+
     public function packages(Request $request)
     {
         $this->requireAdmin($request);
         return response()->json(Package::orderBy('price')->get());
     }
- 
+
     public function storePackage(Request $request)
     {
         $this->requireAdmin($request);
- 
+
         $request->validate([
             'name'          => 'required|string|max:100',
             'price'         => 'required|numeric|min:0',
@@ -366,7 +367,7 @@ class AdminController extends Controller
             'featured'      => 'boolean',
             'description'   => 'nullable|string|max:500',
         ]);
- 
+
         $package = Package::create([
             'name'          => $request->name,
             'price'         => $request->price,
@@ -376,14 +377,14 @@ class AdminController extends Controller
             'description'   => $request->description,
             'is_active'     => true,
         ]);
- 
+
         return response()->json(['message' => 'Paket dodan.', 'package' => $package], 201);
     }
- 
+
     public function updatePackage(Request $request, int $id)
     {
         $this->requireAdmin($request);
- 
+
         $request->validate([
             'name'          => 'required|string|max:100',
             'price'         => 'required|numeric|min:0',
@@ -393,20 +394,127 @@ class AdminController extends Controller
             'description'   => 'nullable|string|max:500',
             'is_active'     => 'boolean',
         ]);
- 
+
         $package = Package::findOrFail($id);
         $package->update($request->only([
-            'name', 'price', 'duration_days', 'max_images',
-            'featured', 'description', 'is_active',
+            'name',
+            'price',
+            'duration_days',
+            'max_images',
+            'featured',
+            'description',
+            'is_active',
         ]));
- 
+
         return response()->json(['message' => 'Paket ažuriran.', 'package' => $package]);
     }
- 
+
     public function deletePackage(Request $request, int $id)
     {
         $this->requireAdmin($request);
         Package::findOrFail($id)->delete();
         return response()->json(['message' => 'Paket obrisan.']);
+    }
+
+
+
+    // ═══════════════════════════════════════
+    // KATEGORIJE
+    // ═══════════════════════════════════════
+
+    public function adminCategories(Request $request)
+    {
+        $this->requireAdmin($request);
+        return response()->json(['data' => VehicleCategory::orderBy('order')->get()]);
+    }
+
+    public function storeCategory(Request $request)
+    {
+        $this->requireAdmin($request);
+
+        $request->validate([
+            'name'  => 'required|string|max:100|unique:vehicle_categories,name',
+            'icon'  => 'nullable|string|max:50',
+            'order' => 'nullable|integer|min:0',
+        ]);
+
+        $cat = VehicleCategory::create([
+            'name'      => $request->name,
+            'slug'      => Str::slug($request->name),
+            'icon'      => $request->icon,
+            'order'     => $request->order ?? 99,
+            'is_active' => true,
+        ]);
+
+        return response()->json(['message' => 'Kategorija dodana.', 'category' => $cat], 201);
+    }
+
+    public function updateCategory(Request $request, int $id)
+    {
+        $this->requireAdmin($request);
+
+        $request->validate([
+            'name'  => 'required|string|max:100|unique:vehicle_categories,name,' . $id,
+            'icon'  => 'nullable|string|max:50',
+            'order' => 'nullable|integer|min:0',
+        ]);
+
+        $cat = VehicleCategory::findOrFail($id);
+        $cat->update([
+            'name'  => $request->name,
+            'slug'  => Str::slug($request->name),
+            'icon'  => $request->icon,
+            'order' => $request->order ?? $cat->order,
+        ]);
+
+        return response()->json(['message' => 'Kategorija ažurirana.', 'category' => $cat]);
+    }
+
+    public function toggleCategory(Request $request, int $id)
+    {
+        $this->requireAdmin($request);
+        $cat = VehicleCategory::findOrFail($id);
+        $cat->update(['is_active' => !$cat->is_active]);
+        return response()->json(['message' => 'Status kategorije promijenjen.', 'is_active' => $cat->is_active]);
+    }
+
+    public function deleteCategory(Request $request, int $id)
+    {
+        $this->requireAdmin($request);
+        VehicleCategory::findOrFail($id)->delete();
+        return response()->json(['message' => 'Kategorija obrisana.']);
+    }
+
+    // POST /admin/payments/{id}/confirm — potvrda žiro uplate
+    public function confirmPayment(Request $request, int $id)
+    {
+        $this->requireAdmin($request);
+
+        $payment = \App\Models\Payment::with('userPackage.package')->findOrFail($id);
+
+        if ($payment->status === 'completed') {
+            return response()->json(['message' => 'Uplata je već potvrđena.'], 422);
+        }
+
+        $payment->update(['status' => 'completed']);
+
+        // Aktiviraj paket
+        $userPackage = $payment->userPackage;
+        $package     = $userPackage->package;
+
+        $userPackage->update([
+            'paid_at'    => now(),
+            'expires_at' => now()->addDays($package->duration_days),
+        ]);
+
+        if ($package->type === 'ad_boost' && $userPackage->ad_id) {
+            \App\Models\Ad::where('id', $userPackage->ad_id)->update([
+                'featured'       => true,
+                'featured_until' => now()->addDays($package->duration_days),
+                'status'         => 'active',
+            ]);
+        }
+
+        return response()->json(['message' => 'Uplata potvrđena, paket aktiviran.']);
     }
 }

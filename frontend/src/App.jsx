@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Search from "./pages/Search";
+import SearchFilters from "./pages/SearchFilters";
 import AdDetail from "./pages/AdDetail";
 import Dashboard from "./pages/Dashboard";
 import DashboardHome from "./pages/dashboard/DashboardHome";
@@ -19,6 +20,8 @@ import Favorites from "./pages/dashboard/Favorites";
 import Profile from "./pages/dashboard/Profile";
 import DealerStats from "./pages/dashboard/DealerStats";
 import ModeratorPanel from "./pages/ModeratorPanel";
+import Packages from "./pages/dashboard/Packages";
+import UserProfile from "./pages/UserProfile";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,7 +59,9 @@ export default function App() {
               {/* Javne rute */}
               <Route path="/" element={<Home />} />
               <Route path="/search" element={<Search />} />
+              <Route path="/search/filters" element={<SearchFilters />} />
               <Route path="/ads/:slug" element={<AdDetail />} />
+              <Route path="/users/:id" element={<UserProfile />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
 
@@ -76,6 +81,7 @@ export default function App() {
                 <Route path="favorites" element={<Favorites />} />
                 <Route path="profile" element={<Profile />} />
                 <Route path="stats" element={<DealerStats />} />
+                <Route path="packages" element={<Packages />} />
               </Route>
 
               {/* Admin */}
