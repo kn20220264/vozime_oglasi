@@ -18,27 +18,54 @@ use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\CategoryController;
 
+// ═══════════════════════════════════════════
+// JAVNE RUTE (bez autentifikacije)
+// ═══════════════════════════════════════════
+
+// Auth — email registracija i login
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login',    [AuthController::class, 'login']);
 
-// VAZNO: specificne rute ispred {slug} wildcard-a
-Route::get('/ads/count',    [AdController::class, 'count']);
-Route::get('/ads/featured', [AdController::class, 'featured']);
-Route::get('/ads',          [AdController::class, 'index']);
-Route::get('/ads/{slug}',   [AdController::class, 'show']);
+// Email verifikacija
+Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+    ->name('verification.verify');
+Route::post('/email/resend', [AuthController::class, 'resendVerification'])
+    ->name('verification.resend');
 
-Route::get('/makes/popular',       [MakeController::class, 'popular']);
+// Google OAuth
+Route::get('/auth/google',          [AuthController::class, 'redirectToGoogle']);
+Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
+
+// TODO: Apple OAuth — aktivirati kad se postavi Apple Developer account
+// Route::get('/auth/apple',           [AuthController::class, 'redirectToApple']);
+// Route::get('/auth/apple/callback',  [AuthController::class, 'handleAppleCallback']);
+
+// TODO: Phone auth — aktivirati kad se uvede Infobip
+// Route::post('/register/phone',   [AuthController::class, 'registerWithPhone']);
+// Route::post('/login/phone',      [AuthController::class, 'loginWithPhone']);
+// Route::post('/phone/verify',     [AuthController::class, 'verifyPhone']);
+
+// TODO: Dealer auth — implementirati naknadno
+// Route::post('/dealer/register',  [AuthController::class, 'registerDealer']);
+// Route::post('/dealer/login',     [AuthController::class, 'loginDealer']);
+
+// Javni oglasi
+Route::get('/ads',        [AdController::class, 'index']);
+Route::get('/ads/{slug}', [AdController::class, 'show']);
+
+// Javni podaci
 Route::get('/makes',               [MakeController::class, 'index']);
-Route::get('/makes/models-multi',      [MakeController::class, 'modelsMulti']);
-Route::get('/makes/{make}/models',     [MakeController::class, 'models']);
-
-Route::get('/cities',     [CityController::class, 'index']);
-Route::get('/equipment',  [EquipmentController::class, 'index']);
-Route::get('/categories', [CategoryController::class, 'index']);
-Route::get('/packages',   [PackageController::class, 'index']);
-Route::get('/dealers',    [UserController::class, 'dealers']);
+Route::get('/makes/{make}/models', [MakeController::class, 'models']);
+Route::get('/cities',              [CityController::class, 'index']);
+Route::get('/equipment',           [EquipmentController::class, 'index']);
+Route::get('/categories',          [CategoryController::class, 'index']);
+Route::get('/packages',            [PackageController::class, 'index']);
 
 Route::get('/users/{userId}/reviews', [ReviewController::class, 'index']);
+
+// ═══════════════════════════════════════════
+// ZAŠTIĆENE RUTE (potreban login)
+// ═══════════════════════════════════════════
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -68,7 +95,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/messages',                [MessageController::class, 'store']);
 
     Route::post('/users/{userId}/reviews', [ReviewController::class, 'store']);
-    Route::post('/ads/{adId}/report',      [ReportController::class, 'store']);
+
+    Route::post('/ads/{adId}/report', [ReportController::class, 'store']);
 
     Route::get('/saved-searches',         [SavedSearchController::class, 'index']);
     Route::post('/saved-searches',        [SavedSearchController::class, 'store']);
@@ -86,13 +114,15 @@ Route::middleware('auth:sanctum')->group(function () {
             'unread_count' => $request->user()->unreadNotifications()->count(),
         ]);
     });
+
     Route::post('/notifications/read-all', function (Request $request) {
         $request->user()->unreadNotifications->markAsRead();
-        return response()->json(['message' => 'Sve oznaceno kao procitano.']);
+        return response()->json(['message' => 'Sve označeno kao pročitano.']);
     });
+
     Route::post('/notifications/{id}/read', function (Request $request, $id) {
         $request->user()->notifications()->findOrFail($id)->markAsRead();
-        return response()->json(['message' => 'Oznaceno kao procitano.']);
+        return response()->json(['message' => 'Označeno kao pročitano.']);
     });
 
     Route::prefix('admin')->group(function () {
@@ -100,32 +130,27 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/ads',                 [AdminController::class, 'ads']);
         Route::put('/ads/{id}/status',     [AdminController::class, 'updateAdStatus']);
         Route::delete('/ads/{id}',         [AdminController::class, 'deleteAd']);
-        Route::get('/users',                    [AdminController::class, 'users']);
+        Route::get('/users',               [AdminController::class, 'users']);
         Route::put('/users/{id}/toggle-active', [AdminController::class, 'toggleUserActive']);
-        Route::put('/users/{id}/role',          [AdminController::class, 'updateUserRole']);
-        Route::get('/reports',              [AdminController::class, 'reports']);
-        Route::put('/reports/{id}/resolve', [AdminController::class, 'resolveReport']);
-        Route::get('/makes',           [AdminController::class, 'makes']);
-        Route::post('/makes',          [AdminController::class, 'storeMake']);
-        Route::put('/makes/{id}',      [AdminController::class, 'updateMake']);
-        Route::delete('/makes/{id}',   [AdminController::class, 'deleteMake']);
-        Route::get('/models',          [AdminController::class, 'models']);
-        Route::post('/models',         [AdminController::class, 'storeModel']);
-        Route::put('/models/{id}',     [AdminController::class, 'updateModel']);
-        Route::delete('/models/{id}',  [AdminController::class, 'deleteModel']);
-        Route::get('/cities',          [AdminController::class, 'cities']);
-        Route::post('/cities',         [AdminController::class, 'storeCity']);
-        Route::put('/cities/{id}',     [AdminController::class, 'updateCity']);
-        Route::delete('/cities/{id}',  [AdminController::class, 'deleteCity']);
-        Route::get('/packages',         [AdminController::class, 'packages']);
-        Route::post('/packages',        [AdminController::class, 'storePackage']);
-        Route::put('/packages/{id}',    [AdminController::class, 'updatePackage']);
-        Route::delete('/packages/{id}', [AdminController::class, 'deletePackage']);
+        Route::put('/users/{id}/role',     [AdminController::class, 'updateUserRole']);
+        Route::get('/reports',             [AdminController::class, 'reports']);
+        Route::put('/reports/{id}/resolve',[AdminController::class, 'resolveReport']);
+        Route::get('/makes',               [AdminController::class, 'makes']);
+        Route::post('/makes',              [AdminController::class, 'storeMake']);
+        Route::put('/makes/{id}',          [AdminController::class, 'updateMake']);
+        Route::delete('/makes/{id}',       [AdminController::class, 'deleteMake']);
+        Route::get('/models',              [AdminController::class, 'models']);
+        Route::post('/models',             [AdminController::class, 'storeModel']);
+        Route::put('/models/{id}',         [AdminController::class, 'updateModel']);
+        Route::delete('/models/{id}',      [AdminController::class, 'deleteModel']);
+        Route::get('/cities',              [AdminController::class, 'cities']);
+        Route::post('/cities',             [AdminController::class, 'storeCity']);
+        Route::put('/cities/{id}',         [AdminController::class, 'updateCity']);
+        Route::delete('/cities/{id}',      [AdminController::class, 'deleteCity']);
+        Route::get('/packages',            [AdminController::class, 'packages']);
+        Route::post('/packages',           [AdminController::class, 'storePackage']);
+        Route::put('/packages/{id}',       [AdminController::class, 'updatePackage']);
+        Route::delete('/packages/{id}',    [AdminController::class, 'deletePackage']);
         Route::post('/payments/{id}/confirm', [AdminController::class, 'confirmPayment']);
-        Route::get('/categories',             [AdminController::class, 'adminCategories']);
-        Route::post('/categories',            [AdminController::class, 'storeCategory']);
-        Route::put('/categories/{id}',        [AdminController::class, 'updateCategory']);
-        Route::put('/categories/{id}/toggle', [AdminController::class, 'toggleCategory']);
-        Route::delete('/categories/{id}',     [AdminController::class, 'deleteCategory']);
     });
 });

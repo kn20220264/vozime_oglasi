@@ -2,101 +2,109 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
         'name',
+        'first_name',
+        'last_name',
         'email',
         'phone',
         'avatar',
         'role',
         'is_active',
         'password',
+        'google_id',
+        'apple_id',
+        'auth_provider',
     ];
 
-    // Sakrivamo ove kolone kada vraćamo JSON
-    // npr. nikad ne šaljemo password u odgovoru API-ja
     protected $hidden = [
         'password',
         'remember_token',
+        'google_id',
+        'apple_id',
     ];
 
-    // Laravel automatski konvertuje ove kolone
-    // npr. email_verified_at će biti Carbon objekat umjesto stringa
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'is_active' => 'boolean',
-        'password' => 'hashed',
+        'is_active'         => 'boolean',
+        'password'          => 'hashed',
     ];
 
-    // Relacija: korisnik ima jedan profil
+    // ─── Relacije ────────────────────────────────────────
+
     public function profile()
     {
         return $this->hasOne(UserProfile::class);
     }
 
-    // Relacija: korisnik ima mnogo oglasa
     public function ads()
     {
         return $this->hasMany(Ad::class);
     }
 
-    // Relacija: korisnik ima mnogo omiljenih oglasa
     public function favorites()
     {
         return $this->hasMany(Favorite::class);
     }
 
-    // Relacija: korisnik ima mnogo sačuvanih pretraga
     public function savedSearches()
     {
         return $this->hasMany(SavedSearch::class);
     }
 
-    // Relacija: korisnik je poslao mnogo poruka
     public function sentMessages()
     {
         return $this->hasMany(Message::class, 'sender_id');
     }
 
-    // Relacija: korisnik je primio mnogo poruka
     public function receivedMessages()
     {
         return $this->hasMany(Message::class, 'receiver_id');
     }
 
-    // Relacija: korisnik je dao mnogo ocjena
     public function givenReviews()
     {
         return $this->hasMany(Review::class, 'reviewer_id');
     }
 
-    // Relacija: korisnik je primio mnogo ocjena
     public function receivedReviews()
     {
         return $this->hasMany(Review::class, 'reviewed_id');
     }
 
-    // Provjera da li je korisnik admin
-   public function isAdmin(): bool
+    // ─── Helper metode ───────────────────────────────────
+
+    public function isAdmin(): bool
     {
-    return $this->role === 'admin';
+        return $this->role === 'admin';
     }
-    // Provjera da li je korisnik diler
+
     public function isDealer(): bool
     {
         return $this->role === 'dealer';
     }
-    // Provjera da li je korisnik moderator
+
     public function isModerator(): bool
     {
         return $this->role === 'moderator';
+    }
+
+    // Puno ime iz first_name + last_name, ili fallback na name
+    public function getFullNameAttribute(): string
+    {
+        if ($this->first_name || $this->last_name) {
+            return trim("{$this->first_name} {$this->last_name}");
+        }
+        return $this->name ?? '';
     }
 }

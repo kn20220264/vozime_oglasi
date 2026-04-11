@@ -39,115 +39,6 @@ function PortalDropdown({ anchorRef, open, children }) {
 }
 
 // ─── ComboInput — unos s filterovanim prijedlozima ───────────
-function ComboInput({ value, onChange, placeholder, options }) {
-  const [input, setInput] = useState('');
-  const [open, setOpen] = useState(false);
-  const [focused, setFocused] = useState(false);
-  const wrapRef = useRef(null);
-
-  const getLabel = (val) => {
-    if (!val) return '';
-    const opt = options.find(o => String(typeof o === 'object' ? o.value : o) === String(val));
-    if (opt) return typeof opt === 'object' ? opt.label : String(opt).toLocaleString();
-    // Ako je custom vrijednost (nije u listi), prikaži je direktno
-    return String(val);
-  };
-
-  const displayValue = focused ? input : getLabel(value);
-
-  const filtered = input.length > 0
-    ? options.filter(o => {
-        const lbl = typeof o === 'object' ? o.label : String(o);
-        const val = typeof o === 'object' ? String(o.value) : String(o);
-        return lbl.toLowerCase().startsWith(input.toLowerCase()) || val.startsWith(input);
-      })
-    : options;
-
-  const handleFocus = () => {
-    setFocused(true);
-    setInput(value ? String(value) : '');
-    setOpen(true);
-  };
-
-  const handleBlur = () => {
-    setTimeout(() => {
-      // Sačuvaj bilo koji broj koji je korisnik ukucao, čak i ako nije u listi
-      const trimmed = input.trim();
-      if (trimmed && !isNaN(trimmed)) {
-        onChange(trimmed);
-      }
-      setFocused(false);
-      setOpen(false);
-    }, 150);
-  };
-
-  const handleChange = (e) => {
-    setInput(e.target.value);
-    setOpen(true);
-  };
-
-  const handleSelect = (opt) => {
-    const val = typeof opt === 'object' ? opt.value : opt;
-    onChange(val);
-    setInput('');
-    setOpen(false);
-    setFocused(false);
-  };
-
-  const handleClear = (e) => { e.stopPropagation(); onChange(''); setInput(''); };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      const trimmed = input.trim();
-      if (trimmed && !isNaN(trimmed)) {
-        onChange(trimmed);
-        setOpen(false);
-        setFocused(false);
-        e.target.blur();
-      }
-    }
-    if (e.key === 'Escape') {
-      setOpen(false);
-      e.target.blur();
-    }
-  };
-
-  return (
-    <div className="relative flex-1" ref={wrapRef}>
-      <div className="relative">
-        <input
-          type="text"
-          value={displayValue}
-          onChange={handleChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] bg-white pr-7
-            ${value ? 'border-[#FF0026]' : 'border-gray-200'}`}
-        />
-        {value ? (
-          <button onMouseDown={handleClear} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#FF0026] text-xs">✕</button>
-        ) : (
-          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none">▾</span>
-        )}
-      </div>
-      <PortalDropdown anchorRef={wrapRef} open={open && filtered.length > 0}>
-        {filtered.slice(0, 60).map(opt => {
-          const val = typeof opt === 'object' ? opt.value : opt;
-          const lbl = typeof opt === 'object' ? opt.label : String(opt).toLocaleString();
-          return (
-            <button key={val} onMouseDown={() => handleSelect(opt)}
-              className={`w-full text-left px-3 py-2 text-sm hover:bg-red-50 hover:text-[#FF0026] transition
-                ${String(value) === String(val) ? 'bg-red-50 text-[#FF0026] font-semibold' : 'text-gray-700'}`}>
-              {lbl}
-            </button>
-          );
-        })}
-      </PortalDropdown>
-    </div>
-  );
-}
 const REGISTERED_UNTIL_OPTIONS = (() => {
   const opts = [];
   const months = ['Januar','Februar','Mart','April','Maj','Jun','Jul','Avgust','Septembar','Oktobar','Novembar','Decembar'];
@@ -269,7 +160,22 @@ const MOTO_HP    = [16,25,35,50,75,100,120,133];
 const MOTO_KW    = [12,18,26,37,55,74,88,98];
 
 // Nautika
-const BOAT_TYPES   = ['Camac','Gliser','Jedrilica','Jahta','Katamaran','Gumenjak/RIB','Ostalo'];
+const BOAT_TYPES   = ['Camac','Gliser','Jedrilica','Jahta','Katamaran','Gumenjak / RIB','Ostalo'];
+const SKUTER_TYPES = ['Sportski','Rekreativni'];
+
+const BOAT_MAKES_BY_TYPE = {
+  'Camac':           ['Alumacraft','Bayliner','Boston Whaler','Chris-Craft','Lund','Princecraft','Tracker','Ostalo'],
+  'Gliser':          ['Bayliner','Chaparral','Chris-Craft','Cobalt','Four Winns','Mastercraft','Rinker','Sea Ray','Sessa Marine','Ostalo'],
+  'Jedrilica':       ['Bavaria','Beneteau','Catalina','Elan','Hanse','Hunter','Jeanneau','Lagoon','Oceanis','X-Yachts','Ostalo'],
+  'Jahta':           ['Azimut-Benetti','Ferretti','Galeon','Jeanneau','Maiora','Princess','Sanlorenzo','Sunseeker','Ostalo'],
+  'Katamaran':       ['Bali','Fountaine Pajot','Lagoon','Leopard','Nautitech','Ostalo'],
+  'Gumenjak / RIB':  ['AB Inflatables','Bombard','Highfield','Joker Boat','Navar','Ribeye','Zar','Ostalo'],
+  'Sportski':        ['Sea-Doo (BRP)','Yamaha','Kawasaki','Ostalo'],
+  'Rekreativni':     ['Sea-Doo (BRP)','Yamaha','Kawasaki','Ostalo'],
+  'Ostalo':          ['Ostalo'],
+};
+
+const ALL_BOAT_MAKES = [...new Set(Object.values(BOAT_MAKES_BY_TYPE).flat())].sort();
 const BOAT_MAKES   = ['Beneteau','Bavaria','Jeanneau','Azimut-Benetti','Four Winns','Sessa Marine','Rinker','Maxum','Elan','Kvarner','Ad Boats','Navar','Zar','Riveto','Abati Yachts','Ostalo'];
 const HULL_MATERIALS = ['Fibreglas/Plastika','Aluminijum','Celik','Drvo','Guma/PVC','Ostalo'];
 const ENGINE_TYPES = ['Vanbrodski (Outboard)','Unutrasnji (Inboard)','I/O (Sterndrive)','Elektricni','Bez motora (jedra)'];
@@ -287,10 +193,20 @@ const BOAT_COLORS  = [
 // Truck
 const TRUCK_CATEGORIES = [
   {value:'kombi',label:'Kombi vozila'},{value:'kamion-do-7t',label:'Kamioni do 7.5t'},
-  {value:'kamion-preko-7t',label:'Kamioni preko 7.5t'},{value:'sleper',label:'Sleper/Teglac'},
-  {value:'prikolica',label:'Prikolice i poluprikolice'},{value:'autobus',label:'Autobusi'},
-  {value:'kamper',label:'Kamperi'},
+  {value:'kamion-preko-7t',label:'Kamioni preko 7.5t'},{value:'prikolica',label:'Prikolice'},
+  {value:'autobus',label:'Autobusi'},{value:'kamper',label:'Kamperi'},
 ];
+
+const TRUCK_MAKES_BY_KAT = {
+  'kombi':           ['Volkswagen','Mercedes-Benz','Renault','Ford','Fiat','Citroën','Opel','Peugeot','Iveco','Toyota','Kia','Nissan','Ostalo'],
+  'kamion-do-7t':    ['Mercedes-Benz','Iveco','Ford','Volkswagen','Renault','Fiat','MAN','DAF','Ostalo'],
+  'kamion-preko-7t': ['Mercedes-Benz','Volvo','Scania','MAN','DAF','Iveco','Renault Trucks','Ostalo'],
+  'prikolica':       ['Schmitz Cargobull','Krone','Kögel','Stema','Gorica','Hoffmann','Ostalo'],
+  'autobus':         ['Mercedes-Benz','Setra','MAN','Iveco','Neoplan','Volvo','Scania','Solaris','Ostalo'],
+  'kamper':          ['Fendt','Hymer','Knaus','Bürstner','Dethleffs','Hobby','LMC','Carado','Volkswagen','Mercedes-Benz','Ostalo'],
+};
+
+const ALL_TRUCK_MAKES = [...new Set(Object.values(TRUCK_MAKES_BY_KAT).flat())].sort();
 const TRUCK_FUEL  = ['Dizel','Benzin','Elektricni','Hibrid','LPG','CNG'];
 const TRUCK_TRANS = ['Manuelni','Automatik','Poluautomatik'];
 const TRUCK_DRIVE = ['Prednji','Zadnji','4x4','4x2','6x2','6x4','8x4'];
@@ -421,6 +337,42 @@ function ModelHierarchySelect({ series, selectedIds, onChange, label = 'Model' }
   );
 }
 
+// ─── MultiChipSelect — dropdown checkbox za string opcije ────
+function MultiChipSelect({ label, options, selected, onChange }) {
+  const [open, setOpen] = useState(false);
+  const btnRef = useRef(null);
+
+  const btnLabel = selected.length === 0 ? `Sve` :
+    selected.length === 1 ? selected[0] :
+    `${selected.length} odabrano`;
+
+  const toggle = (v) => onChange(
+    selected.includes(v) ? selected.filter(x => x !== v) : [...selected, v]
+  );
+
+  return (
+    <div>
+      {label && <label className="block text-xs font-semibold text-gray-500 mb-1">{label}</label>}
+      <div className="relative">
+        <button ref={btnRef} onClick={() => setOpen(p => !p)}
+          className={`border rounded-xl px-3 py-2.5 text-sm w-full text-left flex items-center justify-between transition
+            ${selected.length > 0 ? 'border-[#FF0026] bg-red-50 text-[#FF0026] font-semibold' : 'border-gray-200 bg-white text-gray-700'}`}>
+          <span className="truncate">{btnLabel}</span>
+          <span className="text-gray-400 ml-2 flex-shrink-0">▾</span>
+        </button>
+        <PortalDropdown anchorRef={btnRef} open={open} onClose={() => setOpen(false)}>
+          {options.map(opt => (
+            <label key={opt} className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm">
+              <input type="checkbox" checked={selected.includes(opt)} onChange={() => toggle(opt)} className="accent-[#FF0026]" />
+              {opt}
+            </label>
+          ))}
+        </PortalDropdown>
+      </div>
+    </div>
+  );
+}
+
 function Section({ title, children }) {
   const [open, setOpen] = useState(true);
   return (
@@ -454,8 +406,107 @@ function Sel({ label, value, onChange, options, placeholder='Bilo koji' }) {
 // ─── ComboRange — unos s filterovanim prijedlozima ───────────
 // Korisnik može i kucati i birati iz liste.
 // options: niz brojeva ili { label, value } objekata
-function ComboRange({ label, valueFrom, valueTo, onFrom, onTo, options, lockTo = false }) {
-  // lockTo: ako je true, "do" mora biti >= "od"
+// ─── ComboInput — samo brojevi, s prijedlozima ───────────────
+function ComboInput({ value, onChange, placeholder, options, numericOnly = false }) {
+  const [input, setInput] = useState('');
+  const [open, setOpen] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const wrapRef = useRef(null);
+  const pendingRef = useRef('');
+
+  const getLabel = (val) => {
+    if (!val) return '';
+    const opt = options.find(o => String(typeof o === 'object' ? o.value : o) === String(val));
+    if (opt) return typeof opt === 'object' ? opt.label : String(opt).toLocaleString();
+    return String(val);
+  };
+
+  const displayValue = focused ? input : getLabel(value);
+
+  const filtered = input.length > 0
+    ? options.filter(o => {
+        const lbl = typeof o === 'object' ? o.label : String(o);
+        const val = typeof o === 'object' ? String(o.value) : String(o);
+        return lbl.toLowerCase().startsWith(input.toLowerCase()) || val.startsWith(input);
+      })
+    : options;
+
+  const saveInput = (raw) => {
+    const trimmed = (raw ?? input).trim();
+    if (trimmed && !isNaN(trimmed)) {
+      onChange(trimmed);
+      pendingRef.current = '';
+    }
+  };
+
+  const handleFocus = () => { setFocused(true); setInput(value ? String(value) : ''); setOpen(true); };
+
+  const handleChange = (e) => {
+    let v = e.target.value;
+    if (numericOnly) v = v.replace(/[^0-9]/g, ''); // samo cifre
+    setInput(v);
+    pendingRef.current = v;
+    setOpen(true);
+  };
+
+  const handleBlur = () => {
+    saveInput(pendingRef.current);
+    setTimeout(() => { setFocused(false); setOpen(false); }, 100);
+  };
+
+  const handleSelect = (opt) => {
+    const val = typeof opt === 'object' ? opt.value : opt;
+    onChange(val);
+    pendingRef.current = '';
+    setInput(''); setOpen(false); setFocused(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') { saveInput(input); setOpen(false); setFocused(false); e.target.blur(); }
+    if (e.key === 'Escape') { setOpen(false); e.target.blur(); }
+  };
+
+  const handleClear = (e) => { e.stopPropagation(); onChange(''); setInput(''); pendingRef.current = ''; };
+
+  return (
+    <div className="relative flex-1" ref={wrapRef}>
+      <div className="relative">
+        <input
+          type="text"
+          inputMode={numericOnly ? 'numeric' : 'text'}
+          value={displayValue}
+          onChange={handleChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] bg-white pr-7
+            ${value ? 'border-[#FF0026]' : 'border-gray-200'}`}
+        />
+        {value ? (
+          <button onMouseDown={handleClear} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#FF0026] text-xs">✕</button>
+        ) : (
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none">▾</span>
+        )}
+      </div>
+      <PortalDropdown anchorRef={wrapRef} open={open && filtered.length > 0}>
+        {filtered.slice(0, 60).map(opt => {
+          const val = typeof opt === 'object' ? opt.value : opt;
+          const lbl = typeof opt === 'object' ? opt.label : String(opt).toLocaleString();
+          return (
+            <button key={val} onMouseDown={() => handleSelect(opt)}
+              className={`w-full text-left px-3 py-2 text-sm hover:bg-red-50 hover:text-[#FF0026] transition
+                ${String(value) === String(val) ? 'bg-red-50 text-[#FF0026] font-semibold' : 'text-gray-700'}`}>
+              {lbl}
+            </button>
+          );
+        })}
+      </PortalDropdown>
+    </div>
+  );
+}
+
+function ComboRange({ label, valueFrom, valueTo, onFrom, onTo, options, lockTo = false, numeric = true }) {
   const filteredToOptions = lockTo && valueFrom
     ? options.filter(o => {
         const v = typeof o === 'object' ? Number(o.value) : Number(o);
@@ -463,12 +514,23 @@ function ComboRange({ label, valueFrom, valueTo, onFrom, onTo, options, lockTo =
       })
     : options;
 
+  // Ako je "Do" manje od "Od", resetuj "Do"
+  const handleFrom = (v) => {
+    onFrom(v);
+    if (valueTo && v && Number(valueTo) < Number(v)) onTo(v);
+  };
+
+  const handleTo = (v) => {
+    if (valueFrom && v && Number(v) < Number(valueFrom)) return; // ne dozvoli manje od "Od"
+    onTo(v);
+  };
+
   return (
     <div>
       {label && <label className="block text-xs font-semibold text-gray-500 mb-1">{label}</label>}
       <div className="flex gap-2">
-        <ComboInput value={valueFrom} onChange={v => { onFrom(v); if (valueTo && v && Number(valueTo) < Number(v)) onTo(v); }} placeholder="Od" options={options} />
-        <ComboInput value={valueTo} onChange={onTo} placeholder="Do" options={filteredToOptions} />
+        <ComboInput value={valueFrom} onChange={handleFrom} placeholder="Od" options={options} numericOnly={numeric} />
+        <ComboInput value={valueTo} onChange={handleTo} placeholder="Do" options={filteredToOptions} numericOnly={numeric} />
       </div>
     </div>
   );
@@ -606,8 +668,18 @@ export default function SearchFilters() {
 
   // Nautika
   const [nautika, setNautika] = useState({
-    boat_type:'', make:'', model:'', hull_material:'', engine_type:'',
-    year_from:'', year_to:'', price_from:'', price_to:'', city_id:'',
+    nautika_kat: searchParams.get('nautika_kat') || 'Nautika (sve)',
+    boat_types: (searchParams.get('tip') && searchParams.get('tip') !== 'Svi tipovi') ? [searchParams.get('tip')] : [],
+    boat_makes: searchParams.get('make') ? [searchParams.get('make')] : [],
+    boat_type:  searchParams.get('tip')  || '',
+    make:       searchParams.get('make') || '',
+    model:      searchParams.get('model')    || '',
+    hull_material:'', engine_type:'',
+    year_from:  searchParams.get('year_from')  || '',
+    year_to:    searchParams.get('year_to')    || '',
+    price_from: searchParams.get('price_from') || '',
+    price_to:   searchParams.get('price_to')   || '',
+    city_id:    searchParams.get('city_id')    || '',
     hp_from:'', hp_to:'', length:'', hours_from:'', hours_to:'',
     cabins:'', berths:'', wc:'', kitchen:'',
     color:[], trailer:false, extras:[], seller:'', condition:'',
@@ -616,17 +688,27 @@ export default function SearchFilters() {
 
   // Truck state — popuni iz URL-a
   const [truck, setTruck] = useState({
+    kategorije: (searchParams.get('truck_kats') || '').split(',').filter(Boolean),
+    truck_makes: (searchParams.get('truck_makes') || '').split(',').filter(Boolean),
     kategorija: searchParams.get('kategorija') || '',
-    tip:'', make_id: searchParams.get('make_id') || '',
-    model: searchParams.get('model') || '', fuel:'',
+    tip:'', model: searchParams.get('model') || '',
+    fuels:[], trans_types:[], drives:[], seats_list:[],
+    fuel:'',
     year_from:  searchParams.get('year_from')  || '',
     year_to:    searchParams.get('year_to')    || '',
     km_from:'', km_to: searchParams.get('mileage_to') || '',
     price_from: searchParams.get('price_from') || '',
     price_to:   searchParams.get('price_to')   || '',
     city_id: searchParams.get('city_id') || '',
-    hp_from:'', hp_to:'', trans:'', drive:'',
-    payload_from:'', payload_to:'', euro:'', axles:'',
+    hp_from:'', hp_to:'', power_unit:'ks',
+    cc_from:'', cc_to:'', cc_class:'', trans:'', drive:'',
+    payload_from:'', payload_to:'', total_mass:'',
+    mass_from:'', mass_to:'',
+    euro:'', axles:'', length:'',
+    seats:'', seats_from:'', seats_to:'',
+    berths_from:'', berths_to:'',
+    sleeping:'', bed_types:[], sliding_door:'',
+    equipment:[], extras:[], heating:[],
     condition:'', seller:'',
   });
   const setT = (k,v) => setTruck(p=>({...p,[k]:v}));
@@ -731,7 +813,7 @@ export default function SearchFilters() {
                 <Chips options={VEHICLE_TYPES_AUTO} selected={auto.vehicle_types} onToggle={v=>setA('vehicle_types',toggleArr(auto.vehicle_types,v))} />
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                <ComboRange label="Broj sjedista" valueFrom={auto.seats_from} valueTo={auto.seats_to}
+                <ComboRange numeric label="Broj sjedista" valueFrom={auto.seats_from} valueTo={auto.seats_to}
                   onFrom={v=>setA('seats_from',v)} onTo={v=>setA('seats_to',v)} options={SEATS} />
                 <Sel label="Broj vrata" value={auto.doors} onChange={v=>setA('doors',v)} options={DOORS} />
               </div>
@@ -739,11 +821,11 @@ export default function SearchFilters() {
 
             <Section title="Cijena / Godiste / Kilometraza">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <ComboRange label="Cijena (EUR)" valueFrom={auto.price_from} valueTo={auto.price_to}
+                <ComboRange numeric label="Cijena (EUR)" valueFrom={auto.price_from} valueTo={auto.price_to}
                   onFrom={v=>setA('price_from',v)} onTo={v=>setA('price_to',v)} options={PRICE_STEPS} />
-                <ComboRange lockTo label="Godiste" valueFrom={auto.year_from} valueTo={auto.year_to}
+                <ComboRange lockTo numeric label="Godiste" valueFrom={auto.year_from} valueTo={auto.year_to}
                   onFrom={v=>setA('year_from',v)} onTo={v=>setA('year_to',v)} options={YEARS} />
-                <ComboRange label="Kilometraza (km)" valueFrom={auto.mileage_from} valueTo={auto.mileage_to}
+                <ComboRange numeric label="Kilometraza (km)" valueFrom={auto.mileage_from} valueTo={auto.mileage_to}
                   onFrom={v=>setA('mileage_from',v)} onTo={v=>setA('mileage_to',v)} options={MILEAGE_STEPS} />
               </div>
             </Section>
@@ -798,13 +880,13 @@ export default function SearchFilters() {
                     powerFrom={auto.power_from} powerTo={auto.power_to}
                     onFrom={v=>setA('power_from',v)} onTo={v=>setA('power_to',v)}
                   />
-                  <ComboRange label="Kubikaza (cm3)" valueFrom={auto.cc_from} valueTo={auto.cc_to}
+                  <ComboRange numeric label="Kubikaza (cm3)" valueFrom={auto.cc_from} valueTo={auto.cc_to}
                     onFrom={v=>setA('cc_from',v)} onTo={v=>setA('cc_to',v)} options={CC_STEPS} />
-                  <ComboRange label="Cilindri" valueFrom={auto.cylinders_from} valueTo={auto.cylinders_to}
+                  <ComboRange numeric label="Cilindri" valueFrom={auto.cylinders_from} valueTo={auto.cylinders_to}
                     onFrom={v=>setA('cylinders_from',v)} onTo={v=>setA('cylinders_to',v)} options={[3,4,5,6,8,10,12]} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <ComboRange label="Masa (kg)" valueFrom={auto.weight_from} valueTo={auto.weight_to}
+                  <ComboRange numeric label="Masa (kg)" valueFrom={auto.weight_from} valueTo={auto.weight_to}
                     onFrom={v=>setA('weight_from',v)} onTo={v=>setA('weight_to',v)} options={WEIGHT_STEPS} />
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 mb-2">Pogon</label>
@@ -924,15 +1006,15 @@ export default function SearchFilters() {
 
             <Section title="Cijena / Godiste / Kilometraza / Visina sjedista">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <ComboRange label="Cijena (EUR)" valueFrom={moto.price_from} valueTo={moto.price_to}
+                <ComboRange numeric label="Cijena (EUR)" valueFrom={moto.price_from} valueTo={moto.price_to}
                   onFrom={v=>setM('price_from',v)} onTo={v=>setM('price_to',v)}
                   options={[500,1000,2000,3000,5000,7500,10000,15000,20000,30000,50000,75000,90000]} />
-                <ComboRange lockTo label="Godiste" valueFrom={moto.year_from} valueTo={moto.year_to}
+                <ComboRange lockTo numeric label="Godiste" valueFrom={moto.year_from} valueTo={moto.year_to}
                   onFrom={v=>setM('year_from',v)} onTo={v=>setM('year_to',v)} options={YEARS} />
-                <ComboRange label="Kilometraza (km)" valueFrom={moto.mileage_from} valueTo={moto.mileage_to}
+                <ComboRange numeric label="Kilometraza (km)" valueFrom={moto.mileage_from} valueTo={moto.mileage_to}
                   onFrom={v=>setM('mileage_from',v)} onTo={v=>setM('mileage_to',v)}
                   options={[1000,5000,10000,20000,30000,50000,75000,100000]} />
-                <ComboRange label="Visina sjedista (mm)" valueFrom={moto.seat_height_from} valueTo={moto.seat_height_to}
+                <ComboRange numeric label="Visina sjedista (mm)" valueFrom={moto.seat_height_from} valueTo={moto.seat_height_to}
                   onFrom={v=>setM('seat_height_from',v)} onTo={v=>setM('seat_height_to',v)} options={MOTO_SEAT_HEIGHTS} />
                 <Sel label="Grad" value={moto.city_id} onChange={v=>setM('city_id',v)}
                   options={cities.map(c=>({value:c.id,label:c.name}))} placeholder="Svi gradovi" />
@@ -959,12 +1041,12 @@ export default function SearchFilters() {
                     powerFrom={moto.power_from} powerTo={moto.power_to}
                     onFrom={v=>setM('power_from',v)} onTo={v=>setM('power_to',v)}
                   />
-                  <ComboRange label="Kubikaza (cm3)" valueFrom={moto.cc_from} valueTo={moto.cc_to}
+                  <ComboRange numeric label="Kubikaza (cm3)" valueFrom={moto.cc_from} valueTo={moto.cc_to}
                     onFrom={v=>setM('cc_from',v)} onTo={v=>setM('cc_to',v)} options={MOTO_CC} />
-                  <ComboRange label="Cilindri" valueFrom={moto.cylinders_from} valueTo={moto.cylinders_to}
+                  <ComboRange numeric label="Cilindri" valueFrom={moto.cylinders_from} valueTo={moto.cylinders_to}
                     onFrom={v=>setM('cylinders_from',v)} onTo={v=>setM('cylinders_to',v)} options={[1,2,3,4,5,6]} />
                 </div>
-                <ComboRange label="Tezina (kg)" valueFrom={moto.weight_from} valueTo={moto.weight_to}
+                <ComboRange numeric label="Tezina (kg)" valueFrom={moto.weight_from} valueTo={moto.weight_to}
                   onFrom={v=>setM('weight_from',v)} onTo={v=>setM('weight_to',v)}
                   options={[50,75,100,125,150,175,200,250,300,350,400]} />
               </div>
@@ -1032,8 +1114,35 @@ export default function SearchFilters() {
           <>
             <Section title="Plovila - Osnovi podaci">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <Sel label="Tip plovila" value={nautika.boat_type} onChange={v=>setN('boat_type',v)} options={BOAT_TYPES} />
-                <Sel label="Marka" value={nautika.make} onChange={v=>setN('make',v)} options={BOAT_MAKES} />
+                {/* Kategorija — Nautika sve / Plovila / Vodeni skuter */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Kategorija</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {['Nautika (sve)','Plovila','Vodeni skuter'].map(k => (
+                      <button key={k} onClick={() => setN('nautika_kat', nautika.nautika_kat === k ? 'Nautika (sve)' : k)}
+                        className={`text-xs px-3 py-2 rounded-lg border font-medium transition
+                          ${nautika.nautika_kat === k ? 'bg-[#FF0026] border-[#FF0026] text-white' : 'border-gray-200 text-gray-600 hover:border-[#FF0026]'}`}>
+                        {k}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {/* Tip — ovisi o kategoriji */}
+                <MultiChipSelect
+                  label={nautika.nautika_kat === 'Vodeni skuter' ? 'Tip skutera' : 'Tip plovila'}
+                  options={nautika.nautika_kat === 'Vodeni skuter' ? SKUTER_TYPES : BOAT_TYPES}
+                  selected={nautika.boat_types}
+                  onChange={vals => setN('boat_types', vals)}
+                />
+                {/* Marka — ovisi o tipu */}
+                <MultiChipSelect
+                  label="Marka"
+                  options={nautika.boat_types.length > 0
+                    ? [...new Set(nautika.boat_types.flatMap(t => BOAT_MAKES_BY_TYPE[t] ?? []))].sort()
+                    : ALL_BOAT_MAKES}
+                  selected={nautika.boat_makes}
+                  onChange={vals => setN('boat_makes', vals)}
+                />
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 mb-1">Model</label>
                   <input type="text" value={nautika.model} onChange={e=>setN('model',e.target.value)} placeholder="Slobodan unos"
@@ -1045,22 +1154,24 @@ export default function SearchFilters() {
                   options={cities.map(c=>({value:c.id,label:c.name}))} placeholder="Svi gradovi" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <ComboRange lockTo label="Godiste" valueFrom={nautika.year_from} valueTo={nautika.year_to}
+                <ComboRange lockTo numeric label="Godiste" valueFrom={nautika.year_from} valueTo={nautika.year_to}
                   onFrom={v=>setN('year_from',v)} onTo={v=>setN('year_to',v)} options={YEARS} />
-                <ComboRange label="Cijena (EUR)" valueFrom={nautika.price_from} valueTo={nautika.price_to}
+                <ComboRange numeric label="Cijena (EUR)" valueFrom={nautika.price_from} valueTo={nautika.price_to}
                   onFrom={v=>setN('price_from',v)} onTo={v=>setN('price_to',v)}
                   options={[500,1000,2000,5000,10000,20000,50000,100000,200000,500000]} />
               </div>
             </Section>
+
             <Section title="Tehnicki podaci">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <ComboRange label="Konjska snaga (KS)" valueFrom={nautika.hp_from} valueTo={nautika.hp_to}
+                <ComboRange numeric label="Konjska snaga (KS)" valueFrom={nautika.hp_from} valueTo={nautika.hp_to}
                   onFrom={v=>setN('hp_from',v)} onTo={v=>setN('hp_to',v)} options={BOAT_HP} />
                 <Sel label="Duzina" value={nautika.length} onChange={v=>setN('length',v)} options={BOAT_LENGTH} />
-                <ComboRange label="Radni sati motora" valueFrom={nautika.hours_from} valueTo={nautika.hours_to}
+                <ComboRange numeric label="Radni sati motora" valueFrom={nautika.hours_from} valueTo={nautika.hours_to}
                   onFrom={v=>setN('hours_from',v)} onTo={v=>setN('hours_to',v)} options={BOAT_HOURS} />
               </div>
             </Section>
+
             <Section title="Smjestaj">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Sel label="Broj kabina" value={nautika.cabins} onChange={v=>setN('cabins',v)}
@@ -1089,6 +1200,7 @@ export default function SearchFilters() {
                 </div>
               </div>
             </Section>
+
             <Section title="Oprema i extras">
               <div className="space-y-4">
                 <div>
@@ -1097,12 +1209,37 @@ export default function SearchFilters() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 mb-2">Extras</label>
-                  <Chips options={BOAT_EXTRAS} selected={nautika.extras} onToggle={v=>setN('extras',toggleArr(nautika.extras,v))} />
+                  <CheckGrid items={BOAT_EXTRAS} selected={nautika.extras} onToggle={v=>setN('extras',toggleArr(nautika.extras,v))} cols={3} />
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={nautika.trailer} onChange={e=>setN('trailer',e.target.checked)} className="accent-[#FF0026]" />
                   <span className="text-sm text-gray-700 font-medium">Prikolica ukljucena</span>
                 </label>
+              </div>
+            </Section>
+
+            <Section title="Detalji ponude">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-2">Prodavac</label>
+                  <div className="flex gap-2">
+                    {['Bilo koji','Prodavnica/Marina','Privatni'].map(s=>(
+                      <button key={s} onClick={()=>setN('seller',nautika.seller===s?'':s)}
+                        className={`flex-1 text-xs py-2 rounded-lg border font-medium transition
+                          ${nautika.seller===s?'bg-[#12142D] border-[#12142D] text-white':'border-gray-200 text-gray-600 hover:border-[#12142D]'}`}>{s}</button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-2">Stanje</label>
+                  <div className="flex gap-2">
+                    {['Novo','Polovno'].map(s=>(
+                      <button key={s} onClick={()=>setN('condition',nautika.condition===s?'':s)}
+                        className={`flex-1 text-xs py-2 rounded-lg border font-medium transition
+                          ${nautika.condition===s?'bg-[#FF0026] border-[#FF0026] text-white':'border-gray-200 text-gray-600 hover:border-[#FF0026]'}`}>{s}</button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </Section>
           </>
@@ -1111,47 +1248,348 @@ export default function SearchFilters() {
         {/* ══════════ TRUCK ══════════ */}
         {activeTab==='truck' && (
           <>
-            <Section title="Kategorija i osnovi podaci">
+            {/* ── Kategorija multi-select ── */}
+            <Section title="Kategorija">
+              <div className="flex flex-wrap gap-2">
+                {TRUCK_CATEGORIES.map(c => (
+                  <button key={c.value}
+                    onClick={() => setT('kategorije', toggleArr(truck.kategorije, c.value))}
+                    className={`text-xs px-3 py-2 rounded-lg border font-medium transition
+                      ${truck.kategorije.includes(c.value) ? 'bg-[#FF0026] border-[#FF0026] text-white' : 'border-gray-200 text-gray-600 hover:border-[#FF0026]'}`}>
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </Section>
+
+            {/* ── KOMBI ── */}
+            {(truck.kategorije.includes('kombi') || truck.kategorije.length === 0) && truck.kategorije.length <= 1 && (truck.kategorije.length === 0 ? false : true) && (
+              <></>
+            )}
+
+            {/* Generički osnovi podaci (uvijek vidljivi) */}
+            <Section title="Osnovi podaci">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <Sel label="Kategorija vozila" value={truck.kategorija} onChange={v=>setT('kategorija',v)} options={TRUCK_CATEGORIES} />
-                <Sel label="Marka" value={truck.make_id} onChange={v=>setT('make_id',v)}
-                  options={makes.map(m=>({value:m.id,label:m.name}))} />
+                {/* Tip — ovisi o kategoriji */}
+                {truck.kategorije.length === 1 && (() => {
+                  const tipMap = {
+                    'kombi':           ['Zatvoreni sanduk','Otvoreni (platforma)','Hladnjača','Minibus/Putničko kombi','Kamper van','Ostalo'],
+                    'kamion-do-7t':    ['Zatvoreni sanduk','Otvoreni (platforma/pritska)','Hladnjača','Kiper','Cisterna','Ostalo'],
+                    'kamion-preko-7t': ['Sanduk metalni','Kiper','Hladnjača','Cisterna','Platforma','Šleper/Tegljač','Betonska pumpa','Ostalo'],
+                    'prikolica':       ['Standardne (auto prikolice)','Lake auto prikolice','Kiperi','Hladnjače','Kontejneri','Za prevoz radnih mašina','Poluprikolice','Ostalo'],
+                    'autobus':         ['Gradski autobus','Turistički autobus','Minibus (do 22 mjesta)','Školski autobus','Zglobni autobus','Ostalo'],
+                    'kamper':          ['Kamper van','Integrisani','Polu-integrisani','Alkoven','Kamp kućica (karavan)','Ostalo'],
+                  };
+                  const tipovi = tipMap[truck.kategorije[0]];
+                  return tipovi ? <Sel label="Tip" value={truck.tip} onChange={v=>setT('tip',v)} options={tipovi} /> : null;
+                })()}
+
+                {/* Marka */}
+                <MultiChipSelect
+                  label="Marka"
+                  options={truck.kategorije.length > 0
+                    ? [...new Set(truck.kategorije.flatMap(k => TRUCK_MAKES_BY_KAT[k] ?? []))].sort()
+                    : ALL_TRUCK_MAKES}
+                  selected={truck.truck_makes}
+                  onChange={vals => setT('truck_makes', vals)}
+                />
+
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 mb-1">Model</label>
-                  <input type="text" value={truck.model} onChange={e=>setT('model',e.target.value)} placeholder='npr. "Transporter T6"'
+                  <input type="text" value={truck.model} onChange={e=>setT('model',e.target.value)} placeholder="Slobodan unos"
                     className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]" />
                 </div>
-                <Sel label="Gorivo" value={truck.fuel} onChange={v=>setT('fuel',v)} options={TRUCK_FUEL} />
+
+                {/* Gorivo — ne za prikolice */}
+                {!truck.kategorije.includes('prikolica') && (() => {
+                  const goriva = {
+                    'kombi':           ['Dizel','Benzin','Električni','Hibrid','LPG'],
+                    'kamion-do-7t':    ['Dizel','Benzin','Električni','CNG'],
+                    'kamion-preko-7t': ['Dizel','CNG','Električni'],
+                    'autobus':         ['Dizel','CNG','Električni','Hibrid'],
+                    'kamper':          ['Dizel','Benzin','Električni'],
+                  };
+                  const kat = truck.kategorije[0];
+                  const opts = goriva[kat] || ['Dizel','Benzin','Električni','Hibrid','LPG','CNG'];
+                  return (
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 mb-2">Gorivo</label>
+                      <Chips options={opts} selected={truck.fuels||[]}
+                        onToggle={v=>setT('fuels', toggleArr(truck.fuels||[],v))} />
+                    </div>
+                  );
+                })()}
+
                 <Sel label="Grad" value={truck.city_id} onChange={v=>setT('city_id',v)}
                   options={cities.map(c=>({value:c.id,label:c.name}))} placeholder="Svi gradovi" />
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <ComboRange lockTo label="Godiste" valueFrom={truck.year_from} valueTo={truck.year_to}
+                <ComboRange lockTo numeric label="Godište" valueFrom={truck.year_from} valueTo={truck.year_to}
                   onFrom={v=>setT('year_from',v)} onTo={v=>setT('year_to',v)} options={YEARS} />
-                <ComboRange label="Kilometraza (km)" valueFrom={truck.km_from} valueTo={truck.km_to}
-                  onFrom={v=>setT('km_from',v)} onTo={v=>setT('km_to',v)}
-                  options={[10000,50000,100000,200000,500000,1000000]} />
-                <ComboRange label="Cijena (EUR)" valueFrom={truck.price_from} valueTo={truck.price_to}
+                {/* Kilometraža — ne za prikolice */}
+                {!truck.kategorije.includes('prikolica') && (
+                  <ComboRange numeric label="Kilometraža (km)" valueFrom={truck.km_from} valueTo={truck.km_to}
+                    onFrom={v=>setT('km_from',v)} onTo={v=>setT('km_to',v)}
+                    options={[10000,50000,100000,200000,300000,500000,750000,1000000]} />
+                )}
+                <ComboRange numeric label="Cijena (EUR)" valueFrom={truck.price_from} valueTo={truck.price_to}
                   onFrom={v=>setT('price_from',v)} onTo={v=>setT('price_to',v)} options={PRICE_STEPS} />
               </div>
             </Section>
-            <Section title="Tehnicki podaci">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <PowerSelector
-                  powerUnit={truck.power_unit||'ks'} setPowerUnit={v=>setT('power_unit',v)}
-                  powerFrom={truck.hp_from} powerTo={truck.hp_to}
-                  onFrom={v=>setT('hp_from',v)} onTo={v=>setT('hp_to',v)}
-                />
-                <Sel label="Mjenjac" value={truck.trans} onChange={v=>setT('trans',v)} options={TRUCK_TRANS} />
-                <Sel label="Pogon" value={truck.drive} onChange={v=>setT('drive',v)} options={TRUCK_DRIVE} />
-                <ComboRange label="Nosivost (kg)" valueFrom={truck.payload_from} valueTo={truck.payload_to}
-                  onFrom={v=>setT('payload_from',v)} onTo={v=>setT('payload_to',v)}
-                  options={[500,1000,2000,3500,5000,7500,10000,20000,30000]} />
-                <Sel label="Euro norma" value={truck.euro} onChange={v=>setT('euro',v)} options={EURO_NORMS} />
-                <Sel label="Broj osovina" value={truck.axles} onChange={v=>setT('axles',v)}
-                  options={[2,3,4,5].map(n=>({value:n,label:String(n)}))} />
-              </div>
-            </Section>
+
+            {/* ══ KOMBI — Tehnički podaci ══ */}
+            {(truck.kategorije.length === 0 || truck.kategorije.includes('kombi')) && (
+              <Section title="Tehnički podaci — Kombi">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <ComboRange numeric label="Kubikaza (cm3)" valueFrom={truck.cc_from} valueTo={truck.cc_to}
+                    onFrom={v=>setT('cc_from',v)} onTo={v=>setT('cc_to',v)}
+                    options={[1000,1500,2000,2500,3000,3500,4000,5000]} />
+                  <PowerSelector powerUnit={truck.power_unit||'ks'} setPowerUnit={v=>setT('power_unit',v)}
+                    powerFrom={truck.hp_from} powerTo={truck.hp_to}
+                    onFrom={v=>setT('hp_from',v)} onTo={v=>setT('hp_to',v)} />
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 mb-2">Mjenjač</label>
+                    <Chips options={['Manuelni','Automatik','Poluautomatik']} selected={truck.trans_types||[]}
+                      onToggle={v=>setT('trans_types',toggleArr(truck.trans_types||[],v))} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 mb-2">Pogon</label>
+                    <Chips options={['Prednji','Zadnji','4x4']} selected={truck.drives||[]}
+                      onToggle={v=>setT('drives',toggleArr(truck.drives||[],v))} />
+                  </div>
+                  <ComboRange numeric label="Nosivost (kg)" valueFrom={truck.payload_from} valueTo={truck.payload_to}
+                    onFrom={v=>setT('payload_from',v)} onTo={v=>setT('payload_to',v)}
+                    options={[300,500,750,1000,1500,2000,3000,3500]} />
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 mb-2">Broj sjedišta</label>
+                    <Chips options={[2,3,4,5,6,7,8,9].map(String)} selected={(truck.seats_list||[]).map(String)}
+                      onToggle={v=>setT('seats_list',toggleArr(truck.seats_list||[],v))} />
+                  </div>
+                  <Sel label="Euro norma" value={truck.euro} onChange={v=>setT('euro',v)} options={EURO_NORMS} />
+                </div>
+              </Section>
+            )}
+
+            {/* ══ KOMBI — Oprema ══ */}
+            {(truck.kategorije.length === 0 || truck.kategorije.includes('kombi')) && (
+              <Section title="Oprema — Kombi">
+                <div className="space-y-4">
+                  <CheckGrid items={['Klima','Navigacija','Kamera za vožnju unazad','Pregradni zid','Kuka za prikolicu']}
+                    selected={truck.equipment||[]} onToggle={v=>setT('equipment',toggleArr(truck.equipment||[],v))} cols={3} />
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 mb-2">Bočna klizna vrata</label>
+                    <Chips options={['Desno','Lijevo','Obostrano']} selected={[truck.sliding_door]}
+                      onToggle={v=>setT('sliding_door',truck.sliding_door===v?'':v)} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 mb-2">Extras</label>
+                    <CheckGrid items={['ABS','ESP','Tempomat','Bluetooth','Senzori parkiranja','Grijanje sjedišta','USB']}
+                      selected={truck.extras||[]} onToggle={v=>setT('extras',toggleArr(truck.extras||[],v))} cols={3} />
+                  </div>
+                </div>
+              </Section>
+            )}
+
+            {/* ══ KAMION DO 7.5t — Tehnički podaci ══ */}
+            {(truck.kategorije.length === 0 || truck.kategorije.includes('kamion-do-7t')) && (
+              <Section title="Tehnički podaci — Kamion do 7.5t">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <PowerSelector powerUnit={truck.power_unit||'ks'} setPowerUnit={v=>setT('power_unit',v)}
+                    powerFrom={truck.hp_from} powerTo={truck.hp_to}
+                    onFrom={v=>setT('hp_from',v)} onTo={v=>setT('hp_to',v)} />
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 mb-2">Mjenjač</label>
+                    <Chips options={['Manuelni','Automatik']} selected={truck.trans_types||[]}
+                      onToggle={v=>setT('trans_types',toggleArr(truck.trans_types||[],v))} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 mb-2">Pogon</label>
+                    <Chips options={['4x2','4x4','6x2','6x4']} selected={truck.drives||[]}
+                      onToggle={v=>setT('drives',toggleArr(truck.drives||[],v))} />
+                  </div>
+                  <Sel label="Ukupna masa (kg)" value={truck.total_mass} onChange={v=>setT('total_mass',v)}
+                    options={[2800,3500,5000,6000,7500].map(n=>({value:n,label:n.toLocaleString()+' kg'}))} />
+                  <ComboRange numeric label="Nosivost (kg)" valueFrom={truck.payload_from} valueTo={truck.payload_to}
+                    onFrom={v=>setT('payload_from',v)} onTo={v=>setT('payload_to',v)}
+                    options={[500,1000,2000,3000,4000,5000,6000]} />
+                  <Sel label="Euro norma" value={truck.euro} onChange={v=>setT('euro',v)} options={EURO_NORMS} />
+                  <Sel label="Broj osovina" value={truck.axles} onChange={v=>setT('axles',v)}
+                    options={[{value:2,label:'2'},{value:3,label:'3'}]} />
+                </div>
+              </Section>
+            )}
+
+            {/* ══ KAMION DO 7.5t — Oprema ══ */}
+            {(truck.kategorije.length === 0 || truck.kategorije.includes('kamion-do-7t')) && (
+              <Section title="Oprema — Kamion do 7.5t">
+                <CheckGrid items={['Kuka za prikolicu','Hidraulična rampa','Dizalica/Kran','Klima','Spavaonica u kabini','Dvostruka kabina']}
+                  selected={truck.equipment||[]} onToggle={v=>setT('equipment',toggleArr(truck.equipment||[],v))} cols={3} />
+              </Section>
+            )}
+
+            {/* ══ KAMION PREKO 7.5t — Tehnički podaci ══ */}
+            {(truck.kategorije.length === 0 || truck.kategorije.includes('kamion-preko-7t')) && (
+              <Section title="Tehnički podaci — Kamion preko 7.5t">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Sel label="Kubikaza motora" value={truck.cc_class} onChange={v=>setT('cc_class',v)}
+                    options={['do 8l','8–10l','10–13l','13l+']} />
+                  <PowerSelector powerUnit={truck.power_unit||'ks'} setPowerUnit={v=>setT('power_unit',v)}
+                    powerFrom={truck.hp_from} powerTo={truck.hp_to}
+                    onFrom={v=>setT('hp_from',v)} onTo={v=>setT('hp_to',v)} />
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 mb-2">Mjenjač</label>
+                    <Chips options={['Manuelni','Automatik','Poluautomatik']} selected={truck.trans_types||[]}
+                      onToggle={v=>setT('trans_types',toggleArr(truck.trans_types||[],v))} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 mb-2">Pogon</label>
+                    <Chips options={['4x2','4x4','6x2','6x4','8x4']} selected={truck.drives||[]}
+                      onToggle={v=>setT('drives',toggleArr(truck.drives||[],v))} />
+                  </div>
+                  <Sel label="Ukupna masa (kg)" value={truck.total_mass} onChange={v=>setT('total_mass',v)}
+                    options={[7500,10000,15000,18000,24000,32000,40000,44000,60000].map(n=>({value:n,label:n.toLocaleString()+' kg'}))} />
+                  <ComboRange numeric label="Nosivost (kg)" valueFrom={truck.payload_from} valueTo={truck.payload_to}
+                    onFrom={v=>setT('payload_from',v)} onTo={v=>setT('payload_to',v)}
+                    options={[1000,2000,5000,10000,15000,20000,25000,30000]} />
+                  <Sel label="Euro norma" value={truck.euro} onChange={v=>setT('euro',v)} options={EURO_NORMS} />
+                  <Sel label="Broj osovina" value={truck.axles} onChange={v=>setT('axles',v)}
+                    options={[2,3,4,5].map(n=>({value:n,label:n===5?'5+':String(n)}))} />
+                </div>
+              </Section>
+            )}
+
+            {/* ══ KAMION PREKO 7.5t — Oprema ══ */}
+            {(truck.kategorije.length === 0 || truck.kategorije.includes('kamion-preko-7t')) && (
+              <Section title="Oprema — Kamion preko 7.5t">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 mb-2">Spavaonica</label>
+                    <Chips options={['Bez spavaonice','Mala spavaonica','Velika spavaonica']} selected={[truck.sleeping]}
+                      onToggle={v=>setT('sleeping',truck.sleeping===v?'':v)} />
+                  </div>
+                  <CheckGrid items={['Retarder','Hidraulika','Kuka za poluprikolicu','Klima','Parkovna klima']}
+                    selected={truck.equipment||[]} onToggle={v=>setT('equipment',toggleArr(truck.equipment||[],v))} cols={3} />
+                </div>
+              </Section>
+            )}
+
+            {/* ══ PRIKOLICE — Tehnički podaci ══ */}
+            {(truck.kategorije.length === 0 || truck.kategorije.includes('prikolica')) && (
+              <Section title="Tehnički podaci — Prikolice">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <ComboRange numeric label="Korisna nosivost (kg)" valueFrom={truck.payload_from} valueTo={truck.payload_to}
+                    onFrom={v=>setT('payload_from',v)} onTo={v=>setT('payload_to',v)}
+                    options={[500,1000,2000,5000,10000,15000,20000,30000]} />
+                  <ComboRange numeric label="Ukupna masa (kg)" valueFrom={truck.mass_from} valueTo={truck.mass_to}
+                    onFrom={v=>setT('mass_from',v)} onTo={v=>setT('mass_to',v)}
+                    options={[500,1000,2000,5000,10000,20000,30000]} />
+                  <Sel label="Dužina" value={truck.length} onChange={v=>setT('length',v)}
+                    options={['do 2m','2–5m','5–8m','8–13.6m','13.6m+']} />
+                  <Sel label="Broj osovina" value={truck.axles} onChange={v=>setT('axles',v)}
+                    options={[1,2,3,4].map(n=>({value:n,label:n===4?'4+':String(n)}))} />
+                </div>
+              </Section>
+            )}
+
+            {/* ══ PRIKOLICE — Oprema ══ */}
+            {(truck.kategorije.length === 0 || truck.kategorije.includes('prikolica')) && (
+              <Section title="Oprema — Prikolice">
+                <CheckGrid items={['Cerada/Plane','Hladnjački agregat','Hidraulični kiper','Rolo vrata']}
+                  selected={truck.equipment||[]} onToggle={v=>setT('equipment',toggleArr(truck.equipment||[],v))} cols={2} />
+              </Section>
+            )}
+
+            {/* ══ AUTOBUSI — Tehnički podaci ══ */}
+            {(truck.kategorije.length === 0 || truck.kategorije.includes('autobus')) && (
+              <Section title="Tehnički podaci — Autobusi">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <PowerSelector powerUnit={truck.power_unit||'ks'} setPowerUnit={v=>setT('power_unit',v)}
+                    powerFrom={truck.hp_from} powerTo={truck.hp_to}
+                    onFrom={v=>setT('hp_from',v)} onTo={v=>setT('hp_to',v)} />
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 mb-2">Mjenjač</label>
+                    <Chips options={['Manuelni','Automatik']} selected={truck.trans_types||[]}
+                      onToggle={v=>setT('trans_types',toggleArr(truck.trans_types||[],v))} />
+                  </div>
+                  <ComboRange numeric label="Broj sjedišta" valueFrom={truck.seats_from} valueTo={truck.seats_to}
+                    onFrom={v=>setT('seats_from',v)} onTo={v=>setT('seats_to',v)}
+                    options={[8,12,16,20,25,30,40,50,60,70,80,90]} />
+                  <Sel label="Euro norma" value={truck.euro} onChange={v=>setT('euro',v)} options={EURO_NORMS} />
+                  <Sel label="Dužina" value={truck.length} onChange={v=>setT('length',v)}
+                    options={['6m','8m','10m','12m','15m','18m','24m']} />
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 mb-2">Pogon</label>
+                    <Chips options={['4x2','6x2','6x4']} selected={truck.drives||[]}
+                      onToggle={v=>setT('drives',toggleArr(truck.drives||[],v))} />
+                  </div>
+                </div>
+              </Section>
+            )}
+
+            {/* ══ AUTOBUSI — Oprema ══ */}
+            {(truck.kategorije.length === 0 || truck.kategorije.includes('autobus')) && (
+              <Section title="Oprema — Autobusi">
+                <CheckGrid items={['Klima','Toalet','Wifi','USB punjači','Prostor za prtljag ispod','Rampa za invalidska kolica','Monitori/Ekrani']}
+                  selected={truck.equipment||[]} onToggle={v=>setT('equipment',toggleArr(truck.equipment||[],v))} cols={3} />
+              </Section>
+            )}
+
+            {/* ══ KAMPERI — Tehnički podaci ══ */}
+            {(truck.kategorije.length === 0 || truck.kategorije.includes('kamper')) && (
+              <Section title="Tehnički podaci — Kamperi">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <PowerSelector powerUnit={truck.power_unit||'ks'} setPowerUnit={v=>setT('power_unit',v)}
+                    powerFrom={truck.hp_from} powerTo={truck.hp_to}
+                    onFrom={v=>setT('hp_from',v)} onTo={v=>setT('hp_to',v)} />
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 mb-2">Mjenjač</label>
+                    <Chips options={['Manuelni','Automatik']} selected={truck.trans_types||[]}
+                      onToggle={v=>setT('trans_types',toggleArr(truck.trans_types||[],v))} />
+                  </div>
+                  <Sel label="Dužina" value={truck.length} onChange={v=>setT('length',v)}
+                    options={['4m','5m','6m','7m','8m','10m','12m+']} />
+                  <Sel label="Ukupna masa (kg)" value={truck.total_mass} onChange={v=>setT('total_mass',v)}
+                    options={[2000,2500,3000,3500,4000,5000,7000].map(n=>({value:n,label:n.toLocaleString()+' kg'}))} />
+                </div>
+              </Section>
+            )}
+
+            {/* ══ KAMPERI — Smještaj ══ */}
+            {(truck.kategorije.length === 0 || truck.kategorije.includes('kamper')) && (
+              <Section title="Smještaj — Kamperi">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <ComboRange numeric label="Broj ležaja" valueFrom={truck.berths_from} valueTo={truck.berths_to}
+                    onFrom={v=>setT('berths_from',v)} onTo={v=>setT('berths_to',v)}
+                    options={[2,3,4,5,6,8]} />
+                  <ComboRange numeric label="Broj sjedišta" valueFrom={truck.seats_from} valueTo={truck.seats_to}
+                    onFrom={v=>setT('seats_from',v)} onTo={v=>setT('seats_to',v)}
+                    options={[2,3,4,5,6,9]} />
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 mb-2">Tip kreveta</label>
+                    <CheckGrid items={['Fiksni krevet','Francuski krevet','Jednostruki kreveti','Na kat','Kreveta iz sjedišta']}
+                      selected={truck.bed_types||[]} onToggle={v=>setT('bed_types',toggleArr(truck.bed_types||[],v))} cols={2} />
+                  </div>
+                </div>
+              </Section>
+            )}
+
+            {/* ══ KAMPERI — Oprema ══ */}
+            {(truck.kategorije.length === 0 || truck.kategorije.includes('kamper')) && (
+              <Section title="Oprema — Kamperi">
+                <div className="space-y-3">
+                  <CheckGrid items={['Klima','Solar panel','WC/Kupatilo','Satelitska antena','Tenda/Markiza','Hladnjak/Frižider']}
+                    selected={truck.equipment||[]} onToggle={v=>setT('equipment',toggleArr(truck.equipment||[],v))} cols={3} />
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 mb-2">Grijanje</label>
+                    <Chips options={['Dizel grijanje','Gas grijanje','Električno grijanje']} selected={truck.heating||[]}
+                      onToggle={v=>setT('heating',toggleArr(truck.heating||[],v))} />
+                  </div>
+                </div>
+              </Section>
+            )}
+
+            {/* ══ OFFER DETAILS (uvijek) ══ */}
             <Section title="Detalji ponude">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>

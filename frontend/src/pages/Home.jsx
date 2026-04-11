@@ -106,6 +106,24 @@ const NAUTIKA_KAT = ['Nautika (sve)', 'Plovila', 'Vodeni skuter'];
 const PLOVILA_TIPOVI = ['Svi tipovi', 'Camac', 'Gliser', 'Jedrilica', 'Jahta', 'Katamaran', 'Gumenjak / RIB', 'Ostalo'];
 const SKUTER_TIPOVI  = ['Svi tipovi', 'Sportski', 'Rekreativni'];
 
+// Marke po tipu plovila
+const NAUTIKA_MAKES_BY_TIP = {
+  'Svi tipovi':      ['Beneteau','Bavaria','Jeanneau','Azimut-Benetti','Four Winns','Sessa Marine','Rinker','Maxum','Elan','Sea-Doo','Yamaha','Kawasaki','Ostalo'],
+  'Camac':           ['Alumacraft','Boston Whaler','Bayliner','Lund','Princecraft','Tracker','Ostalo'],
+  'Gliser':          ['Bayliner','Chaparral','Chris-Craft','Cobalt','Four Winns','Mastercraft','Rinker','Sea Ray','Sessa Marine','Ostalo'],
+  'Jedrilica':       ['Bavaria','Beneteau','Catalina','Elan','Hanse','Hunter','Jeanneau','Lagoon','X-Yachts','Ostalo'],
+  'Jahta':           ['Azimut-Benetti','Ferretti','Galeon','Jeanneau','Princess','Sanlorenzo','Sunseeker','Ostalo'],
+  'Katamaran':       ['Bali','Fountaine Pajot','Lagoon','Leopard','Nautitech','Ostalo'],
+  'Gumenjak / RIB':  ['AB Inflatables','Bombard','Highfield','Joker Boat','Navar','Ribeye','Zar','Ostalo'],
+  'Ostalo':          ['Ostalo'],
+  // Vodeni skuter tipovi
+  'Sportski':        ['Sea-Doo (BRP)','Yamaha','Kawasaki','Ostalo'],
+  'Rekreativni':     ['Sea-Doo (BRP)','Yamaha','Kawasaki','Ostalo'],
+};
+
+// Sve nautičke marke (za Nautika sve)
+const ALL_NAUTIKA_MAKES = [...new Set(Object.values(NAUTIKA_MAKES_BY_TIP).flat())].sort();
+
 const MOTO_KAT = [
   'Chopper / Cruiser','Dirt Bike','Enduro / Touring Enduro','Sidecar',
   'Small / Lightweight','Moped / Mokick','Motocikl','Naked Bike','Pocket Bike',
@@ -143,14 +161,24 @@ const MOTO_MAKES_BY_CAT = {
 const ALL_MOTO_MAKES = [...new Set(Object.values(MOTO_MAKES_BY_CAT).flat())].sort();
 
 const TRUCK_KAT = [
-  { label: 'Kombi vozila',          value: 'kombi'           },
-  { label: 'Kamion do 7.5t',        value: 'kamion-do-7t'    },
-  { label: 'Kamion preko 7.5t',     value: 'kamion-preko-7t' },
-  { label: 'Sleper / Teglac',       value: 'sleper'          },
-  { label: 'Prikolica',             value: 'prikolica'       },
-  { label: 'Autobus',               value: 'autobus'         },
-  { label: 'Kamper',                value: 'kamper'          },
+  { label: 'Kombi vozila',      value: 'kombi'           },
+  { label: 'Kamion do 7.5t',    value: 'kamion-do-7t'    },
+  { label: 'Kamion preko 7.5t', value: 'kamion-preko-7t' },
+  { label: 'Prikolica',         value: 'prikolica'       },
+  { label: 'Autobus',           value: 'autobus'         },
+  { label: 'Kamper',            value: 'kamper'          },
 ];
+
+const TRUCK_MAKES_BY_KAT = {
+  'kombi':           ['Volkswagen','Mercedes-Benz','Renault','Ford','Fiat','Citroën','Opel','Peugeot','Iveco','Toyota','Kia','Nissan','Ostalo'],
+  'kamion-do-7t':    ['Mercedes-Benz','Iveco','Ford','Volkswagen','Renault','Fiat','MAN','DAF','Ostalo'],
+  'kamion-preko-7t': ['Mercedes-Benz','Volvo','Scania','MAN','DAF','Iveco','Renault Trucks','Ostalo'],
+  'prikolica':       ['Schmitz Cargobull','Krone','Kögel','Stema','Gorica','Hoffmann','Ostalo'],
+  'autobus':         ['Mercedes-Benz','Setra','MAN','Iveco','Neoplan','Volvo','Scania','Solaris','Ostalo'],
+  'kamper':          ['Fendt','Hymer','Knaus','Bürstner','Dethleffs','Hobby','LMC','Carado','Volkswagen','Mercedes-Benz','Ostalo'],
+};
+
+const ALL_TRUCK_MAKES = [...new Set(Object.values(TRUCK_MAKES_BY_KAT).flat())].sort();
 
 const BODY_TYPES = [
   { type: 'suv',       label: 'SUV',       emoji: 'U+1F699' },
@@ -491,6 +519,81 @@ function MotoMakeSelect({ selectedCats, selectedMakes, onChange }) {
   );
 }
 
+// ─── Truck kategorija multi-select ───────────────────────────
+function TruckKatSelect({ selectedKats, onChange }) {
+  const [open, setOpen] = useState(false);
+  const btnRef = useRef(null);
+
+  const label = selectedKats.length === 0 ? 'Kategorija' :
+    selectedKats.length === 1 ? TRUCK_KAT.find(k=>k.value===selectedKats[0])?.label || selectedKats[0] :
+    `${selectedKats.length} kategorije`;
+
+  const toggle = (val) => onChange(
+    selectedKats.includes(val) ? selectedKats.filter(v => v !== val) : [...selectedKats, val]
+  );
+
+  return (
+    <div className="relative">
+      <button ref={btnRef} onClick={() => setOpen(p => !p)}
+        className={`border rounded-xl px-3 py-2.5 text-sm w-full text-left flex items-center justify-between transition
+          ${selectedKats.length > 0 ? 'border-[#FF0026] bg-red-50 text-[#FF0026] font-semibold' : 'border-gray-200 bg-white text-gray-700'}`}>
+        <span>{label}</span>
+        <span className="text-gray-400 ml-2">▾</span>
+      </button>
+      <PortalDropdown anchorRef={btnRef} open={open} onClose={() => setOpen(false)}>
+        {TRUCK_KAT.map(k => (
+          <label key={k.value} className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm">
+            <input type="checkbox" checked={selectedKats.includes(k.value)} onChange={() => toggle(k.value)} className="accent-[#FF0026]" />
+            {k.label}
+          </label>
+        ))}
+      </PortalDropdown>
+    </div>
+  );
+}
+
+// ─── Truck marka multi-select (filtrirana po kategoriji) ──────
+function TruckMakeSelect({ selectedKats, selectedMakes, onChange }) {
+  const [open, setOpen] = useState(false);
+  const btnRef = useRef(null);
+
+  const relevantMakes = selectedKats.length > 0
+    ? [...new Set(selectedKats.flatMap(k => TRUCK_MAKES_BY_KAT[k] ?? []))].sort()
+    : ALL_TRUCK_MAKES;
+
+  const label = selectedMakes.length === 0 ? 'Marka' :
+    selectedMakes.length === 1 ? selectedMakes[0] :
+    `${selectedMakes.length} marke`;
+
+  const toggle = (make) => onChange(
+    selectedMakes.includes(make) ? selectedMakes.filter(m => m !== make) : [...selectedMakes, make]
+  );
+
+  return (
+    <div className="relative">
+      <button ref={btnRef} onClick={() => setOpen(p => !p)}
+        className={`border rounded-xl px-3 py-2.5 text-sm w-full text-left flex items-center justify-between transition
+          ${selectedMakes.length > 0 ? 'border-[#FF0026] bg-red-50 text-[#FF0026] font-semibold' : 'border-gray-200 bg-white text-gray-700'}`}>
+        <span>{label}</span>
+        <span className="text-gray-400 ml-2">▾</span>
+      </button>
+      <PortalDropdown anchorRef={btnRef} open={open} onClose={() => setOpen(false)}>
+        {selectedKats.length > 0 && (
+          <div className="px-3 py-1.5 bg-gray-50 text-xs text-gray-400 border-b border-gray-100">
+            Marke za odabrane kategorije
+          </div>
+        )}
+        {relevantMakes.map(make => (
+          <label key={make} className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm">
+            <input type="checkbox" checked={selectedMakes.includes(make)} onChange={() => toggle(make)} className="accent-[#FF0026]" />
+            {make}
+          </label>
+        ))}
+      </PortalDropdown>
+    </div>
+  );
+}
+
 // ─── Search dugme ─────────────────────────────────────────────
 function SearchBtn({ count, onSearch }) {
   return (
@@ -524,10 +627,12 @@ export default function Home() {
 
   // Nautika
   const [nautikaKat, setNautikaKat] = useState('Nautika (sve)');
-  const [nautikaF, setNautikaF]     = useState({ tip: '', make_id: '', model: '', price_to: '', year_to: '', city_id: '' });
+  const [nautikaF, setNautikaF]     = useState({ tip: '', make: '', model: '', price_to: '', year_to: '', city_id: '' });
 
   // Truck
-  const [truckF, setTruckF] = useState({ kategorija: '', make_id: '', model: '', year_from: '', mileage_to: '', price_to: '', city_id: '' });
+  const [truckKatIds, setTruckKatIds] = useState([]);
+  const [truckMakeIds, setTruckMakeIds] = useState([]);
+  const [truckF, setTruckF] = useState({ model: '', year_from: '', mileage_to: '', price_to: '', city_id: '' });
 
   // ─── API ─────────────────────────────────────────────────
   const { data: makesData } = useQuery({
@@ -563,7 +668,7 @@ export default function Home() {
     ? { make_ids: autoMakeIds.join(','), model_ids: autoModelIds.join(','), ...autoF }
     : activeTab === 'moto' ? { kategorije: motoCatIds.join(','), moto_makes: motoMakeIds.join(','), ...motoF }
     : activeTab === 'nautika' ? nautikaF
-    : truckF;
+    : { truck_kats: truckKatIds.join(','), truck_makes: truckMakeIds.join(','), ...truckF };
 
   const { data: countData } = useQuery({
     queryKey: ['ads-count', activeTab, activeFilters],
@@ -635,6 +740,8 @@ export default function Home() {
         params.set('tab', 'nautika');
       } else {
         params = new URLSearchParams();
+        if (truckKatIds.length)  params.set('truck_kats',  truckKatIds.join(','));
+        if (truckMakeIds.length) params.set('truck_makes', truckMakeIds.join(','));
         Object.entries(truckF).forEach(([k, v]) => v && params.set(k, v));
         params.set('tab', 'truck');
       }
@@ -645,8 +752,8 @@ export default function Home() {
   const handleReset = () => {
     if (activeTab === 'auto') { setAutoMakeIds([]); setAutoModelIds([]); setAutoF({ year_from: '', year_to: '', mileage_to: '', price_to: '', city_id: '' }); }
     else if (activeTab === 'moto') { setMotoCatIds([]); setMotoMakeIds([]); setMotoF({ year_from: '', mileage_to: '', price_to: '', city_id: '' }); }
-    else if (activeTab === 'nautika') { setNautikaKat('Nautika (sve)'); setNautikaF({ tip: '', make_id: '', model: '', price_to: '', year_to: '', city_id: '' }); }
-    else setTruckF({ kategorija: '', make_id: '', model: '', year_from: '', mileage_to: '', price_to: '', city_id: '' });
+    else if (activeTab === 'nautika') { setNautikaKat('Nautika (sve)'); setNautikaF({ tip: '', make: '', model: '', price_to: '', year_to: '', city_id: '' }); }
+    else { setTruckKatIds([]); setTruckMakeIds([]); setTruckF({ model: '', year_from: '', mileage_to: '', price_to: '', city_id: '' }); }
   };
 
   const nautikaTipOpcije = nautikaKat === 'Plovila' ? PLOVILA_TIPOVI : nautikaKat === 'Vodeni skuter' ? SKUTER_TIPOVI : null;
@@ -718,14 +825,17 @@ export default function Home() {
               {/* ── NAUTIKA ── */}
               {activeTab === 'nautika' && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Sel value={nautikaKat} onChange={v => { setNautikaKat(v); setNautikaF(p=>({...p,tip:''})); }} placeholder="">
+                  <Sel value={nautikaKat} onChange={v => { setNautikaKat(v); setNautikaF(p=>({...p,tip:'',make:''})); }} placeholder="">
                     {NAUTIKA_KAT.map(k => <option key={k} value={k}>{k}</option>)}
                   </Sel>
-                  <Sel value={nautikaF.tip} onChange={v => setNautikaF(p=>({...p,tip:v}))} placeholder="Tip" disabled={tipDisabled}>
+                  <Sel value={nautikaF.tip} onChange={v => setNautikaF(p=>({...p,tip:v,make:''})) } placeholder="Tip" disabled={tipDisabled}>
                     {nautikaTipOpcije?.map(t => <option key={t} value={t}>{t}</option>)}
                   </Sel>
-                  <Sel value={nautikaF.make_id} onChange={v => setNautikaF(p=>({...p,make_id:v}))} placeholder="Marka">
-                    {makes.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                  <Sel value={nautikaF.make} onChange={v => setNautikaF(p=>({...p,make:v}))} placeholder="Marka">
+                    {(nautikaF.tip && nautikaF.tip !== 'Svi tipovi'
+                      ? NAUTIKA_MAKES_BY_TIP[nautikaF.tip] ?? ALL_NAUTIKA_MAKES
+                      : ALL_NAUTIKA_MAKES
+                    ).map(m => <option key={m} value={m}>{m}</option>)}
                   </Sel>
                   <input type="text" value={nautikaF.model} onChange={e => setNautikaF(p=>({...p,model:e.target.value}))}
                     placeholder="Model" className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] w-full" />
@@ -741,20 +851,15 @@ export default function Home() {
               {/* ── TRUCK ── */}
               {activeTab === 'truck' && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Sel value={truckF.kategorija} onChange={v => setTruckF(p=>({...p,kategorija:v}))} placeholder="Kategorija vozila">
-                    {TRUCK_KAT.map(k => <option key={k.value} value={k.value}>{k.label}</option>)}
-                  </Sel>
-                  <Sel value={truckF.make_id} onChange={v => setTruckF(p=>({...p,make_id:v}))} placeholder="Marka">
-                    {makes.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
-                  </Sel>
-                  <input type="text" value={truckF.model} onChange={e => setTruckF(p=>({...p,model:e.target.value}))}
-                    placeholder="Model" className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] w-full" />
+                  <TruckKatSelect selectedKats={truckKatIds} onChange={ids => { setTruckKatIds(ids); setTruckMakeIds([]); }} />
+                  <TruckMakeSelect selectedKats={truckKatIds} selectedMakes={truckMakeIds} onChange={setTruckMakeIds} />
                   <ComboInput value={truckF.year_from} onChange={v => setTruckF(p=>({...p,year_from:v}))} placeholder="Godiste od" options={YEARS.map(y=>({value:y,label:String(y)}))} />
                   <ComboInput value={truckF.mileage_to} onChange={v => setTruckF(p=>({...p,mileage_to:v}))} placeholder="Kilometraza do" options={MILEAGE_TRUCK} />
                   <ComboInput value={truckF.price_to} onChange={v => setTruckF(p=>({...p,price_to:v}))} placeholder="Cijena do" options={PRICE_TRUCK} />
                   <Sel value={truckF.city_id} onChange={v => setTruckF(p=>({...p,city_id:v}))} placeholder="Grad">
                     {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </Sel>
+                  <div />
                   <SearchBtn count={adsCount} onSearch={handleSearch} />
                 </div>
               )}
@@ -771,7 +876,7 @@ export default function Home() {
                     params.set('tab', activeTab);
                     if (activeTab === 'moto') { if (motoCatIds.length) params.set('kategorije', motoCatIds.join(',')); if (motoMakeIds.length) params.set('moto_makes', motoMakeIds.join(',')); Object.entries(motoF).forEach(([k, v]) => v && params.set(k, v)); }
                     else if (activeTab === 'nautika') { Object.entries(nautikaF).forEach(([k, v]) => v && params.set(k, v)); if (nautikaKat !== 'Nautika (sve)') params.set('nautika_kat', nautikaKat); }
-                    else if (activeTab === 'truck') Object.entries(truckF).forEach(([k, v]) => v && params.set(k, v));
+                    else if (activeTab === 'truck') { if (truckKatIds.length) params.set('truck_kats', truckKatIds.join(',')); if (truckMakeIds.length) params.set('truck_makes', truckMakeIds.join(',')); Object.entries(truckF).forEach(([k, v]) => v && params.set(k, v)); }
                     navigate(`/search/filters?${params.toString()}`);
                   }, 50);
                 }}

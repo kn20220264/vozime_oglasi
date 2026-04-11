@@ -22,6 +22,8 @@ import DealerStats from "./pages/dashboard/DealerStats";
 import ModeratorPanel from "./pages/ModeratorPanel";
 import Packages from "./pages/dashboard/Packages";
 import UserProfile from "./pages/UserProfile";
+import GoogleCallback from "./pages/GoogleCallback";
+import VerifyEmail from "./pages/VerifyEmail";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -65,6 +67,12 @@ export default function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
 
+              {/* Google OAuth callback */}
+              <Route path="/auth/google/callback" element={<GoogleCallback />} />
+
+              {/* Email verifikacija */}
+              <Route path="/email/verify/:id/:hash" element={<VerifyEmail />} />
+
               {/* Dashboard — nested rute */}
               <Route
                 path="/dashboard"
@@ -94,6 +102,7 @@ export default function App() {
                 }
               />
 
+              {/* Moderator */}
               <Route
                 path="/moderator/*"
                 element={
@@ -103,7 +112,7 @@ export default function App() {
                 }
               />
 
-              {/* 404 */}
+              {/* 404 — mora biti zadnja */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
