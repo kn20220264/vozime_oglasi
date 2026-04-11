@@ -24,6 +24,7 @@ import Packages from "./pages/dashboard/Packages";
 import UserProfile from "./pages/UserProfile";
 import GoogleCallback from "./pages/GoogleCallback";
 import VerifyEmail from "./pages/VerifyEmail";
+import Notifications from "./pages/dashboard/Notifications";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -87,6 +88,7 @@ export default function App() {
                 <Route path="ads/create" element={<CreateAd />} />
                 <Route path="ads/:slug/edit" element={<EditAd />} />
                 <Route path="favorites" element={<Favorites />} />
+                <Route path="notifications" element={<Notifications />} />
                 <Route path="profile" element={<Profile />} />
                 <Route path="stats" element={<DealerStats />} />
                 <Route path="packages" element={<Packages />} />

@@ -16,21 +16,21 @@ export default function DashboardHome() {
     queryFn: () => api.get("/favorites").then((r) => r.data.data),
   });
 
-  const { data: messages } = useQuery({
-    queryKey: ["my-messages"],
-    queryFn: () => api.get("/messages").then((r) => r.data.data),
+  const { data: notifications } = useQuery({
+    queryKey: ["my-notifications"],
+    queryFn: () => api.get("/notifications").then((r) => r.data.data),
   });
 
   const activeAds = myAds?.filter((a) => a.status === "active")?.length ?? 0;
   const pendingAds = myAds?.filter((a) => a.status === "pending")?.length ?? 0;
   const totalFavorites = favorites?.length ?? 0;
-  const unreadMessages = messages?.filter((m) => !m.read_at)?.length ?? 0;
+  const unreadNotifications = notifications?.filter((n) => !n.read_at)?.length ?? 0;
 
   const stats = [
     { label: "Aktivni oglasi", value: activeAds, to: "/dashboard/ads", color: "bg-green-50 text-green-700" },
     { label: "Na cekanju", value: pendingAds, to: "/dashboard/ads", color: "bg-yellow-50 text-yellow-700" },
     { label: "Omiljeni", value: totalFavorites, to: "/dashboard/favorites", color: "bg-blue-50 text-blue-700" },
-    { label: "Neprocitane poruke", value: unreadMessages, to: "/dashboard/messages", color: "bg-red-50 text-red-700" },
+    { label: "Obavjestenja", value: unreadNotifications, to: "/dashboard/notifications", color: "bg-red-50 text-red-700" },
   ];
 
   const quickActions = [
