@@ -12,24 +12,50 @@ class Payment extends Model
         'amount',
         'currency',
         'gateway',
+        'payment_method',
+        'reference',
         'status',
+        'admin_note',
+        'confirmed_by',
+        'confirmed_at',
     ];
 
-    // Plaćanje pripada korisniku
+    protected $casts = [
+        'confirmed_at' => 'datetime',
+    ];
+
+    // ─── Relacije ────────────────────────────────────────
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Plaćanje je vezano za kupljeni paket
     public function userPackage()
     {
-        return $this->belongsTo(UserPackage::class);
+        return $this->belongsTo(UserPackage::class)->with(['user:id,name,email', 'package:id,name,type']);
     }
 
-    // Provjera da li je plaćanje uspješno
-    public function isCompleted()
+    public function confirmedBy()
+    {
+        return $this->belongsTo(User::class, 'confirmed_by');
+    }
+
+    // ─── Helper metode ───────────────────────────────────
+
+    public function isCompleted(): bool
     {
         return $this->status === 'completed';
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isBankTransfer(): bool
+    {
+        return $this->payment_method === 'bank_transfer'
+            || $this->gateway === 'cash'; // backwards compat
     }
 }

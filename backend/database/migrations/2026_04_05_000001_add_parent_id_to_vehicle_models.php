@@ -1,24 +1,10 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
+// parent_id je vec dodat direktno u create_vehicle_models_table migraciji
 return new class extends Migration
 {
-    public function up(): void
-    {
-        Schema::table('vehicle_models', function (Blueprint $table) {
-            $table->unsignedBigInteger('parent_id')->nullable()->after('make_id');
-            $table->foreign('parent_id')->references('id')->on('vehicle_models')->nullOnDelete();
-        });
-    }
-
-    public function down(): void
-    {
-        Schema::table('vehicle_models', function (Blueprint $table) {
-            $table->dropForeign(['parent_id']);
-            $table->dropColumn('parent_id');
-        });
-    }
+    public function up(): void {}
+    public function down(): void {}
 };

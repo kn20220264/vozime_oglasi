@@ -10,12 +10,18 @@ return new class extends Migration
     {
         Schema::create('makes', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('category_id')
+                  ->nullable()
+                  ->constrained('vehicle_categories')
+                  ->nullOnDelete();
             $table->string('name');
-            $table->string('slug')->unique();
+            $table->string('slug');
             $table->string('logo')->nullable();
             $table->string('country')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+
+            $table->unique(['category_id', 'slug']);
         });
     }
 

@@ -7,7 +7,9 @@ use App\Models\Package;
 use App\Models\UserPackage;
 use App\Models\Payment;
 use App\Models\Ad;
+use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PackageController extends Controller
 {
@@ -22,6 +24,17 @@ class PackageController extends Controller
         return response()->json($packages);
     }
 
+    // GET /api/bank-settings — javni endpoint za instrukcije uplatnice
+    public function bankSettings()
+    {
+        return response()->json([
+            'naziv'   => Setting::get('bank_naziv', 'BEBOLD DOO BAR'),
+            'racun'   => Setting::get('bank_racun', 'XXX-XXXX-XXXX'),
+            'banka'   => Setting::get('bank_banka', 'CKB banka'),
+            'info'    => Setting::get('bank_info',  'Molimo navedite svrhu uplate kako bismo identifikovali uplatu.'),
+        ]);
+    }
+
     // POST /api/packages/purchase
     public function purchase(Request $request)
     {
@@ -34,72 +47,73 @@ class PackageController extends Controller
         $package = Package::findOrFail($request->package_id);
         $user    = $request->user();
 
-        // ad_boost paket zahtijeva ad_id
+        // Provjeri free_listing privilegiju
+        $isFree = $user->hasPrivilege('free_listing') || $user->hasPrivilege('featured_bypass');
+
+        $ad = null;
+
+        // ad_boost paket zahtijeva ad_id koji pripada korisniku
         if ($package->type === 'ad_boost') {
             if (!$request->ad_id) {
-                return response()->json([
-                    'message' => 'Morate odabrati oglas za ovaj paket.'
-                ], 422);
+                return response()->json(['message' => 'Morate odabrati oglas za ovaj paket.'], 422);
             }
+            $ad = Ad::where('id', $request->ad_id)->where('user_id', $user->id)->firstOrFail();
+        }
 
-            // Provjeri da oglas pripada korisniku
-            $ad = Ad::where('id', $request->ad_id)
-                ->where('user_id', $user->id)
-                ->firstOrFail();
+        // Generiši referencu za uplatu
+        // Za ad_boost koristimo ad_code, za account generišemo ACC- kod
+        if ($package->type === 'ad_boost' && $ad && $ad->ad_code) {
+            $reference = $ad->ad_code;
+        } else {
+            $reference = 'ACC-' . strtoupper(Str::random(9));
         }
 
         // Kreiraj user_package
+        $isBankPending = $request->gateway === 'bank_transfer' && !$isFree;
         $userPackage = UserPackage::create([
             'user_id'    => $user->id,
             'ad_id'      => $request->ad_id,
             'package_id' => $package->id,
-            'paid_at'    => $request->gateway === 'bank_transfer' ? null : now(),
-            'expires_at' => $request->gateway === 'bank_transfer'
-                ? null  // aktivira se tek kad admin potvrdi uplatu
-                : now()->addDays($package->duration_days),
+            'paid_at'    => $isBankPending ? null : now(),
+            'expires_at' => $isBankPending ? null : now()->addDays($package->duration_days),
         ]);
 
         // Kreiraj payment zapis
         $payment = Payment::create([
             'user_id'         => $user->id,
             'user_package_id' => $userPackage->id,
-            'amount'          => $package->price,
+            'amount'          => $isFree ? 0 : $package->price,
             'currency'        => 'EUR',
             'gateway'         => $request->gateway,
-            // wspay: pending dok se ne dobije callback
-            // bank_transfer: pending dok admin ne potvrdi
+            'payment_method'  => $isFree ? 'free' : $request->gateway,
+            'reference'       => $reference,
             'status'          => 'pending',
         ]);
 
-        // Ako je WSPay, odmah aktiviramo (simulacija — u produkciji čekamo callback)
-        // Za sada tretiramo wspay kao direktnu potvrdu u dev okruženju
-        if ($request->gateway === 'wspay') {
+        // Aktivacija odmah: WSPay ili korisnik ima free privilegiju
+        if ($request->gateway === 'wspay' || $isFree) {
             $this->activatePackage($userPackage, $package);
             $payment->update(['status' => 'completed']);
         }
 
         $response = [
-            'message'      => $request->gateway === 'bank_transfer'
+            'message'      => $isBankPending
                 ? 'Narudžba primljena. Aktiviraćemo paket nakon potvrde uplate.'
                 : 'Paket uspješno aktiviran.',
             'user_package' => $userPackage->load('package'),
             'payment'      => $payment,
+            'reference'    => $reference,
         ];
 
-        // Žiro račun — dodaj instrukcije za uplatu
-        if ($request->gateway === 'bank_transfer') {
-            // Svrha uplate: šifra oglasa ako je ad_boost, inače šifra user_package
-            $svrha = isset($ad) && $ad->ad_code
-                ? $ad->ad_code
-                : 'PAK-' . $userPackage->id;
-
+        // Instrukcije za uplatnicu iz baze settings
+        if ($isBankPending) {
             $response['bank_details'] = [
-                'primalac'      => 'BEBOLD DOO BAR',
-                'ziro_racun'    => '1234567890001',
-                'iznos'         => $package->price . ' EUR',
-                'svrha_uplate'  => $svrha,
-                'poziv_na_broj' => 'PAK-' . str_pad($userPackage->id, 6, '0', STR_PAD_LEFT),
-                'napomena'      => 'Molimo navedite svrhu uplate kako bismo identifikovali uplatu. Paket će biti aktiviran u roku od 1–2 radna dana.',
+                'naziv_korisnika' => Setting::get('bank_naziv', 'BEBOLD DOO BAR'),
+                'banka'           => Setting::get('bank_banka', 'CKB banka'),
+                'ziro_racun'      => Setting::get('bank_racun', 'XXX-XXXX-XXXX'),
+                'iznos'           => $package->price . ' EUR',
+                'svrha_uplate'    => $reference,
+                'info'            => Setting::get('bank_info', 'Navedite svrhu uplate kako bismo identifikovali uplatu.'),
             ];
         }
 
@@ -109,7 +123,7 @@ class PackageController extends Controller
     // GET /api/my-packages
     public function myPackages(Request $request)
     {
-        $packages = UserPackage::with(['package', 'ad.primaryImage'])
+        $packages = UserPackage::with(['package', 'ad'])
             ->where('user_id', $request->user()->id)
             ->orderByDesc('created_at')
             ->get()
@@ -121,6 +135,17 @@ class PackageController extends Controller
         return response()->json($packages);
     }
 
+    // GET /api/my-payments
+    public function myPayments(Request $request)
+    {
+        $payments = Payment::with(['userPackage.package'])
+            ->where('user_id', $request->user()->id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        return response()->json($payments);
+    }
+
     // Privatna metoda za aktivaciju paketa
     private function activatePackage(UserPackage $userPackage, Package $package): void
     {
@@ -129,7 +154,6 @@ class PackageController extends Controller
             'expires_at' => now()->addDays($package->duration_days),
         ]);
 
-        // Ako je ad_boost — ažuriraj oglas
         if ($package->type === 'ad_boost' && $userPackage->ad_id) {
             Ad::where('id', $userPackage->ad_id)->update([
                 'featured'       => true,

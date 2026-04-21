@@ -10,6 +10,11 @@ class AdsSeeder extends Seeder
 {
     public function run(): void
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        DB::table('ad_equipment')->truncate();
+        DB::table('ad_images')->truncate();
+        DB::table('ads')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
         $categoryId = DB::table('vehicle_categories')->where('name', 'Putnička vozila')->value('id');
         $cities     = DB::table('cities')->pluck('id', 'name');
         $users      = DB::table('users')->pluck('id', 'email');
@@ -255,7 +260,8 @@ class AdsSeeder extends Seeder
 
     private function getMakeModel(string $makeName, string $modelName): array
     {
-        $makeId  = DB::table('makes')->where('name', $makeName)->value('id');
+        $autoId  = DB::table('vehicle_categories')->where('name', 'Putnička vozila')->value('id');
+        $makeId  = DB::table('makes')->where('name', $makeName)->where('category_id', $autoId)->value('id');
         $modelId = DB::table('vehicle_models')
             ->where('make_id', $makeId)
             ->where('name', $modelName)

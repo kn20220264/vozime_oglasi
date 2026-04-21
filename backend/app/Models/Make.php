@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Make extends Model
 {
     protected $fillable = [
+        'category_id',
         'name',
         'slug',
         'logo',
@@ -14,16 +15,23 @@ class Make extends Model
         'is_active',
     ];
 
-    // Relacija: jedna marka ima mnogo modela
-    // npr. BMW → Serija 3, Serija 5, X5...
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
+    public function category()
+    {
+        return $this->belongsTo(VehicleCategory::class);
+    }
+
     public function models()
     {
         return $this->hasMany(VehicleModel::class);
     }
 
-    // Relacija: jedna marka ima mnogo oglasa
-    public function ads()
+    // Samo root modeli (bez parenta) — serije ili direktni modeli
+    public function rootModels()
     {
-        return $this->hasMany(Ad::class);
+        return $this->hasMany(VehicleModel::class)->whereNull('parent_id')->orderBy('name');
     }
 }

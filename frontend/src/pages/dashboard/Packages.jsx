@@ -98,11 +98,11 @@ function PaymentModal({ pkg, myAds, onClose, onConfirm, isPending }) {
 // ── Modal za žiro instrukcije ─────────────────────────────────
 function BankModal({ details, onClose }) {
   const rows = [
-    ["Primalac",      details.primalac],
-    ["Žiro račun",    details.ziro_racun],
-    ["Iznos",         details.iznos],
-    ["Svrha uplate",  details.svrha_uplate],
-    ["Poziv na broj", details.poziv_na_broj],
+    ["Iznos za uplatu",  details.iznos],
+    ["Svrha uplate",     details.svrha_uplate, true],
+    ["Naziv korisnika",  details.naziv_korisnika],
+    ["Banka",            details.banka],
+    ["Žiro račun",       details.ziro_racun],
   ].filter(([, v]) => v);
 
   const handleCopy = (text) => {
@@ -130,11 +130,11 @@ function BankModal({ details, onClose }) {
         <div className="bg-gray-50 rounded-2xl p-4 mb-4 border border-gray-200">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Podaci za uplatu</p>
           <div className="space-y-2.5">
-            {rows.map(([label, value]) => (
-              <div key={label} className="flex items-start justify-between gap-2">
-                <span className="text-xs text-gray-500 flex-shrink-0 w-28">{label}:</span>
-                <div className="flex items-center gap-1.5 flex-1 justify-end">
-                  <span className="font-semibold text-sm text-[#12142D] text-right">{value}</span>
+            {rows.map(([label, value, highlight]) => (
+              <div key={label} className={`rounded-xl p-2.5 ${highlight ? 'bg-[#FFEA00]/20 border border-[#FFEA00]/40' : 'bg-white'}`}>
+                <p className="text-xs text-gray-400 mb-0.5">{label}</p>
+                <div className="flex items-center gap-1.5 justify-between">
+                  <span className={`font-bold text-sm text-[#12142D] ${highlight ? 'font-mono tracking-wider' : ''}`}>{value}</span>
                   <button
                     onClick={() => handleCopy(value)}
                     title="Kopiraj"

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import axios from "../../api/axios";
 import toast from "react-hot-toast";
+import PromoteModal from "../../components/PromoteModal";
 
 const STATUS_LABELS = {
   active: { label: "Aktivan", cls: "bg-green-100 text-green-700" },
@@ -17,6 +18,7 @@ export default function MyAds() {
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
   const [deletingId, setDeletingId] = useState(null);
+  const [promoteAd, setPromoteAd] = useState(null); // { id, title }
 
   const { data, isLoading } = useQuery({
     queryKey: ["my-ads", page],
@@ -154,12 +156,20 @@ export default function MyAds() {
                   Uredi
                 </Link>
                 {ad.status === "active" && (
-                  <button
-                    onClick={() => markSoldMutation.mutate(ad.id)}
-                    className="text-xs px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-semibold transition"
-                  >
-                    Označi prodat
-                  </button>
+                  <>
+                    <button
+                      onClick={() => setPromoteAd({ id: ad.id, title: ad.title })}
+                      className="text-xs px-3 py-1.5 bg-[#FFEA00]/30 hover:bg-[#FFEA00]/50 text-[#12142D] rounded-lg font-semibold transition"
+                    >
+                      ⭐ Promoviši
+                    </button>
+                    <button
+                      onClick={() => markSoldMutation.mutate(ad.id)}
+                      className="text-xs px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-semibold transition"
+                    >
+                      Označi prodat
+                    </button>
+                  </>
                 )}
                 <button
                   onClick={() => handleDelete(ad.id)}
@@ -173,6 +183,16 @@ export default function MyAds() {
           );
         })}
       </div>
+
+      {promoteAd && (
+        <PromoteModal
+          adId={promoteAd.id}
+          adTitle={promoteAd.title}
+          packageType="ad_boost"
+          onClose={() => setPromoteAd(null)}
+          onSuccess={() => { setPromoteAd(null); qc.invalidateQueries(["my-ads"]); }}
+        />
+      )}
 
       {meta?.last_page > 1 && (
         <div className="flex justify-center gap-2 mt-6">

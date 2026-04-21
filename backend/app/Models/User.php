@@ -82,6 +82,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Review::class, 'reviewed_id');
     }
 
+    public function privileges()
+    {
+        return $this->hasMany(UserPrivilege::class);
+    }
+
+    public function userPackages()
+    {
+        return $this->hasMany(UserPackage::class);
+    }
+
     // ─── Helper metode ───────────────────────────────────
 
     public function isAdmin(): bool
@@ -97,6 +107,30 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isModerator(): bool
     {
         return $this->role === 'moderator';
+    }
+
+    // Provjera aktivne privilegije
+    public function hasPrivilege(string $key): bool
+    {
+        return $this->privileges()
+            ->where('privilege_key', $key)
+            ->where(function ($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
+            ->exists();
+    }
+
+    // Dohvati vrijednost privilegije
+    public function getPrivilegeValue(string $key): ?string
+    {
+        $priv = $this->privileges()
+            ->where('privilege_key', $key)
+            ->where(function ($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
+            ->first();
+
+        return $priv?->privilege_value;
     }
 
     // Puno ime iz first_name + last_name, ili fallback na name

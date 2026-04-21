@@ -9,12 +9,13 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            CitiesSeeder::class,
             VehicleCategoriesSeeder::class,
+            CitiesSeeder::class,
             MakesSeeder::class,
             VehicleModelsSeeder::class,
             EquipmentSeeder::class,
             PackagesSeeder::class,
+            FilterOptionsSeeder::class,   // <-- novo
             UsersSeeder::class,
             AdsSeeder::class,
         ]);

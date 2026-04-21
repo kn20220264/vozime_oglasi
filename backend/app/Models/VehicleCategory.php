@@ -7,30 +7,66 @@ use Illuminate\Database\Eloquent\Model;
 class VehicleCategory extends Model
 {
     protected $fillable = [
+        'parent_id',
         'name',
         'slug',
         'icon',
-        'parent_id',
+        'sort_order',
         'is_active',
-        'order',
     ];
 
-    // Relacija: kategorija može imati podkategorije
-    // npr. "Vozila" → "Automobili", "Motocikli"
-    public function children()
-    {
-        return $this->hasMany(VehicleCategory::class, 'parent_id');
-    }
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
 
-    // Relacija: podkategorija pripada roditeljskoj kategoriji
+    // Roditeljska kategorija
     public function parent()
     {
         return $this->belongsTo(VehicleCategory::class, 'parent_id');
     }
 
-    // Relacija: kategorija ima mnogo oglasa
+    // Podkategorije
+    public function children()
+    {
+        return $this->hasMany(VehicleCategory::class, 'parent_id')
+                    ->orderBy('sort_order');
+    }
+
+    // Aktivne podkategorije
+    public function activeChildren()
+    {
+        return $this->hasMany(VehicleCategory::class, 'parent_id')
+                    ->where('is_active', true)
+                    ->orderBy('sort_order');
+    }
+
+    // Marke koje pripadaju ovoj kategoriji
+    public function makes()
+    {
+        return $this->hasMany(Make::class, 'category_id');
+    }
+
+    // Oglasi
     public function ads()
     {
         return $this->hasMany(Ad::class, 'category_id');
+    }
+
+    // Scope: samo root kategorije
+    public function scopeRoot($query)
+    {
+        return $query->whereNull('parent_id');
+    }
+
+    // Scope: samo aktivne
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    // Da li je ovo root kategorija
+    public function isRoot(): bool
+    {
+        return is_null($this->parent_id);
     }
 }

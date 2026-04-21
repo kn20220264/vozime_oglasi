@@ -13,6 +13,11 @@ return new class extends Migration
             $table->foreignId('make_id')
                   ->constrained('makes')
                   ->cascadeOnDelete();
+            $table->unsignedBigInteger('parent_id')->nullable()->index();
+            $table->foreign('parent_id')
+                  ->references('id')
+                  ->on('vehicle_models')
+                  ->onDelete('cascade');
             $table->string('name');
             $table->string('slug');
             $table->integer('year_from')->nullable();
