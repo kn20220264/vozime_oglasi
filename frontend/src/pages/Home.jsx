@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import axios from '../api/axios';
 import AdCard from '../components/AdCard';
+import Aurora from '../components/ui/Aurora';
 
 // ─── Portal dropdown helper ───────────────────────────────────
 function PortalDropdown({ anchorRef, open, onClose, children }) {
@@ -106,7 +107,6 @@ const NAUTIKA_KAT = ['Nautika (sve)', 'Plovila', 'Vodeni skuter'];
 const PLOVILA_TIPOVI = ['Svi tipovi', 'Camac', 'Gliser', 'Jedrilica', 'Jahta', 'Katamaran', 'Gumenjak / RIB', 'Ostalo'];
 const SKUTER_TIPOVI  = ['Svi tipovi', 'Sportski', 'Rekreativni'];
 
-// Marke po tipu plovila
 const NAUTIKA_MAKES_BY_TIP = {
   'Svi tipovi':      ['Beneteau','Bavaria','Jeanneau','Azimut-Benetti','Four Winns','Sessa Marine','Rinker','Maxum','Elan','Sea-Doo','Yamaha','Kawasaki','Ostalo'],
   'Camac':           ['Alumacraft','Boston Whaler','Bayliner','Lund','Princecraft','Tracker','Ostalo'],
@@ -116,12 +116,10 @@ const NAUTIKA_MAKES_BY_TIP = {
   'Katamaran':       ['Bali','Fountaine Pajot','Lagoon','Leopard','Nautitech','Ostalo'],
   'Gumenjak / RIB':  ['AB Inflatables','Bombard','Highfield','Joker Boat','Navar','Ribeye','Zar','Ostalo'],
   'Ostalo':          ['Ostalo'],
-  // Vodeni skuter tipovi
   'Sportski':        ['Sea-Doo (BRP)','Yamaha','Kawasaki','Ostalo'],
   'Rekreativni':     ['Sea-Doo (BRP)','Yamaha','Kawasaki','Ostalo'],
 };
 
-// Sve nautičke marke (za Nautika sve)
 const ALL_NAUTIKA_MAKES = [...new Set(Object.values(NAUTIKA_MAKES_BY_TIP).flat())].sort();
 
 const MOTO_KAT = [
@@ -132,7 +130,6 @@ const MOTO_KAT = [
   'Tourer','Trike','Ostalo',
 ];
 
-// Marke po kategoriji motocikla
 const MOTO_MAKES_BY_CAT = {
   'Chopper / Cruiser':       ['Harley-Davidson','Indian','Honda','Yamaha','Kawasaki','Suzuki','BMW','Triumph','Ducati','Moto Guzzi','Royal Enfield','Victory'],
   'Dirt Bike':               ['KTM','Honda','Yamaha','Kawasaki','Suzuki','Husqvarna','Beta','Gas Gas','Sherco','TM Racing'],
@@ -157,7 +154,6 @@ const MOTO_MAKES_BY_CAT = {
   'Ostalo':                  ['Honda','Yamaha','Kawasaki','Suzuki','BMW','KTM','Ducati','Triumph','Aprilia','Ostalo'],
 };
 
-// Sve unique moto marke
 const ALL_MOTO_MAKES = [...new Set(Object.values(MOTO_MAKES_BY_CAT).flat())].sort();
 
 const TRUCK_KAT = [
@@ -179,17 +175,6 @@ const TRUCK_MAKES_BY_KAT = {
 };
 
 const ALL_TRUCK_MAKES = [...new Set(Object.values(TRUCK_MAKES_BY_KAT).flat())].sort();
-
-const BODY_TYPES = [
-  { type: 'suv',       label: 'SUV',       emoji: 'U+1F699' },
-  { type: 'sedan',     label: 'Sedan',     emoji: 'U+1F697' },
-  { type: 'hatchback', label: 'Hatchback', emoji: 'U+1F698' },
-  { type: 'karavan',   label: 'Karavan',   emoji: 'U+1F690' },
-  { type: 'coupe',     label: 'Kupe',      emoji: 'U+1F3CE' },
-  { type: 'kabrio',    label: 'Kabrio',    emoji: 'U+1F3D6' },
-  { type: 'van',       label: 'Van',       emoji: 'U+1F68C' },
-  { type: 'pickup',    label: 'Pickup',    emoji: 'U+1F6FB' },
-];
 
 const TABS = [
   { id: 'auto',    label: 'Auto',      icon: '🚗' },
@@ -217,7 +202,7 @@ function ComboInput({ value, onChange, placeholder, options }) {
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
   const wrapRef = useRef(null);
-  const pendingValueRef = useRef(''); // cuva custom vrijednost za slucaj brze navigacije
+  const pendingValueRef = useRef('');
 
   const getLabel = (val) => {
     if (!val) return '';
@@ -252,7 +237,7 @@ function ComboInput({ value, onChange, placeholder, options }) {
 
   const handleChange = (e) => {
     setInput(e.target.value);
-    pendingValueRef.current = e.target.value; // pamti odmah
+    pendingValueRef.current = e.target.value;
     setOpen(true);
   };
 
@@ -477,12 +462,10 @@ function MotoMakeSelect({ selectedCats, selectedMakes, onChange }) {
   const [open, setOpen] = useState(false);
   const btnRef = useRef(null);
 
-  // Prikaži marke relevantne za odabrane kategorije
   const relevantMakes = selectedCats.length > 0
     ? [...new Set(selectedCats.flatMap(c => MOTO_MAKES_BY_CAT[c] ?? []))].sort()
     : ALL_MOTO_MAKES;
 
-  // Kad se kategorije promijene, ukloni marke koje nisu više relevantne
   const filteredSelected = selectedMakes.filter(m => relevantMakes.includes(m));
 
   const label = filteredSelected.length === 0 ? 'Marka' :
@@ -552,7 +535,7 @@ function TruckKatSelect({ selectedKats, onChange }) {
   );
 }
 
-// ─── Truck marka multi-select (filtrirana po kategoriji) ──────
+// ─── Truck marka multi-select ─────────────────────────────────
 function TruckMakeSelect({ selectedKats, selectedMakes, onChange }) {
   const [open, setOpen] = useState(false);
   const btnRef = useRef(null);
@@ -641,7 +624,6 @@ export default function Home() {
   });
   const makes = makesData?.data ?? [];
 
-  // Modeli za odabrane marke (multi)
   const { data: multiModelsData } = useQuery({
     queryKey: ['models-multi', autoMakeIds],
     queryFn: () => axios.get(`/makes/models-multi?make_ids=${autoMakeIds.join(',')}`).then(r => r.data),
@@ -649,7 +631,6 @@ export default function Home() {
   });
   const autoSeries = multiModelsData?.data ?? [];
 
-  // Modeli za moto (single)
   const { data: motoModelsData } = useQuery({
     queryKey: ['models', motoF.make_id],
     queryFn: () => axios.get(`/makes/${motoF.make_id}/models`).then(r => r.data),
@@ -663,7 +644,7 @@ export default function Home() {
   });
   const cities = citiesData?.data ?? [];
 
-  // Count za dugme
+  // Count za dugme pretrage
   const activeFilters = activeTab === 'auto'
     ? { make_ids: autoMakeIds.join(','), model_ids: autoModelIds.join(','), ...autoF }
     : activeTab === 'moto' ? { kategorije: motoCatIds.join(','), moto_makes: motoMakeIds.join(','), ...motoF }
@@ -680,6 +661,14 @@ export default function Home() {
     staleTime: 30000,
   });
   const adsCount = countData?.count ?? '...';
+
+  // Ukupan broj oglasa za hero stats traku
+  const { data: totalCountData } = useQuery({
+    queryKey: ['total-ads-count'],
+    queryFn: () => axios.get('/ads/count').then(r => r.data),
+    staleTime: 60000,
+  });
+  const totalAdsCount = totalCountData?.count ?? null;
 
   // Featured
   const { data: featuredData } = useQuery({
@@ -709,6 +698,11 @@ export default function Home() {
   });
   const latestAds = latestData?.data ?? [];
 
+  // Prosječna cijena iz latest auto oglasa
+  const avgPrice = latestAds.length > 0
+    ? latestAds.filter(a => a.price > 0).reduce((sum, a, _, arr) => sum + a.price / arr.length, 0)
+    : null;
+
   // ─── Search ──────────────────────────────────────────────
   const buildAutoParams = () => {
     const params = new URLSearchParams();
@@ -720,9 +714,7 @@ export default function Home() {
   };
 
   const handleSearch = () => {
-    // Flush svih focused inputa prije navigacije
     if (document.activeElement) document.activeElement.blur();
-    // Mali timeout da blur handleri završe
     setTimeout(() => {
       let params;
       if (activeTab === 'auto') {
@@ -759,25 +751,67 @@ export default function Home() {
   const nautikaTipOpcije = nautikaKat === 'Plovila' ? PLOVILA_TIPOVI : nautikaKat === 'Vodeni skuter' ? SKUTER_TIPOVI : null;
   const tipDisabled = nautikaKat === 'Nautika (sve)' || !nautikaKat;
 
+  // Dinamičan datum za hero (MM/YYYY)
+  const heroDate = new Date().toLocaleDateString('sr-Latn', { month: '2-digit', year: 'numeric' })
+    .replace('. ', '/').replace('.', '');
+
   return (
     <div className="min-h-screen bg-white">
 
       {/* ══ HERO ══ */}
-      <section className="bg-[#12142D] relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5 pointer-events-none">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-[#FF0026] rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#FFEA00] rounded-full translate-y-1/2 -translate-x-1/2" />
-        </div>
-        <div className="relative max-w-6xl mx-auto px-4 py-12">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-5xl font-black text-white leading-tight">
-              Pronađi svoje <span className="text-[#FF0026]">savršeno</span> vozilo
+<section className="relative overflow-hidden min-h-[600px]">
+
+  {/* 1. Pozadinska slika — najdolje */}
+  <div
+    className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+    style={{ backgroundImage: "url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1920&q=80')" }}
+  />
+
+  {/* 2. Tamni overlay preko slike */}
+  <div className="absolute inset-0 z-[1] bg-gradient-to-r from-[#12142D] via-[#12142D]/90 to-[#12142D]/60" />
+  <div className="absolute inset-0 z-[1] bg-gradient-to-t from-[#12142D] via-transparent to-transparent" />
+
+  {/* 3. Aurora animacija */}
+  <div className="absolute inset-0 z-[2]" style={{ mixBlendMode: 'screen' }}>
+    <Aurora
+      colorStops={["#FF0026", "#1B2B5A", "#12142D"]}
+      blend={0.6}
+      amplitude={1.2}
+      speed={0.8}
+    />
+  </div>
+
+  {/* 4. Sadržaj */}
+ <div className="relative z-[3] max-w-6xl mx-auto px-4 pt-24 pb-10">
+          {/* Hero tekst — lijevo poravnat */}
+          <div className="mb-8 max-w-2xl">
+            {/* Meta linija */}
+            <p className="text-[#FF0026] text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
+              <span className="w-6 h-px bg-[#FF0026] inline-block" />
+              CRNA GORA · {heroDate} · {totalAdsCount ? `${totalAdsCount.toLocaleString('sr-Latn')} OGLASA` : '— OGLASA'}
+            </p>
+
+            {/* Glavni naslov */}
+            <h1 className="text-4xl md:text-6xl font-black text-white leading-[1.05] mb-5">
+              Pronađi svoje<br />sljedeće vozilo.
             </h1>
-            <p className="text-[#6674A3] mt-3 text-lg">Hiljade oglasa vozila u Crnoj Gori na jednom mjestu</p>
+
+            {/* Tagline */}
+            <p className="text-2xl md:text-3xl font-black">
+              <span className="text-[#FF0026] italic">Brzo.</span>{' '}
+              <span className="text-[#6674A3]">Pošteno.</span>{' '}
+              <span className="text-[#FFEA00]">Bez buke.</span>
+            </p>
+
+            {/* Podnaslov */}
+            <p className="text-[#6674A3] mt-4 text-base max-w-lg leading-relaxed">
+              Crnogorski marketplace za automobile, motocikle, plovila i transport.
+              Jedna pretraga — hiljade oglasa.
+            </p>
           </div>
 
-          {/* Search box */}
-          <div className="bg-white rounded-2xl shadow-2xl max-w-5xl mx-auto overflow-hidden">
+          {/* ── Search box ── */}
+          <div className="bg-white rounded-2xl shadow-2xl max-w-5xl overflow-hidden">
             {/* Tabovi */}
             <div className="flex border-b border-gray-100">
               {TABS.map(tab => (
@@ -807,6 +841,7 @@ export default function Home() {
                 </div>
               )}
 
+              {/* ── MOTO ── */}
               {activeTab === 'moto' && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <MotoCatSelect selectedCats={motoCatIds} onChange={ids => { setMotoCatIds(ids); setMotoMakeIds([]); }} />
@@ -864,7 +899,7 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Reset + Vise filtera */}
+              {/* Reset + Više filtera */}
               <div className="flex items-center gap-4 mt-3">
                 <button onClick={handleReset} className="text-xs text-gray-400 hover:text-gray-700 flex items-center gap-1 transition">
                   🔄 Resetuj filtere
@@ -889,6 +924,31 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ══ STATS TRAKA ══ */}
+      <div className="bg-[#1B2B5A] border-b border-[#12142D]">
+        <div className="max-w-6xl mx-auto px-4 py-5 grid grid-cols-3 divide-x divide-[#12142D]">
+          {[
+            {
+              value: totalAdsCount != null ? totalAdsCount.toLocaleString('sr-Latn') : '—',
+              label: 'AKTIVNIH OGLASA',
+            },
+            {
+              value: dealers.length > 0 ? dealers.length.toLocaleString('sr-Latn') : '—',
+              label: 'VERIFIKOVANIH TRGOVACA',
+            },
+            {
+              value: avgPrice ? `€ ${Math.round(avgPrice).toLocaleString('sr-Latn')}` : '—',
+              label: 'PROSJEČNA CIJENA',
+            },
+          ].map(s => (
+            <div key={s.label} className="text-center px-4">
+              <div className="text-2xl md:text-3xl font-black text-white">{s.value}</div>
+              <div className="text-[#6674A3] text-xs font-bold tracking-widest mt-0.5">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ══ ISTAKNUTI ══ */}
       {featuredAds.length > 0 && (
         <section className="max-w-6xl mx-auto px-4 py-10">
@@ -908,7 +968,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* ══ PO TIPU ══ */}
+      {/* ══ PO TIPU KAROSERIJE ══ */}
       <section className="bg-gray-50 py-10">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex items-center gap-3 mb-6">
@@ -995,7 +1055,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* ══ NAJNOVIJI ══ */}
+      {/* ══ NAJNOVIJI OGLASI ══ */}
       <section className="max-w-6xl mx-auto px-4 py-10">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
@@ -1011,8 +1071,8 @@ export default function Home() {
             </div>
             <div className="text-center mt-8">
               <button onClick={() => navigate('/search')}
-                className="bg-[#12142D] hover:bg-[#1B2B5A] text-white px-10 py-3 rounded-xl font-bold transition">
-                Pogledaj sve oglase
+                className="bg-[#FF0026] hover:bg-red-700 text-white px-10 py-3 rounded-xl font-bold transition">
+                Pogledaj sve oglase →
               </button>
             </div>
           </>
@@ -1055,12 +1115,12 @@ export default function Home() {
       </section>
 
       {/* ══ FOOTER ══ */}
+      {/* ══ FOOTER ══ */}
       <footer className="bg-[#12142D] border-t border-[#1B2B5A] py-8">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="bg-[#FF0026] px-3 py-1 rounded-lg"><span className="text-white font-black text-lg">VOZIME</span></div>
-              <span className="text-[#FFEA00] font-bold">OGLASI</span>
+             <img src="/images/bijeli.png" alt="VozimeOglasi" className="h-24 w-auto" />
             </div>
             <p className="text-[#6674A3] text-xs text-center">© {new Date().getFullYear()} VozimeOglasi – Oglasnik vozila za Crnu Goru</p>
             <div className="flex gap-4 text-xs text-[#6674A3]">
@@ -1073,4 +1133,5 @@ export default function Home() {
       </footer>
     </div>
   );
+  
 }

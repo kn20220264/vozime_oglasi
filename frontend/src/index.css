@@ -1,30 +1,126 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  body {
-    @apply bg-gray-50 text-brand-dark font-sans;
-  }
+/* ═══════════════════════════════════════════
+   GOMME SANS — svi weightovi
+═══════════════════════════════════════════ */
+@font-face {
+  font-family: 'Gomme Sans';
+  src: url('/fonts/fonnts.com-Gomme_Sans_ExtraLight.otf') format('opentype');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gomme Sans';
+  src: url('/fonts/fonnts.com-Gomme_Sans_ExtraLight_Italic.otf') format('opentype');
+  font-weight: 200;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gomme Sans';
+  src: url('/fonts/fonnts.com-Gomme_Sans_Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gomme Sans';
+  src: url('/fonts/fonnts.com-Gomme_Sans_Light_Italic.otf') format('opentype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gomme Sans';
+  src: url('/fonts/fonnts.com-Gomme_Sans.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gomme Sans';
+  src: url('/fonts/fonnts.com-Gomme_Sans_Italic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gomme Sans';
+  src: url('/fonts/fonnts.com-Gomme_Sans_SemiBold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gomme Sans';
+  src: url('/fonts/fonnts.com-Gomme_Sans_SemiBold_Italic.otf') format('opentype');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gomme Sans';
+  src: url('/fonts/fonnts.com-Gomme_Sans_Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gomme Sans';
+  src: url('/fonts/fonnts.com-Gomme_Sans_Bold_Italic.otf') format('opentype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gomme Sans';
+  src: url('/fonts/fonnts.com-Gomme_Sans_ExtraBold.otf') format('opentype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Gomme Sans';
+  src: url('/fonts/fonnts.com-Gomme_Sans_ExtraBold_Italic.otf') format('opentype');
+  font-weight: 800;
+  font-style: italic;
+  font-display: swap;
 }
 
-@layer components {
-  .filter-select {
-    @apply w-full border border-gray-200 rounded-xl px-3 py-2 text-sm
-           focus:outline-none focus:ring-2 focus:ring-[#FF0026] bg-white;
-  }
-  .filter-input {
-    @apply w-full border border-gray-200 rounded-xl px-3 py-2 text-sm
-           focus:outline-none focus:ring-2 focus:ring-[#FF0026];
-  }
-  .form-select {
-    @apply w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm
-           focus:outline-none focus:ring-2 focus:ring-[#FF0026] bg-white;
-  }
-  .form-input {
-    @apply w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm
-           focus:outline-none focus:ring-2 focus:ring-[#FF0026];
-  }
+/* ═══════════════════════════════════════════
+   TERMINATOR NTL — branding/logo font
+═══════════════════════════════════════════ */
+@font-face {
+  font-family: 'Terminator NTL';
+  src: url('/fonts/terminator real nfi.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ═══════════════════════════════════════════
+   GLOBALNI FONT — primijeni Gomme Sans svuda
+═══════════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  font-family: 'Gomme Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ═══════════════════════════════════════════
+   UTILITY KLASE za Terminator font
+═══════════════════════════════════════════ */
+.font-terminator {
+  font-family: 'Terminator NTL', sans-serif;
+}
+
+.font-gomme {
+  font-family: 'Gomme Sans', sans-serif;
 }
