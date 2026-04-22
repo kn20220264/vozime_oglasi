@@ -96,7 +96,8 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link to="/" className="flex items-center flex-shrink-0">
-            <img src="/images/bijeli.png" alt="VozimeOglasi" className="h-24 w-auto" />
+            <img src="/images/bijeli.png" alt="VozimeOglasi" className="h-24
+             w-auto" />
           </Link>
 
           {/* Search bar */}

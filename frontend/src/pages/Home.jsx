@@ -811,118 +811,136 @@ export default function Home() {
           </div>
 
           {/* ── Search box ── */}
-          <div className="bg-white rounded-2xl shadow-2xl max-w-5xl overflow-hidden">
-            {/* Tabovi */}
-            <div className="flex border-b border-gray-100">
-              {TABS.map(tab => (
-                <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-bold transition
-                    ${activeTab === tab.id ? 'bg-[#FF0026] text-white' : 'text-gray-500 hover:bg-gray-50'}`}>
-                  <span>{tab.icon}</span>
-                  <span className="hidden sm:inline">{tab.label}</span>
-                </button>
-              ))}
-            </div>
+<div className="max-w-5xl overflow-hidden rounded-2xl border border-white/20"
+  style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
 
-            <div className="p-5">
-              {/* ── AUTO ── */}
-              {activeTab === 'auto' && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <MakeMultiSelect makes={makes} selectedIds={autoMakeIds} onChange={ids => { setAutoMakeIds(ids); setAutoModelIds([]); }} />
-                  <ModelHierarchySelect series={autoSeries} selectedIds={autoModelIds} onChange={setAutoModelIds} />
-                  <ComboInput value={autoF.year_from} onChange={v => setAutoF(p => ({...p, year_from: v, year_to: p.year_to && v && Number(p.year_to) < Number(v) ? v : p.year_to}))} placeholder="Godiste od" options={YEARS.map(y => ({value: y, label: String(y)}))} />
-                  <ComboInput value={autoF.year_to} onChange={v => setAutoF(p => ({...p, year_to: v}))} placeholder="Godiste do" options={YEARS.filter(y => !autoF.year_from || y >= Number(autoF.year_from)).map(y => ({value: y, label: String(y)}))} />
-                  <ComboInput value={autoF.mileage_to} onChange={v => setAutoF(p => ({...p, mileage_to: v}))} placeholder="Kilometraza do" options={MILEAGE_OPTIONS} />
-                  <ComboInput value={autoF.price_to} onChange={v => setAutoF(p => ({...p, price_to: v}))} placeholder="Cijena do" options={PRICE_OPTIONS} />
-                  <Sel value={autoF.city_id} onChange={v => setAutoF(p => ({...p, city_id: v}))} placeholder="Grad">
-                    {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </Sel>
-                  <SearchBtn count={adsCount} onSearch={handleSearch} />
-                </div>
-              )}
+  {/* Tabovi */}
+  <div className="flex border-b border-white/15">
+    {TABS.map(tab => (
+      <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+        className={`flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-bold transition
+          ${activeTab === tab.id ? 'bg-[#FF0026] text-white' : 'text-white/70 hover:bg-white/10'}`}>
+        <span>{tab.icon}</span>
+        <span className="hidden sm:inline">{tab.label}</span>
+      </button>
+    ))}
+  </div>
 
-              {/* ── MOTO ── */}
-              {activeTab === 'moto' && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <MotoCatSelect selectedCats={motoCatIds} onChange={ids => { setMotoCatIds(ids); setMotoMakeIds([]); }} />
-                  <MotoMakeSelect selectedCats={motoCatIds} selectedMakes={motoMakeIds} onChange={setMotoMakeIds} />
-                  <ComboInput value={motoF.year_from} onChange={v => setMotoF(p=>({...p,year_from:v}))} placeholder="Godiste" options={YEARS.map(y=>({value:y,label:String(y)}))} />
-                  <ComboInput value={motoF.mileage_to} onChange={v => setMotoF(p=>({...p,mileage_to:v}))} placeholder="Kilometraza do" options={MILEAGE_MOTO} />
-                  <ComboInput value={motoF.price_to} onChange={v => setMotoF(p=>({...p,price_to:v}))} placeholder="Cijena do" options={PRICE_OPTIONS} />
-                  <Sel value={motoF.city_id} onChange={v => setMotoF(p=>({...p,city_id:v}))} placeholder="Grad">
-                    {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </Sel>
-                  <div />
-                  <SearchBtn count={adsCount} onSearch={handleSearch} />
-                </div>
-              )}
+  <div className="p-5">
+    {/* ── AUTO ── */}
+    {activeTab === 'auto' && (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <MakeMultiSelect makes={makes} selectedIds={autoMakeIds} onChange={ids => { setAutoMakeIds(ids); setAutoModelIds([]); }} />
+        <ModelHierarchySelect series={autoSeries} selectedIds={autoModelIds} onChange={setAutoModelIds} />
+        <ComboInput value={autoF.year_from} onChange={v => setAutoF(p => ({...p, year_from: v, year_to: p.year_to && v && Number(p.year_to) < Number(v) ? v : p.year_to}))} placeholder="Godiste od" options={YEARS.map(y => ({value: y, label: String(y)}))} />
+        <ComboInput value={autoF.year_to} onChange={v => setAutoF(p => ({...p, year_to: v}))} placeholder="Godiste do" options={YEARS.filter(y => !autoF.year_from || y >= Number(autoF.year_from)).map(y => ({value: y, label: String(y)}))} />
+        <ComboInput value={autoF.mileage_to} onChange={v => setAutoF(p => ({...p, mileage_to: v}))} placeholder="Kilometraza do" options={MILEAGE_OPTIONS} />
+        <ComboInput value={autoF.price_to} onChange={v => setAutoF(p => ({...p, price_to: v}))} placeholder="Cijena do" options={PRICE_OPTIONS} />
+        <Sel value={autoF.city_id} onChange={v => setAutoF(p => ({...p, city_id: v}))} placeholder="Grad">
+          {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </Sel>
+        <SearchBtn count={adsCount} onSearch={handleSearch} />
+      </div>
+    )}
 
-              {/* ── NAUTIKA ── */}
-              {activeTab === 'nautika' && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Sel value={nautikaKat} onChange={v => { setNautikaKat(v); setNautikaF(p=>({...p,tip:'',make:''})); }} placeholder="">
-                    {NAUTIKA_KAT.map(k => <option key={k} value={k}>{k}</option>)}
-                  </Sel>
-                  <Sel value={nautikaF.tip} onChange={v => setNautikaF(p=>({...p,tip:v,make:''})) } placeholder="Tip" disabled={tipDisabled}>
-                    {nautikaTipOpcije?.map(t => <option key={t} value={t}>{t}</option>)}
-                  </Sel>
-                  <Sel value={nautikaF.make} onChange={v => setNautikaF(p=>({...p,make:v}))} placeholder="Marka">
-                    {(nautikaF.tip && nautikaF.tip !== 'Svi tipovi'
-                      ? NAUTIKA_MAKES_BY_TIP[nautikaF.tip] ?? ALL_NAUTIKA_MAKES
-                      : ALL_NAUTIKA_MAKES
-                    ).map(m => <option key={m} value={m}>{m}</option>)}
-                  </Sel>
-                  <input type="text" value={nautikaF.model} onChange={e => setNautikaF(p=>({...p,model:e.target.value}))}
-                    placeholder="Model" className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] w-full" />
-                  <ComboInput value={nautikaF.price_to} onChange={v => setNautikaF(p=>({...p,price_to:v}))} placeholder="Cijena do" options={PRICE_NAUTIKA} />
-                  <ComboInput value={nautikaF.year_to} onChange={v => setNautikaF(p=>({...p,year_to:v}))} placeholder="Godiste do" options={YEARS.map(y=>({value:y,label:String(y)}))} />
-                  <Sel value={nautikaF.city_id} onChange={v => setNautikaF(p=>({...p,city_id:v}))} placeholder="Grad">
-                    {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </Sel>
-                  <SearchBtn count={adsCount} onSearch={handleSearch} />
-                </div>
-              )}
+    {/* ── MOTO ── */}
+    {activeTab === 'moto' && (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <MotoCatSelect selectedCats={motoCatIds} onChange={ids => { setMotoCatIds(ids); setMotoMakeIds([]); }} />
+        <MotoMakeSelect selectedCats={motoCatIds} selectedMakes={motoMakeIds} onChange={setMotoMakeIds} />
+        <ComboInput value={motoF.year_from} onChange={v => setMotoF(p=>({...p,year_from:v}))} placeholder="Godiste" options={YEARS.map(y=>({value:y,label:String(y)}))} />
+        <ComboInput value={motoF.mileage_to} onChange={v => setMotoF(p=>({...p,mileage_to:v}))} placeholder="Kilometraza do" options={MILEAGE_MOTO} />
+        <ComboInput value={motoF.price_to} onChange={v => setMotoF(p=>({...p,price_to:v}))} placeholder="Cijena do" options={PRICE_OPTIONS} />
+        <Sel value={motoF.city_id} onChange={v => setMotoF(p=>({...p,city_id:v}))} placeholder="Grad">
+          {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </Sel>
+        <div />
+        <SearchBtn count={adsCount} onSearch={handleSearch} />
+      </div>
+    )}
 
-              {/* ── TRUCK ── */}
-              {activeTab === 'truck' && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <TruckKatSelect selectedKats={truckKatIds} onChange={ids => { setTruckKatIds(ids); setTruckMakeIds([]); }} />
-                  <TruckMakeSelect selectedKats={truckKatIds} selectedMakes={truckMakeIds} onChange={setTruckMakeIds} />
-                  <ComboInput value={truckF.year_from} onChange={v => setTruckF(p=>({...p,year_from:v}))} placeholder="Godiste od" options={YEARS.map(y=>({value:y,label:String(y)}))} />
-                  <ComboInput value={truckF.mileage_to} onChange={v => setTruckF(p=>({...p,mileage_to:v}))} placeholder="Kilometraza do" options={MILEAGE_TRUCK} />
-                  <ComboInput value={truckF.price_to} onChange={v => setTruckF(p=>({...p,price_to:v}))} placeholder="Cijena do" options={PRICE_TRUCK} />
-                  <Sel value={truckF.city_id} onChange={v => setTruckF(p=>({...p,city_id:v}))} placeholder="Grad">
-                    {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </Sel>
-                  <div />
-                  <SearchBtn count={adsCount} onSearch={handleSearch} />
-                </div>
-              )}
+    {/* ── NAUTIKA ── */}
+    {activeTab === 'nautika' && (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Sel value={nautikaKat} onChange={v => { setNautikaKat(v); setNautikaF(p=>({...p,tip:'',make:''})); }} placeholder="">
+          {NAUTIKA_KAT.map(k => <option key={k} value={k}>{k}</option>)}
+        </Sel>
+        <Sel value={nautikaF.tip} onChange={v => setNautikaF(p=>({...p,tip:v,make:''}))} placeholder="Tip" disabled={tipDisabled}>
+          {nautikaTipOpcije?.map(t => <option key={t} value={t}>{t}</option>)}
+        </Sel>
+        <Sel value={nautikaF.make} onChange={v => setNautikaF(p=>({...p,make:v}))} placeholder="Marka">
+          {(nautikaF.tip && nautikaF.tip !== 'Svi tipovi'
+            ? NAUTIKA_MAKES_BY_TIP[nautikaF.tip] ?? ALL_NAUTIKA_MAKES
+            : ALL_NAUTIKA_MAKES
+          ).map(m => <option key={m} value={m}>{m}</option>)}
+        </Sel>
+        <input type="text" value={nautikaF.model} onChange={e => setNautikaF(p=>({...p,model:e.target.value}))}
+          placeholder="Model" className="border border-white/20 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] w-full bg-white/90" />
+        <ComboInput value={nautikaF.price_to} onChange={v => setNautikaF(p=>({...p,price_to:v}))} placeholder="Cijena do" options={PRICE_NAUTIKA} />
+        <ComboInput value={nautikaF.year_to} onChange={v => setNautikaF(p=>({...p,year_to:v}))} placeholder="Godiste do" options={YEARS.map(y=>({value:y,label:String(y)}))} />
+        <Sel value={nautikaF.city_id} onChange={v => setNautikaF(p=>({...p,city_id:v}))} placeholder="Grad">
+          {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </Sel>
+        <SearchBtn count={adsCount} onSearch={handleSearch} />
+      </div>
+    )}
 
-              {/* Reset + Više filtera */}
-              <div className="flex items-center gap-4 mt-3">
-                <button onClick={handleReset} className="text-xs text-gray-400 hover:text-gray-700 flex items-center gap-1 transition">
-                  🔄 Resetuj filtere
-                </button>
-                <button onClick={() => {
-                  if (document.activeElement) document.activeElement.blur();
-                  setTimeout(() => {
-                    const params = activeTab === 'auto' ? buildAutoParams() : new URLSearchParams();
-                    params.set('tab', activeTab);
-                    if (activeTab === 'moto') { if (motoCatIds.length) params.set('kategorije', motoCatIds.join(',')); if (motoMakeIds.length) params.set('moto_makes', motoMakeIds.join(',')); Object.entries(motoF).forEach(([k, v]) => v && params.set(k, v)); }
-                    else if (activeTab === 'nautika') { Object.entries(nautikaF).forEach(([k, v]) => v && params.set(k, v)); if (nautikaKat !== 'Nautika (sve)') params.set('nautika_kat', nautikaKat); }
-                    else if (activeTab === 'truck') { if (truckKatIds.length) params.set('truck_kats', truckKatIds.join(',')); if (truckMakeIds.length) params.set('truck_makes', truckMakeIds.join(',')); Object.entries(truckF).forEach(([k, v]) => v && params.set(k, v)); }
-                    navigate(`/search/filters?${params.toString()}`);
-                  }, 50);
-                }}
-                  className="text-xs text-[#1B2B5A] hover:text-[#FF0026] flex items-center gap-1 font-semibold transition">
-                  ⚙ Više filtera
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+    {/* ── TRUCK ── */}
+    {activeTab === 'truck' && (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <TruckKatSelect selectedKats={truckKatIds} onChange={ids => { setTruckKatIds(ids); setTruckMakeIds([]); }} />
+        <TruckMakeSelect selectedKats={truckKatIds} selectedMakes={truckMakeIds} onChange={setTruckMakeIds} />
+        <ComboInput value={truckF.year_from} onChange={v => setTruckF(p=>({...p,year_from:v}))} placeholder="Godiste od" options={YEARS.map(y=>({value:y,label:String(y)}))} />
+        <ComboInput value={truckF.mileage_to} onChange={v => setTruckF(p=>({...p,mileage_to:v}))} placeholder="Kilometraza do" options={MILEAGE_TRUCK} />
+        <ComboInput value={truckF.price_to} onChange={v => setTruckF(p=>({...p,price_to:v}))} placeholder="Cijena do" options={PRICE_TRUCK} />
+        <Sel value={truckF.city_id} onChange={v => setTruckF(p=>({...p,city_id:v}))} placeholder="Grad">
+          {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </Sel>
+        <div />
+        <SearchBtn count={adsCount} onSearch={handleSearch} />
+      </div>
+    )}
+
+          {/* Reset + Više filtera */}
+      <div className="flex items-center gap-4 mt-3">
+        <button onClick={handleReset} className="text-xs text-white/50 hover:text-white flex items-center gap-1 transition">
+          🔄 Resetuj filtere
+        </button>
+
+        <button
+          onClick={() => {
+            if (document.activeElement) document.activeElement.blur();
+            setTimeout(() => {
+              const params = activeTab === 'auto' ? buildAutoParams() : new URLSearchParams();
+              params.set('tab', activeTab);
+
+              if (activeTab === 'moto') {
+                if (motoCatIds.length) params.set('kategorije', motoCatIds.join(','));
+                if (motoMakeIds.length) params.set('moto_makes', motoMakeIds.join(','));
+                Object.entries(motoF).forEach(([k, v]) => v && params.set(k, v));
+              } else if (activeTab === 'nautika') {
+                Object.entries(nautikaF).forEach(([k, v]) => v && params.set(k, v));
+                if (nautikaKat !== 'Nautika (sve)') params.set('nautika_kat', nautikaKat);
+              } else if (activeTab === 'truck') {
+                if (truckKatIds.length) params.set('truck_kats', truckKatIds.join(','));
+                if (truckMakeIds.length) params.set('truck_makes', truckMakeIds.join(','));
+                Object.entries(truckF).forEach(([k, v]) => v && params.set(k, v));
+              }
+
+              navigate(`/search/filters?${params.toString()}`);
+            }, 50);
+          }}
+          className="text-xs text-white/70 hover:text-white flex items-center gap-1 font-semibold transition"
+        >
+          ⚙ Više filtera
+        </button>
+      </div>
+
+    </div>   {/* p-5 */}
+  </div>     {/* search box */}
+</div>       {/* HERO content wrapper */}
+</section>
+    
 
       {/* ══ STATS TRAKA ══ */}
       <div className="bg-[#1B2B5A] border-b border-[#12142D]">
