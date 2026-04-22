@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Package;
+use App\Models\Payment;
 use App\Models\User;
+use App\Models\UserPackage;
 use App\Models\UserProfile;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Events\Verified;
@@ -44,6 +47,7 @@ class AuthController extends Controller
         ]);
 
         UserProfile::create(['user_id' => $user->id]);
+        $this->assignFreePackage($user);
 
         event(new Registered($user));
 
@@ -204,6 +208,7 @@ class AuthController extends Controller
             ]);
 
             UserProfile::create(['user_id' => $user->id]);
+            $this->assignFreePackage($user);
         }
 
         $user->tokens()->delete();
@@ -211,6 +216,39 @@ class AuthController extends Controller
 
         $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
         return redirect("{$frontendUrl}/auth/google/callback?token={$token}");
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // HELPER — dodjeli FREE paket novom korisniku
+    // ═══════════════════════════════════════════════════════
+
+    private function assignFreePackage(User $user): void
+    {
+        $free = Package::where('type', 'account')
+                       ->where('name', 'FREE')
+                       ->where('is_active', true)
+                       ->first();
+
+        if (!$free) return;
+
+        $userPackage = UserPackage::create([
+            'user_id'    => $user->id,
+            'ad_id'      => null,
+            'package_id' => $free->id,
+            'paid_at'    => now(),
+            'expires_at' => now()->addDays($free->duration_days),
+        ]);
+
+        Payment::create([
+            'user_id'         => $user->id,
+            'user_package_id' => $userPackage->id,
+            'amount'          => 0,
+            'currency'        => 'EUR',
+            'gateway'         => 'admin_grant',
+            'payment_method'  => 'admin_grant',
+            'reference'       => 'FREE-' . strtoupper(Str::random(6)),
+            'status'          => 'completed',
+        ]);
     }
 
     // ═══════════════════════════════════════════════════════

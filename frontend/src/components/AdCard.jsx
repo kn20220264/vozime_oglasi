@@ -21,10 +21,6 @@ export default function AdCard({ ad }) {
                         ISTAKNUTO
                     </span>
                 )}
-                <span className={`absolute top-2 right-2 text-xs font-bold px-2 py-0.5 rounded-lg
-                    ${ad.condition === 'novo' ? 'bg-green-500 text-white' : 'bg-[#12142D] text-white'}`}>
-                    {ad.condition === 'novo' ? 'NOVO' : 'POLOVNO'}
-                </span>
             </div>
 
             {/* Sadržaj */}

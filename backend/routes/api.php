@@ -134,6 +134,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/ads/{id}',                  [AdminController::class, 'updateAd']);
         Route::post('/ads/{id}/toggle-featured', [AdminController::class, 'toggleAdFeatured']);
         Route::post('/ads/{id}/toggle-pinned',   [AdminController::class, 'toggleAdPinned']);
+        Route::post('/ads/{id}/grant-boost',     [AdminController::class, 'grantAdBoost']);
         Route::delete('/ads/{id}',               [AdminController::class, 'deleteAd']);
 
         // Korisnici
@@ -141,6 +142,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users/{id}',                [AdminController::class, 'showUser']);
         Route::put('/users/{id}/toggle-active',  [AdminController::class, 'toggleUserActive']);
         Route::put('/users/{id}/role',           [AdminController::class, 'updateUserRole']);
+        Route::post('/users/{id}/grant-package', [AdminController::class, 'grantAccountPackage']);
 
         // Privilegije korisnika
         Route::get('/privileges/available',              [AdminController::class, 'availablePrivileges']);

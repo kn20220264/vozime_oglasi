@@ -336,9 +336,16 @@ export default function AdDetail() {
                   )}
                 </div>
                 <div>
-                  <p className="font-bold text-[#12142D] group-hover:text-[#FF0026] transition">
-                    {ad.seller?.company?.name ?? ad.seller?.name}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-bold text-[#12142D] group-hover:text-[#FF0026] transition">
+                      {ad.seller?.company?.name ?? ad.seller?.name}
+                    </p>
+                    {ad.seller?.premium_seller && (
+                      <span className="bg-[#1B2B5A] text-white text-[10px] font-bold px-2 py-0.5 rounded-lg">
+                        ⭐ PREMIUM
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-400 capitalize">
                     {ad.seller?.role === 'dealer' ? 'Auto plac / Diler' : 'Privatni prodavac'}
                   </p>

@@ -133,6 +133,15 @@ class User extends Authenticatable implements MustVerifyEmail
         return $priv?->privilege_value;
     }
 
+    // Provjeri da li korisnik ima aktivan premium_seller paket (MAX)
+    public function isPremiumSeller(): bool
+    {
+        return $this->userPackages()
+            ->whereHas('package', fn($q) => $q->where('premium_seller', true))
+            ->where('expires_at', '>', now())
+            ->exists();
+    }
+
     // Puno ime iz first_name + last_name, ili fallback na name
     public function getFullNameAttribute(): string
     {

@@ -136,6 +136,88 @@ class AdminController extends Controller
         return response()->json(['message' => 'Oglas ažuriran.', 'ad' => $ad->fresh()]);
     }
 
+    // Admin dodjeljuje ad_boost paket ogladu besplatno
+    public function grantAdBoost(Request $request, int $id)
+    {
+        $this->requireAdmin($request);
+
+        $request->validate([
+            'package_id' => 'required|exists:packages,id',
+        ]);
+
+        $ad      = Ad::findOrFail($id);
+        $package = Package::where('id', $request->package_id)
+                          ->where('type', 'ad_boost')
+                          ->firstOrFail();
+
+        $userPackage = UserPackage::create([
+            'user_id'    => $ad->user_id,
+            'ad_id'      => $ad->id,
+            'package_id' => $package->id,
+            'paid_at'    => now(),
+            'expires_at' => now()->addDays($package->duration_days),
+        ]);
+
+        Payment::create([
+            'user_id'         => $ad->user_id,
+            'user_package_id' => $userPackage->id,
+            'amount'          => 0,
+            'currency'        => 'EUR',
+            'gateway'         => 'admin_grant',
+            'payment_method'  => 'admin_grant',
+            'reference'       => $ad->ad_code ?? 'ADMIN-' . strtoupper(Str::random(6)),
+            'status'          => 'completed',
+        ]);
+
+        $ad->update([
+            'featured'       => true,
+            'featured_until' => now()->addDays($package->duration_days),
+        ]);
+
+        return response()->json([
+            'message'        => "Paket \"{$package->name}\" dodijeljen oglasu.",
+            'featured_until' => $ad->fresh()->featured_until,
+        ]);
+    }
+
+    // Admin dodjeljuje account paket korisniku besplatno
+public function grantAccountPackage(Request $request, int $userId)
+{
+    $this->requireAdmin($request);
+
+    $request->validate([
+        'package_id' => 'required|exists:packages,id',
+    ]);
+
+    $user    = User::findOrFail($userId);
+    $package = Package::where('id', $request->package_id)
+                      ->where('type', 'listing')
+                      ->firstOrFail();
+
+    $userPackage = UserPackage::create([
+        'user_id'    => $user->id,
+        'ad_id'      => null,
+        'package_id' => $package->id,
+        'paid_at'    => now(),
+        'expires_at' => now()->addDays($package->duration_days),
+    ]);
+
+    Payment::create([
+        'user_id'         => $user->id,
+        'user_package_id' => $userPackage->id,
+        'amount'          => 0,
+        'currency'        => 'EUR',
+        'gateway'         => 'admin_grant',
+        'payment_method'  => 'admin_grant',
+        'reference'       => 'GRANT-' . strtoupper(Str::random(6)),
+        'status'          => 'completed',
+    ]);
+
+    return response()->json([
+        'message' => "Paket \"{$package->name}\" dodijeljen korisniku {$user->name}.",
+    ]);
+}
+
     // Admin toggle featured (brzi shortcut)
     public function toggleAdFeatured(Request $request, int $id)
     {
@@ -422,14 +504,18 @@ class AdminController extends Controller
 
         // Kreiraj payment zapis kao "admin_grant"
         Payment::create([
-            'user_package_id' => $userPackage->id,
-            'amount'          => 0,
-            'payment_method'  => 'admin_grant',
-            'status'          => 'completed',
-            'admin_note'      => $request->note ?? 'Admin dodjela bez plaćanja.',
-            'confirmed_by'    => $request->user()->id,
-            'confirmed_at'    => now(),
-        ]);
+    'user_id'         => $request->user_id,
+    'user_package_id' => $userPackage->id,
+    'amount'          => 0,
+    'currency'        => 'EUR',
+    'gateway'         => 'admin_grant',
+    'payment_method'  => 'admin_grant',
+    'reference'       => 'GRANT-' . strtoupper(\Illuminate\Support\Str::random(6)),
+    'status'          => 'completed',
+    'admin_note'      => $request->note ?? 'Admin dodjela bez plaćanja.',
+    'confirmed_by'    => $request->user()->id,
+    'confirmed_at'    => now(),
+]);
 
         // Ako je ad_boost paket i ima ad_id
         if ($package->type === 'ad_boost' && $request->ad_id) {

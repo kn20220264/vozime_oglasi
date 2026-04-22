@@ -9,6 +9,7 @@ use App\Http\Resources\AdDetailResource;
 use App\Http\Resources\AdResource;
 use App\Models\Ad;
 use App\Models\AdImage;
+use App\Models\UserPackage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -231,6 +232,28 @@ class AdController extends Controller
     // ==========================================
     public function store(StoreAdRequest $request): JsonResponse
     {
+        $user = auth()->user();
+
+        // Provjeri limit oglasa prema aktivnom account paketu
+        $activePackage = UserPackage::with('package')
+            ->where('user_id', $user->id)
+            ->whereHas('package', fn($q) => $q->where('type', 'account'))
+            ->where('expires_at', '>', now())
+            ->orderByDesc('created_at')
+            ->first();
+
+        $maxAds = $activePackage?->package?->max_active_ads ?? 3; // default FREE = 3
+
+        $currentAds = Ad::where('user_id', $user->id)
+            ->whereIn('status', ['active', 'pending'])
+            ->count();
+
+        if ($currentAds >= $maxAds) {
+            return response()->json([
+                'message' => "Dostigli ste maksimalan broj aktivnih oglasa ({$maxAds}) za vaš trenutni paket. Nadogradite paket za više oglasa.",
+            ], 422);
+        }
+
         $ad = DB::transaction(function () use ($request) {
  
             $ad = Ad::create([
@@ -410,4 +433,3 @@ class AdController extends Controller
         ]);
     }
 }
- 

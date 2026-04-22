@@ -388,10 +388,18 @@ function AdminAds() {
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState('');
     const [status, setStatus] = useState('');
+    const [boostModal, setBoostModal] = useState(null); // { id, adTitle, featured }
+    const [selectedPackage, setSelectedPackage] = useState('');
 
     const { data, isLoading } = useQuery({
         queryKey: ['admin-ads', page, search, status],
         queryFn: () => axios.get('/admin/ads', { params: { page, search, status, per_page: 20 } }).then(r => r.data)
+    });
+
+    // Dohvati ad_boost pakete za modal
+    const { data: boostPackages } = useQuery({
+        queryKey: ['boost-packages'],
+        queryFn: () => axios.get('/packages', { params: { type: 'ad_boost' } }).then(r => r.data)
     });
 
     const setStatusMutation = useMutation({
@@ -399,7 +407,18 @@ function AdminAds() {
         onSuccess: () => { toast.success('Status ažuriran.'); qc.invalidateQueries({ queryKey: ['admin-ads'] }); }
     });
 
-    const toggleFeatured = useMutation({
+    const grantBoost = useMutation({
+        mutationFn: ({ id, package_id }) => axios.post(`/admin/ads/${id}/grant-boost`, { package_id }),
+        onSuccess: (res) => {
+            toast.success(res.data.message);
+            qc.invalidateQueries({ queryKey: ['admin-ads'] });
+            setBoostModal(null);
+            setSelectedPackage('');
+        },
+        onError: (e) => toast.error(e.response?.data?.message ?? 'Greška.')
+    });
+
+    const removeFeatured = useMutation({
         mutationFn: (id) => axios.post(`/admin/ads/${id}/toggle-featured`),
         onSuccess: (res) => { toast.success(res.data.message); qc.invalidateQueries({ queryKey: ['admin-ads'] }); }
     });
@@ -413,6 +432,11 @@ function AdminAds() {
         mutationFn: (id) => axios.delete(`/admin/ads/${id}`),
         onSuccess: () => { toast.success('Oglas obrisan.'); qc.invalidateQueries({ queryKey: ['admin-ads'] }); }
     });
+
+    const openBoostModal = (ad) => {
+        setBoostModal({ id: ad.id, adTitle: ad.title, featured: ad.featured });
+        setSelectedPackage(boostPackages?.[0]?.id?.toString() ?? '');
+    };
 
     const statusColor = { active: 'green', pending: 'yellow', rejected: 'red', inactive: 'gray', sold: 'blue', expired: 'gray' };
     const statusLabel = { active: 'Aktivan', pending: 'Na čekanju', rejected: 'Odbijen', inactive: 'Neaktivan', sold: 'Prodat', expired: 'Istekao' };
@@ -494,7 +518,7 @@ function AdminAds() {
                                     <td className="px-4 py-3">
                                         <div className="flex gap-1.5 justify-end">
                                             <Btn size="sm" variant="secondary" onClick={() => navigate(`/admin/ads/${ad.id}`)}>✏️</Btn>
-                                            <Btn size="sm" variant={ad.featured ? 'yellow' : 'secondary'} onClick={() => toggleFeatured.mutate(ad.id)}>⭐</Btn>
+                                            <Btn size="sm" variant={ad.featured ? 'yellow' : 'secondary'} onClick={() => ad.featured ? removeFeatured.mutate(ad.id) : openBoostModal(ad)}>⭐</Btn>
                                             <Btn size="sm" variant={ad.pinned   ? 'yellow' : 'secondary'} onClick={() => togglePinned.mutate(ad.id)}>📌</Btn>
                                             <a href={`/ads/${ad.slug}`} target="_blank" rel="noreferrer">
                                                 <Btn size="sm" variant="secondary">👁</Btn>
@@ -509,6 +533,56 @@ function AdminAds() {
                 </div>
                 <Pagination meta={data?.meta} onPage={setPage} />
             </div>
+
+            {/* Modal — dodjela boost paketa */}
+            <Modal open={!!boostModal} onClose={() => { setBoostModal(null); setSelectedPackage(''); }}
+                title="⭐ Dodijeli istaknuto">
+                <div className="space-y-4">
+                    <p className="text-sm text-gray-600">
+                        Oglas: <span className="font-semibold text-[#12142D]">{boostModal?.adTitle}</span>
+                    </p>
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-600 mb-2">Odaberi paket</label>
+                        {boostPackages?.length ? (
+                            <div className="space-y-2">
+                                {boostPackages.map(pkg => (
+                                    <label key={pkg.id}
+                                        className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition ${
+                                            selectedPackage === pkg.id.toString()
+                                                ? 'border-[#FF0026] bg-red-50'
+                                                : 'border-gray-200 hover:border-gray-300'
+                                        }`}>
+                                        <input
+                                            type="radio"
+                                            name="boost_package"
+                                            value={pkg.id}
+                                            checked={selectedPackage === pkg.id.toString()}
+                                            onChange={e => setSelectedPackage(e.target.value)}
+                                            className="accent-[#FF0026]"
+                                        />
+                                        <div className="flex-1">
+                                            <p className="font-semibold text-[#12142D] text-sm">{pkg.name}</p>
+                                            <p className="text-xs text-gray-400">{pkg.duration_days} dana · {pkg.description || 'Istaknuto oglašavanje'}</p>
+                                        </div>
+                                        <Badge color="yellow">Besplatno</Badge>
+                                    </label>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-sm text-gray-400">Nema dostupnih boost paketa.</p>
+                        )}
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                        <Btn
+                            variant="yellow"
+                            disabled={!selectedPackage || grantBoost.isPending}
+                            onClick={() => grantBoost.mutate({ id: boostModal.id, package_id: parseInt(selectedPackage) })}>
+                            {grantBoost.isPending ? 'Dodjeljujem...' : '⭐ Dodijeli paket'}
+                        </Btn>
+                        <Btn variant="secondary" onClick={() => { setBoostModal(null); setSelectedPackage(''); }}>Otkaži</Btn>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }
@@ -751,9 +825,9 @@ function AdminUserDetail() {
         queryFn: () => axios.get('/admin/privileges/available').then(r => r.data)
     });
 
-    const { data: packages } = useQuery({
-        queryKey: ['admin-packages-list'],
-        queryFn: () => axios.get('/admin/packages').then(r => r.data)
+    const { data: listingPackages } = useQuery({
+        queryKey: ['admin-listing-packages'],
+        queryFn: () => axios.get('/packages', { params: { type: 'account' } }).then(r => r.data)
     });
 
     const grantPriv = useMutation({
@@ -781,7 +855,6 @@ function AdminUserDetail() {
         },
         onError: (e) => toast.error(e.response?.data?.message ?? 'Greška.')
     });
-
     if (!user) return <div className="p-6 text-gray-400">Učitavanje...</div>;
 
     return (
@@ -882,24 +955,41 @@ function AdminUserDetail() {
             </Modal>
 
             {/* Modal — paket */}
-            <Modal open={pkgModal} onClose={() => setPkgModal(false)} title="Dodjeli paket korisniku">
+            <Modal open={pkgModal} onClose={() => { setPkgModal(false); setPkgForm({ package_id: '', ad_id: '', note: '' }); }} title="📦 Dodjeli nalog paket">
                 <div className="space-y-4">
-                    <Select label="Paket" value={pkgForm.package_id}
-                        onChange={e => setPkgForm(p => ({ ...p, package_id: e.target.value }))}>
-                        <option value="">Odaberi paket...</option>
-                        {packages?.map(pkg => (
-                            <option key={pkg.id} value={pkg.id}>{pkg.name} — {pkg.price} € / {pkg.duration_days} dana</option>
+                    <p className="text-sm text-gray-500">Odaberi paket koji želiš dodijeliti korisniku <strong className="text-[#12142D]">{user.name}</strong> besplatno.</p>
+                    <div className="space-y-2">
+                        {listingPackages?.map(pkg => (
+                            <label key={pkg.id}
+                                className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition ${
+                                    pkgForm.package_id === pkg.id.toString()
+                                        ? 'border-[#FF0026] bg-red-50'
+                                        : 'border-gray-200 hover:border-gray-300'
+                                }`}>
+                                <input
+                                    type="radio"
+                                    name="listing_package"
+                                    value={pkg.id}
+                                    checked={pkgForm.package_id === pkg.id.toString()}
+                                    onChange={e => setPkgForm(p => ({ ...p, package_id: e.target.value }))}
+                                    className="accent-[#FF0026]"
+                                />
+                                <div className="flex-1">
+                                    <p className="font-semibold text-[#12142D] text-sm">{pkg.name}</p>
+                                    <p className="text-xs text-gray-400">
+                                        {pkg.duration_days} dana · max {pkg.max_active_ads ?? '∞'} oglasa
+                                        {pkg.featured ? ' · ⭐ Premium' : ''}
+                                    </p>
+                                </div>
+                                <Badge color="green">Besplatno</Badge>
+                            </label>
                         ))}
-                    </Select>
-                    <Input label="ID oglasa (opciono, za ad_boost)" value={pkgForm.ad_id}
-                        onChange={e => setPkgForm(p => ({ ...p, ad_id: e.target.value }))} />
-                    <Input label="Napomena" value={pkgForm.note}
-                        onChange={e => setPkgForm(p => ({ ...p, note: e.target.value }))} />
+                    </div>
                     <div className="flex gap-3 pt-2">
-                        <Btn variant="yellow" onClick={() => grantPkg.mutate(pkgForm)} disabled={!pkgForm.package_id || grantPkg.isPending}>
-                            {grantPkg.isPending ? 'Dodjeljivanje...' : 'Dodjeli paket besplatno'}
+                        <Btn variant="primary" onClick={() => grantPkg.mutate(pkgForm)} disabled={!pkgForm.package_id || grantPkg.isPending}>
+                            {grantPkg.isPending ? 'Dodjeljivanje...' : '📦 Dodjeli paket'}
                         </Btn>
-                        <Btn variant="secondary" onClick={() => setPkgModal(false)}>Otkaži</Btn>
+                        <Btn variant="secondary" onClick={() => { setPkgModal(false); setPkgForm({ package_id: '', ad_id: '', note: '' }); }}>Otkaži</Btn>
                     </div>
                 </div>
             </Modal>

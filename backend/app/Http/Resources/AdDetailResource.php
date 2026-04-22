@@ -103,15 +103,16 @@ class AdDetailResource extends JsonResource
             ),
  
             'seller' => $this->whenLoaded('user', fn() => [
-                'id'           => $this->user->id,
-                'name'         => $this->user->name,
-                'phone'        => $this->user->phone,
-                'role'         => $this->user->role,
-                'avatar'       => $this->user->avatar
+                'id'             => $this->user->id,
+                'name'           => $this->user->name,
+                'phone'          => $this->user->phone,
+                'role'           => $this->user->role,
+                'premium_seller' => $this->user->isPremiumSeller(),
+                'avatar'         => $this->user->avatar
                     ? asset('storage/' . $this->user->avatar)
                     : null,
-                'member_since' => $this->user->created_at->format('Y'),
-                'company'      => $this->user->role === 'dealer' && $this->user->relationLoaded('profile')
+                'member_since'   => $this->user->created_at->format('Y'),
+                'company'        => $this->user->role === 'dealer' && $this->user->relationLoaded('profile')
                     ? [
                         'name'          => $this->user->profile?->company_name,
                         'logo'          => $this->user->profile?->logo

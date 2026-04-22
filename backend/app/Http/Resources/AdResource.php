@@ -35,8 +35,9 @@ class AdResource extends JsonResource
             'model'            => $this->vehicleModel?->name,
             'city'             => $this->city?->name,
             'user'             => [
-                'id'   => $this->user?->id,
-                'name' => $this->user?->name,
+                'id'             => $this->user?->id,
+                'name'           => $this->user?->name,
+                'premium_seller' => $this->user?->isPremiumSeller() ?? false,
             ],
             'created_at'       => $this->created_at,
         ];
