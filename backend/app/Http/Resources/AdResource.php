@@ -3,11 +3,21 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class AdResource extends JsonResource
 {
     public function toArray($request): array
     {
+        // Provjeri da li fajl stvarno postoji na disku
+        $primaryImage = null;
+        if ($this->primaryImage) {
+            $path = $this->primaryImage->path;
+            if (Storage::disk('public')->exists($path)) {
+                $primaryImage = '/storage/' . $path;
+            }
+        }
+
         return [
             'id'               => $this->id,
             'ad_code'          => $this->ad_code,
@@ -28,12 +38,10 @@ class AdResource extends JsonResource
             'status'           => $this->status,
             'views_count'      => $this->views_count,
             'featured'         => $this->featured,
-            'primary_image'    => $this->primaryImage
-                                    ? '/storage/' . $this->primaryImage->path
-                                    : null,
+            'primary_image'    => $primaryImage,
             'make'             => $this->make?->name,
             'model'            => $this->vehicleModel?->name,
-            'city'             => $this->city?->name,
+            'city'             => $this->city ? ['name' => $this->city->name] : null,
             'user'             => [
                 'id'             => $this->user?->id,
                 'name'           => $this->user?->name,

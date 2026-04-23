@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import axios from '../api/axios';
 import AdCard from '../components/AdCard';
 import Aurora from '../components/ui/Aurora';
+import GlassIcons from '../components/GlassIcons';
 
 // ─── Portal dropdown helper ───────────────────────────────────
 function PortalDropdown({ anchorRef, open, onClose, children }) {
@@ -970,45 +971,48 @@ export default function Home() {
       {/* ══ ISTAKNUTI ══ */}
       {featuredAds.length > 0 && (
         <section className="max-w-6xl mx-auto px-4 py-10">
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-3">
-              <div className="w-1 h-7 bg-[#FF0026] rounded-full" />
-              <h2 className="text-xl font-black text-[#12142D]">Istaknuti oglasi</h2>
-              <span className="bg-[#FFEA00] text-[#12142D] text-xs font-bold px-2 py-0.5 rounded-md">PREMIUM</span>
-            </div>
-            <button onClick={() => navigate('/search?featured=1')} className="text-sm text-[#FF0026] hover:underline font-semibold">
-              Pretraži sve istaknute →
-            </button>
-          </div>
-          <div className={`grid gap-4 ${featuredAds.length === 1 ? 'grid-cols-1 max-w-sm mx-auto' : featuredAds.length === 2 ? 'grid-cols-2 max-w-2xl mx-auto' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
-            {featuredAds.slice(0, 30).map(ad => <AdCard key={ad.id} ad={ad} />)}
-          </div>
-        </section>
+  <div className="flex items-start justify-between mb-8">
+    <div>
+      <h2 className="text-2xl font-black text-[#12142D]">Istaknuti oglasi</h2>
+      <div className="w-10 h-0.5 bg-[#FFEA00] mt-1.5 mb-1" />
+      <p className="text-sm text-gray-400">Oglasi koji su danas u fokusu kupaca.</p>
+    </div>
+    <button
+      onClick={() => navigate('/search?featured=1')}
+      className="text-sm text-[#FF0026] hover:underline font-semibold whitespace-nowrap mt-1"
+    >
+      Svi istaknuti →
+    </button>
+  </div>
+  <div className={`grid gap-4 ${featuredAds.length === 1 ? 'grid-cols-1 max-w-sm mx-auto' : featuredAds.length === 2 ? 'grid-cols-2 max-w-2xl mx-auto' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
+    {featuredAds.slice(0, 30).map(ad => <AdCard key={ad.id} ad={ad} />)}
+  </div>
+</section>
       )}
 
-      {/* ══ PO TIPU KAROSERIJE ══ */}
-      <section className="bg-gray-50 py-10">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-1 h-7 bg-[#1B2B5A] rounded-full" />
-            <h2 className="text-xl font-black text-[#12142D]">Pretraži po tipu</h2>
-          </div>
-          <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
-            {[
-              {type:'suv',label:'SUV',emoji:'🚙'},{type:'sedan',label:'Sedan',emoji:'🚗'},
-              {type:'hatchback',label:'Hatchback',emoji:'🚘'},{type:'karavan',label:'Karavan',emoji:'🚐'},
-              {type:'coupe',label:'Kupe',emoji:'🎏'},{type:'kabrio',label:'Kabrio',emoji:'🏖️'},
-              {type:'van',label:'Van',emoji:'🚌'},{type:'pickup',label:'Pickup',emoji:'🛻'},
-            ].map(cat => (
-              <button key={cat.type} onClick={() => navigate(`/search?body_type=${cat.type}`)}
-                className="bg-white hover:bg-[#12142D] group rounded-2xl p-3 text-center shadow-sm border border-gray-100 hover:border-[#12142D] transition-all">
-                <div className="text-2xl mb-1">{cat.emoji}</div>
-                <div className="text-xs font-semibold text-gray-700 group-hover:text-white transition-colors">{cat.label}</div>
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
+     
+{/* ══ PO TIPU ══ */}
+<section className="bg-gray-50 py-12">
+  <div className="max-w-6xl mx-auto px-4">
+    <div className="mb-4">
+      <h2 className="text-2xl font-black text-[#12142D]">Pretraži po tipu karoserije</h2>
+      <div className="w-10 h-0.5 bg-[#FFEA00] mt-1.5 mb-1" />
+      <p className="text-sm text-gray-400">Odaberi tip koji ti odgovara.</p>
+    </div>
+    <GlassIcons
+      items={[
+        { icon: <img src="/src/assets/body-types/suv.png"       alt="SUV"       />, color: 'navy',    label: 'SUV',       onClick: () => navigate('/search?body_type=suv')       },
+        { icon: <img src="/src/assets/body-types/sedan.png"     alt="Sedan"     />, color: 'indigo',  label: 'Sedan',     onClick: () => navigate('/search?body_type=sedan')     },
+        { icon: <img src="/src/assets/body-types/karavan.png"   alt="Karavan"   />, color: 'blue',    label: 'Karavan',   onClick: () => navigate('/search?body_type=karavan')   },
+        { icon: <img src="/src/assets/body-types/kabriolet.png" alt="Kabriolet" />, color: 'crimson', label: 'Kabriolet', onClick: () => navigate('/search?body_type=kabriolet') },
+        { icon: <img src="/src/assets/body-types/hatchback.png" alt="Hatchback" />, color: 'purple',  label: 'Hatchback', onClick: () => navigate('/search?body_type=hatchback') },
+        { icon: <img src="/src/assets/body-types/kupe.png"      alt="Kupe"      />, color: 'red',     label: 'Kupe',      onClick: () => navigate('/search?body_type=kupe')      },
+        { icon: <img src="/src/assets/body-types/van.png"       alt="Kombi"     />, color: 'orange',  label: 'Kombi',     onClick: () => navigate('/search?body_type=van')       },
+        { icon: <img src="/src/assets/body-types/pickup.png"    alt="Pickup"    />, color: 'green',   label: 'Pickup',    onClick: () => navigate('/search?body_type=pickup')    },
+      ]}
+    />
+  </div>
+</section>
 
       {/* ══ POPULARNE MARKE ══ */}
       {popularMakes.length > 0 && (
