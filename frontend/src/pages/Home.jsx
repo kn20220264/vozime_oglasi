@@ -7,6 +7,7 @@ import AdCard from '../components/AdCard';
 import Aurora from '../components/ui/Aurora';
 import GlassIcons from '../components/GlassIcons';
 import BorderGlow from '../components/BorderGlow';
+import SplitText from '../components/SplitText';
 
 // ─── Portal dropdown helper ───────────────────────────────────
 function PortalDropdown({ anchorRef, open, onClose, children }) {
@@ -179,10 +180,29 @@ const TRUCK_MAKES_BY_KAT = {
 const ALL_TRUCK_MAKES = [...new Set(Object.values(TRUCK_MAKES_BY_KAT).flat())].sort();
 
 const TABS = [
-  { id: 'auto',    label: 'Auto',      icon: '🚗' },
-  { id: 'moto',    label: 'Motocikl',  icon: '🏍' },
-  { id: 'nautika', label: 'Nautika',   icon: '⛵' },
-  { id: 'truck',   label: 'Transport', icon: '🚛' },
+  { id: 'auto', label: 'Auto', icon: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3h10l2 3h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/>
+      <circle cx="7.5" cy="17" r="2.5"/><circle cx="16.5" cy="17" r="2.5"/>
+    </svg>
+  )},
+  { id: 'moto', label: 'Motocikl', icon: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/>
+      <path d="M15 6h-5l-3 7h10l-1-4h-3"/><path d="M15 6l2 4"/>
+    </svg>
+  )},
+  { id: 'nautika', label: 'Nautika', icon: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 17l2-8 7-6 7 6 2 8H3z"/><path d="M12 3v14"/><path d="M3 17c0 2 18 2 18 0"/>
+    </svg>
+  )},
+  { id: 'truck', label: 'Transport', icon: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1" y="7" width="13" height="10" rx="1"/><path d="M14 10h4l3 3v4h-7V10z"/>
+      <circle cx="5.5" cy="18.5" r="1.5"/><circle cx="18.5" cy="18.5" r="1.5"/>
+    </svg>
+  )},
 ];
 
 // ─── Select helper ────────────────────────────────────────────
@@ -765,9 +785,9 @@ export default function Home() {
 
   {/* 1. Pozadinska slika — najdolje */}
   <div
-    className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-    style={{ backgroundImage: "url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1920&q=80')" }}
-  />
+  className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+  style={{ backgroundImage: "url('/images/hero.jpg')" }}
+/>
 
   {/* 2. Tamni overlay preko slike */}
   <div className="absolute inset-0 z-[1] bg-gradient-to-r from-[#12142D] via-[#12142D]/90 to-[#12142D]/60" />
@@ -784,33 +804,54 @@ export default function Home() {
   </div>
 
   {/* 4. Sadržaj */}
- <div className="relative z-[3] max-w-6xl mx-auto px-4 pt-24 pb-10">
-          {/* Hero tekst — lijevo poravnat */}
-          <div className="mb-8 max-w-2xl">
-            {/* Meta linija */}
-            <p className="text-[#FF0026] text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
-              <span className="w-6 h-px bg-[#FF0026] inline-block" />
-              CRNA GORA · {heroDate} · {totalAdsCount ? `${totalAdsCount.toLocaleString('sr-Latn')} OGLASA` : '— OGLASA'}
-            </p>
-
-            {/* Glavni naslov */}
-            <h1 className="text-4xl md:text-6xl font-black text-white leading-[1.05] mb-5">
-              Pronađi svoje<br />sljedeće vozilo.
-            </h1>
-
-            {/* Tagline */}
-            <p className="text-2xl md:text-3xl font-black">
-              <span className="text-[#FF0026] italic">Brzo.</span>{' '}
-              <span className="text-[#6674A3]">Pošteno.</span>{' '}
-              <span className="text-[#FFEA00]">Bez buke.</span>
-            </p>
-
-            {/* Podnaslov */}
-            <p className="text-[#6674A3] mt-4 text-base max-w-lg leading-relaxed">
-              Crnogorski marketplace za automobile, motocikle, plovila i transport.
-              Jedna pretraga — hiljade oglasa.
-            </p>
-          </div>
+ <div className="relative z-[2] max-w-6xl mx-auto px-4 pt-32 pb-40">
+{/* Hero tekst */}
+<div className="mb-8">
+  <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+    <SplitText
+      text="Kupi."
+      tag="span"
+      className="text-5xl md:text-7xl font-light text-white leading-tight"
+      delay={60}
+      duration={0.8}
+      ease="power3.out"
+      splitType="chars"
+      from={{ opacity: 0, y: 40 }}
+      to={{ opacity: 1, y: 0 }}
+      textAlign="left"
+      rootMargin="0px"
+    />
+    <SplitText
+      text="Prodaj."
+      tag="span"
+      className="text-5xl md:text-7xl font-light text-white leading-tight"
+      delay={60}
+      duration={0.8}
+      ease="power3.out"
+      splitType="chars"
+      from={{ opacity: 0, y: 40 }}
+      to={{ opacity: 1, y: 0 }}
+      textAlign="left"
+      rootMargin="0px"
+    />
+  </div>
+  <SplitText
+    text="VoziMe Oglasi."
+    tag="div"
+    className="text-5xl md:text-7xl font-light text-white leading-tight mt-1"
+    delay={40}
+    duration={0.9}
+    ease="power3.out"
+    splitType="chars"
+    from={{ opacity: 0, y: 40 }}
+    to={{ opacity: 1, y: 0 }}
+    textAlign="left"
+    rootMargin="0px"
+  />
+  <p className="text-[#6674A3] text-base font-light mt-2 mb-5">
+  Crnogorski oglasnik za automobile, motocikle, plovila i transport.
+</p>
+</div>
 
 {/* ── Search box ── */}
 <BorderGlow
@@ -829,8 +870,8 @@ export default function Home() {
   <div className="flex border-b border-white/15">
     {TABS.map(tab => (
       <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-        className={`flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-bold transition
-          ${activeTab === tab.id ? 'bg-[#FF0026] text-white' : 'text-white/70 hover:bg-white/10'}`}>
+       className={`flex-1 flex items-center justify-center gap-2 py-3.5 text-base font-light transition
+  ${activeTab === tab.id ? 'bg-white/15 text-white border-b-2 border-white/60' : 'text-white/50 hover:bg-white/8 hover:text-white/80'}`}>
         <span>{tab.icon}</span>
         <span className="hidden sm:inline">{tab.label}</span>
       </button>
@@ -955,31 +996,30 @@ export default function Home() {
 </div>       {/* HERO content wrapper */}
 </section>
     
-
-      {/* ══ STATS TRAKA ══ */}
-      <div className="bg-[#1B2B5A] border-b border-[#12142D]">
-        <div className="max-w-6xl mx-auto px-4 py-5 grid grid-cols-3 divide-x divide-[#12142D]">
-          {[
-            {
-              value: totalAdsCount != null ? totalAdsCount.toLocaleString('sr-Latn') : '—',
-              label: 'AKTIVNIH OGLASA',
-            },
-            {
-              value: dealers.length > 0 ? dealers.length.toLocaleString('sr-Latn') : '—',
-              label: 'VERIFIKOVANIH TRGOVACA',
-            },
-            {
-              value: avgPrice ? `€ ${Math.round(avgPrice).toLocaleString('sr-Latn')}` : '—',
-              label: 'PROSJEČNA CIJENA',
-            },
-          ].map(s => (
-            <div key={s.label} className="text-center px-4">
-              <div className="text-2xl md:text-3xl font-black text-white">{s.value}</div>
-              <div className="text-[#6674A3] text-xs font-bold tracking-widest mt-0.5">{s.label}</div>
-            </div>
-          ))}
-        </div>
+{/* ══ STATS TRAKA ══ */}
+<div className="relative -mt-36 z-10 max-w-4xl mx-auto px-4 pb-8">
+  <div className="grid grid-cols-3 divide-x divide-white/10 py-5">
+    {[
+      {
+        value: totalAdsCount != null ? totalAdsCount.toLocaleString('sr-Latn') : '—',
+        label: 'AKTIVNIH OGLASA',
+      },
+      {
+        value: dealers.length > 0 ? dealers.length.toLocaleString('sr-Latn') : '—',
+        label: 'VERIFIKOVANIH PRODAVACA',
+      },
+      {
+        value: avgPrice ? `€ ${Math.round(avgPrice).toLocaleString('sr-Latn')}` : '—',
+        label: 'PROSJEČNA CIJENA',
+      },
+    ].map(s => (
+      <div key={s.label} className="text-center px-4">
+        <div className="text-2xl md:text-3xl font-light text-white">{s.value}</div>
+        <div className="text-[#6674A3] text-xs font-medium tracking-widest mt-0.5">{s.label}</div>
       </div>
+    ))}
+  </div>
+</div>
 
       {/* ══ ISTAKNUTI ══ */}
       {featuredAds.length > 0 && (
