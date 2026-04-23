@@ -6,6 +6,7 @@ import axios from '../api/axios';
 import AdCard from '../components/AdCard';
 import Aurora from '../components/ui/Aurora';
 import GlassIcons from '../components/GlassIcons';
+import BorderGlow from '../components/BorderGlow';
 
 // ─── Portal dropdown helper ───────────────────────────────────
 function PortalDropdown({ anchorRef, open, onClose, children }) {
@@ -811,9 +812,18 @@ export default function Home() {
             </p>
           </div>
 
-          {/* ── Search box ── */}
-<div className="max-w-5xl overflow-hidden rounded-2xl border border-white/20"
-  style={{ background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+{/* ── Search box ── */}
+<BorderGlow
+  backgroundColor="#1a1f3a"
+  borderRadius={16}
+  glowColor="3 90 50"
+  colors={['#FF0026', '#FFEA00', '#1B2B5A']}
+  glowRadius={30}
+  glowIntensity={0.9}
+  coneSpread={22}
+  fillOpacity={0}
+  className="max-w-5xl rounded-2xl border border-white/20"
+>
 
   {/* Tabovi */}
   <div className="flex border-b border-white/15">
@@ -828,6 +838,7 @@ export default function Home() {
   </div>
 
   <div className="p-5">
+
     {/* ── AUTO ── */}
     {activeTab === 'auto' && (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -938,7 +949,9 @@ export default function Home() {
       </div>
 
     </div>   {/* p-5 */}
-  </div>     {/* search box */}
+    
+  </BorderGlow>   {/* glow box */}
+  
 </div>       {/* HERO content wrapper */}
 </section>
     
