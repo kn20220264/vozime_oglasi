@@ -34,6 +34,7 @@ function VehicleImage({ hue = 220, shade = 22 }) {
         position: 'absolute', bottom: 8, right: 10,
         fontSize: 8, letterSpacing: '0.15em', fontWeight: 700,
         color: 'rgba(255,255,255,0.28)',
+        fontFamily: "'Gomme Sans', sans-serif",
       }}>VO · FOTO</span>
     </div>
   );
@@ -59,11 +60,32 @@ const PinIcon = () => (
     <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>
   </svg>
 );
+const ClockIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+  </svg>
+);
 
 function hueFromTitle(title = '') {
   let h = 0;
   for (let i = 0; i < title.length; i++) h = (h * 31 + title.charCodeAt(i)) % 360;
   return h;
+}
+
+function timeAgo(dateStr) {
+  if (!dateStr) return null;
+  const now = new Date();
+  const then = new Date(dateStr);
+  const diffMs = now - then;
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffH = Math.floor(diffMs / 3600000);
+  const diffD = Math.floor(diffMs / 86400000);
+
+  if (diffMin < 1) return 'Upravo';
+  if (diffMin < 60) return `${diffMin} min`;
+  if (diffH < 24) return `${diffH}h`;
+  if (diffD === 1) return '1 dan';
+  return `${diffD} dana`;
 }
 
 export default function AdCard({ ad, queryKey }) {
@@ -96,10 +118,13 @@ export default function AdCard({ ad, queryKey }) {
     favMutation.mutate();
   };
 
+  const relTime = timeAgo(ad.created_at);
+
   return (
     <Link
       to={`/ads/${ad.slug}`}
       className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex flex-col"
+      style={{ fontFamily: "'Gomme Sans', sans-serif" }}
     >
       {/* Medija */}
       <div className="relative overflow-hidden rounded-t-2xl">
@@ -117,7 +142,8 @@ export default function AdCard({ ad, queryKey }) {
         )}
 
         {ad.featured && (
-          <span className="absolute top-3 left-3 bg-[#FFEA00] text-[#12142D] text-xs font-black px-2.5 py-1 rounded-lg tracking-wide shadow">
+          <span className="absolute top-3 left-3 bg-[#FFEA00] text-[#12142D] text-xs font-black px-2.5 py-1 rounded-lg tracking-wide shadow"
+            style={{ fontFamily: "'Gomme Sans', sans-serif" }}>
             ISTAKNUTO
           </span>
         )}
@@ -141,15 +167,15 @@ export default function AdCard({ ad, queryKey }) {
       </div>
 
       {/* Body */}
-      <div className="p-5 flex flex-col gap-3">
+      <div className="p-5 flex flex-col gap-3" style={{ fontFamily: "'Gomme Sans', sans-serif" }}>
 
         {/* Naslov */}
-        <h3 className="font-bold text-[#12142D] text-base leading-snug line-clamp-2 group-hover:text-[#FF0026] transition-colors">
+        <h3 className="text-[#12142D] text-base leading-snug line-clamp-2 group-hover:text-[#1B2B5A] transition-colors" style={{ fontWeight: 600 }}>
           {ad.title}
         </h3>
 
         {/* Cijena */}
-        <p className="text-xl font-black text-[#FF0026]">
+        <p className="text-xl transition-transform duration-200 group-hover:scale-105 origin-left" style={{ color: '#1B2B5A', fontWeight: 600 }}>
           {Number(ad.price).toLocaleString()} €
           {ad.price_negotiable && (
             <span className="text-xs text-green-600 font-medium ml-2">po dogovoru</span>
@@ -175,12 +201,19 @@ export default function AdCard({ ad, queryKey }) {
           )}
         </div>
 
-        {/* Grad — odvojen separatorom */}
-        {ad.city?.name && (
-          <div className="pt-2 border-t border-gray-100 flex items-center gap-1.5 text-xs text-gray-400">
-            <PinIcon /> {ad.city.name}
-          </div>
-        )}
+        {/* Grad + Vrijeme */}
+        <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400">
+          {ad.city?.name ? (
+            <span className="flex items-center gap-1.5">
+              <PinIcon /> {ad.city.name}
+            </span>
+          ) : <span />}
+          {relTime && (
+            <span className="flex items-center gap-1 text-gray-400">
+              <ClockIcon /> {relTime}
+            </span>
+          )}
+        </div>
 
       </div>
     </Link>

@@ -180,29 +180,10 @@ const TRUCK_MAKES_BY_KAT = {
 const ALL_TRUCK_MAKES = [...new Set(Object.values(TRUCK_MAKES_BY_KAT).flat())].sort();
 
 const TABS = [
-  { id: 'auto', label: 'Auto', icon: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1l2-3h10l2 3h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2"/>
-      <circle cx="7.5" cy="17" r="2.5"/><circle cx="16.5" cy="17" r="2.5"/>
-    </svg>
-  )},
-  { id: 'moto', label: 'Motocikl', icon: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/>
-      <path d="M15 6h-5l-3 7h10l-1-4h-3"/><path d="M15 6l2 4"/>
-    </svg>
-  )},
-  { id: 'nautika', label: 'Nautika', icon: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 17l2-8 7-6 7 6 2 8H3z"/><path d="M12 3v14"/><path d="M3 17c0 2 18 2 18 0"/>
-    </svg>
-  )},
-  { id: 'truck', label: 'Transport', icon: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="1" y="7" width="13" height="10" rx="1"/><path d="M14 10h4l3 3v4h-7V10z"/>
-      <circle cx="5.5" cy="18.5" r="1.5"/><circle cx="18.5" cy="18.5" r="1.5"/>
-    </svg>
-  )},
+  { id: 'auto',    label: 'Auto',      icon: <img src="/src/assets/icons/auto gray icon.png"      alt="Auto"      className="w-10 h-10 object-contain brightness-0 invert" /> },
+  { id: 'moto',    label: 'Motori',    icon: <img src="/src/assets/icons/motor gray icon.png"     alt="Motori"    className="w-10 h-10 object-contain brightness-0 invert" /> },
+  { id: 'nautika', label: 'Nautika',   icon: <img src="/src/assets/icons/nautika gray icon.png"   alt="Nautika"   className="w-10 h-10 object-contain brightness-0 invert" /> },
+  { id: 'truck',   label: 'Transport', icon: <img src="/src/assets/icons/transport gray icon.png" alt="Transport"  className="w-10 h-1 object-contain brightness-0 invert" /> },
 ];
 
 // ─── Select helper ────────────────────────────────────────────
@@ -806,10 +787,11 @@ export default function Home() {
   {/* 4. Sadržaj */}
  <div className="relative z-[2] max-w-6xl mx-auto px-4 pt-32 pb-40">
 {/* Hero tekst */}
+{/* Hero tekst */}
 <div className="mb-8">
   <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
     <SplitText
-      text="Kupi."
+      text="Pretraži"
       tag="span"
       className="text-5xl md:text-7xl font-light text-white leading-tight"
       delay={60}
@@ -822,7 +804,7 @@ export default function Home() {
       rootMargin="0px"
     />
     <SplitText
-      text="Prodaj."
+      text="i vozi."
       tag="span"
       className="text-5xl md:text-7xl font-light text-white leading-tight"
       delay={60}
@@ -836,10 +818,10 @@ export default function Home() {
     />
   </div>
   <SplitText
-    text="VoziMe Oglasi."
+    text="Od auta do nautike, sve na jednom mjestu."
     tag="div"
-    className="text-5xl md:text-7xl font-light text-white leading-tight mt-1"
-    delay={40}
+    className="text-2xl md:text-3xl font-light text-white/80 leading-tight mt-1"
+    delay={20}
     duration={0.9}
     ease="power3.out"
     splitType="chars"
@@ -848,9 +830,7 @@ export default function Home() {
     textAlign="left"
     rootMargin="0px"
   />
-  <p className="text-[#6674A3] text-base font-light mt-2 mb-5">
-  Crnogorski oglasnik za automobile, motocikle, plovila i transport.
-</p>
+ 
 </div>
 
 {/* ── Search box ── */}
@@ -997,7 +977,7 @@ export default function Home() {
 </section>
     
 {/* ══ STATS TRAKA ══ */}
-<div className="relative -mt-36 z-10 max-w-4xl mx-auto px-4 pb-8">
+<div className="relative -mt-36 z-10 max-w-6xl mx-auto px-4 pb-8">
   <div className="grid grid-cols-3 divide-x divide-white/10 py-5">
     {[
       {
@@ -1021,132 +1001,191 @@ export default function Home() {
   </div>
 </div>
 
-      {/* ══ ISTAKNUTI ══ */}
-      {featuredAds.length > 0 && (
-        <section className="max-w-6xl mx-auto px-4 py-10">
-  <div className="flex items-start justify-between mb-8">
-    <div>
-      <h2 className="text-2xl font-black text-[#12142D]">Istaknuti oglasi</h2>
-      <div className="w-10 h-0.5 bg-[#FFEA00] mt-1.5 mb-1" />
-      <p className="text-sm text-gray-400">Oglasi koji su danas u fokusu kupaca.</p>
-    </div>
-    <button
-      onClick={() => navigate('/search?featured=1')}
-      className="text-sm text-[#FF0026] hover:underline font-semibold whitespace-nowrap mt-1"
-    >
-      Svi istaknuti →
-    </button>
-  </div>
-  <div className={`grid gap-4 ${featuredAds.length === 1 ? 'grid-cols-1 max-w-sm mx-auto' : featuredAds.length === 2 ? 'grid-cols-2 max-w-2xl mx-auto' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
-    {featuredAds.slice(0, 30).map(ad => <AdCard key={ad.id} ad={ad} />)}
-  </div>
-</section>
-      )}
+{/* ══ WRAPPER SA BANER KOLONAMA ══ */}
+<div className="flex items-start gap-0">
 
-     
-{/* ══ PO TIPU ══ */}
-<section className="bg-gray-50 py-12">
-  <div className="max-w-6xl mx-auto px-4">
-    <div className="mb-4">
-      <h2 className="text-2xl font-black text-[#12142D]">Pretraži po tipu karoserije</h2>
-      <div className="w-10 h-0.5 bg-[#FFEA00] mt-1.5 mb-1" />
-      <p className="text-sm text-gray-400">Odaberi tip koji ti odgovara.</p>
+  {/* Lijevi baner */}
+  <div className="hidden xl:block w-[160px] flex-shrink-0">
+    <div className="sticky top-4 w-[160px] h-[600px] bg-gray-100 border border-dashed border-gray-300 rounded-r-xl flex items-center justify-center mt-10">
+      <span className="text-xs text-gray-400 rotate-90 whitespace-nowrap">Reklama 160×600</span>
     </div>
-    <GlassIcons
-      items={[
-        { icon: <img src="/src/assets/body-types/suv.png"       alt="SUV"       />, color: 'navy',    label: 'SUV',       onClick: () => navigate('/search?body_type=suv')       },
-        { icon: <img src="/src/assets/body-types/sedan.png"     alt="Sedan"     />, color: 'indigo',  label: 'Sedan',     onClick: () => navigate('/search?body_type=sedan')     },
-        { icon: <img src="/src/assets/body-types/karavan.png"   alt="Karavan"   />, color: 'blue',    label: 'Karavan',   onClick: () => navigate('/search?body_type=karavan')   },
-        { icon: <img src="/src/assets/body-types/kabriolet.png" alt="Kabriolet" />, color: 'crimson', label: 'Kabriolet', onClick: () => navigate('/search?body_type=kabriolet') },
-        { icon: <img src="/src/assets/body-types/hatchback.png" alt="Hatchback" />, color: 'purple',  label: 'Hatchback', onClick: () => navigate('/search?body_type=hatchback') },
-        { icon: <img src="/src/assets/body-types/kupe.png"      alt="Kupe"      />, color: 'red',     label: 'Kupe',      onClick: () => navigate('/search?body_type=kupe')      },
-        { icon: <img src="/src/assets/body-types/van.png"       alt="Kombi"     />, color: 'orange',  label: 'Kombi',     onClick: () => navigate('/search?body_type=van')       },
-        { icon: <img src="/src/assets/body-types/pickup.png"    alt="Pickup"    />, color: 'green',   label: 'Pickup',    onClick: () => navigate('/search?body_type=pickup')    },
-      ]}
-    />
   </div>
-</section>
 
-      {/* ══ POPULARNE MARKE ══ */}
-      {popularMakes.length > 0 && (
-        <section className="max-w-6xl mx-auto px-4 py-10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-1 h-7 bg-[#FFEA00] rounded-full" />
-            <h2 className="text-xl font-black text-[#12142D]">Popularne marke</h2>
+  {/* Srednji sadržaj */}
+  <div className="flex-1 min-w-0">
+
+    {/* ══ ISTAKNUTI ══ */}
+    {featuredAds.length > 0 && (
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        <div className="bg-white border border-gray-200 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-semibold text-[#12142D]" style={{ fontFamily: "'Gomme Sans', sans-serif" }}>Istaknuti oglasi</h2>
+            <button onClick={() => navigate('/search?featured=1')}
+              className="text-sm font-semibold text-[#FF0026] hover:underline whitespace-nowrap"
+              style={{ fontFamily: "'Gomme Sans', sans-serif" }}>
+              Svi istaknuti →
+            </button>
           </div>
-          <div className="grid grid-cols-5 gap-4">
-            {popularMakes.map(make => (
-              <button key={make.id} onClick={() => navigate(`/search?make_ids=${make.id}`)}
-                className="bg-white border border-gray-100 hover:border-[#FF0026] hover:shadow-md rounded-2xl p-4 flex flex-col items-center gap-2 transition-all group">
-                {make.logo ? (
-                  <img src={`http://localhost:8000/storage/${make.logo}`} alt={make.name}
-                    className="h-12 w-full object-contain"
-                    onError={e => { e.target.style.display='none'; }} />
+          <div className={`grid gap-4 ${featuredAds.length < 3 ? 'grid-cols-2 max-w-2xl mx-auto' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
+            {featuredAds.slice(0, 30).map(ad => <AdCard key={ad.id} ad={ad} />)}
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* ══ PO TIPU ══ */}
+    <section className="bg-gray-50 py-12">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="mb-4">
+          <h2 className="text-2xl font-semibold text-[#12142D]" style={{ fontFamily: "'Gomme Sans', sans-serif" }}>Pretraži po tipu karoserije</h2>
+        </div>
+        <GlassIcons
+          items={[
+            { icon: <img src="/src/assets/body-types/suv.png"       alt="SUV"       />, color: 'navy',    label: 'SUV',       onClick: () => navigate('/search?body_type=suv')       },
+            { icon: <img src="/src/assets/body-types/sedan.png"     alt="Sedan"     />, color: 'indigo',  label: 'Sedan',     onClick: () => navigate('/search?body_type=sedan')     },
+            { icon: <img src="/src/assets/body-types/karavan.png"   alt="Karavan"   />, color: 'blue',    label: 'Karavan',   onClick: () => navigate('/search?body_type=karavan')   },
+            { icon: <img src="/src/assets/body-types/kabriolet.png" alt="Kabriolet" />, color: 'crimson', label: 'Kabriolet', onClick: () => navigate('/search?body_type=kabriolet') },
+            { icon: <img src="/src/assets/body-types/hatchback.png" alt="Hatchback" />, color: 'purple',  label: 'Hatchback', onClick: () => navigate('/search?body_type=hatchback') },
+            { icon: <img src="/src/assets/body-types/kupe.png"      alt="Kupe"      />, color: 'red',     label: 'Kupe',      onClick: () => navigate('/search?body_type=kupe')      },
+            { icon: <img src="/src/assets/body-types/van.png"       alt="Kombi"     />, color: 'orange',  label: 'Kombi',     onClick: () => navigate('/search?body_type=van')       },
+            { icon: <img src="/src/assets/body-types/pickup.png"    alt="Pickup"    />, color: 'green',   label: 'Pickup',    onClick: () => navigate('/search?body_type=pickup')    },
+          ]}
+        />
+      </div>
+    </section>
+
+    {/* ══ POPULARNE MARKE ══ */}
+    {popularMakes.length > 0 && (
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        <div className="flex items-center gap-3 mb-6">
+          <h2 className="text-2xl font-semibold text-[#12142D]" style={{ fontFamily: "'Gomme Sans', sans-serif" }}>Popularne marke</h2>
+        </div>
+        <div className="grid grid-cols-5 gap-4">
+          {popularMakes.map(make => (
+            <button key={make.id} onClick={() => navigate(`/search?make_ids=${make.id}`)}
+              className="bg-white border border-gray-100 hover:border-[#FF0026] hover:shadow-md rounded-2xl p-4 flex flex-col items-center gap-2 transition-all group">
+              {make.logo ? (
+                <img src={`http://localhost:8000/storage/${make.logo}`} alt={make.name}
+                  className="h-12 w-full object-contain"
+                  onError={e => { e.target.style.display='none'; }} />
+              ) : (
+                <div className="h-12 flex items-center justify-center">
+                  <span className="text-2xl font-black text-[#12142D] group-hover:text-[#FF0026] transition-colors">
+                    {make.name.substring(0,2).toUpperCase()}
+                  </span>
+                </div>
+              )}
+              <span className="text-xs font-semibold text-gray-600 group-hover:text-[#FF0026] transition-colors">{make.name}</span>
+              <span className="text-xs text-gray-400">{make.ads_count} oglasa</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    )}
+
+{/* ══ DILERI ══ */}
+{dealers.length > 0 && (() => {
+  const CARD_W = 252; // minWidth (220) + gap (16) + malo margine
+  const copies = Math.ceil((1800 / CARD_W) / dealers.length) + 2;
+  const items = Array.from({ length: copies }).flatMap((_, ci) =>
+    dealers.map((d, di) => ({ ...d, _key: `${ci}-${di}` }))
+  );
+  const halfWidth = dealers.length * CARD_W * Math.floor(copies / 2);
+ const duration = dealers.length === 1 ? 25
+  : dealers.length <= 3 ? 40
+  : dealers.length <= 6 ? 55
+  : 70;
+
+  return (
+    <>
+      <style>{`
+        @keyframes dealerLoop {
+          0%   { transform: translateX(0px); }
+          100% { transform: translateX(-${halfWidth}px); }
+        }
+      `}</style>
+      <section className="py-10 overflow-hidden">
+        <div className="max-w-6xl mx-auto px-4 mb-6">
+          <h2 className="text-2xl font-semibold text-[#12142D]"
+            style={{ fontFamily: "'Gomme Sans', sans-serif" }}>
+            Autoplaci i dileri
+          </h2>
+        </div>
+
+        <div className="relative w-full overflow-hidden">
+          <div className="absolute left-0 top-0 h-full w-20 z-10 pointer-events-none"
+            style={{ background: 'linear-gradient(to right, white, transparent)' }} />
+          <div className="absolute right-0 top-0 h-full w-20 z-10 pointer-events-none"
+            style={{ background: 'linear-gradient(to left, white, transparent)' }} />
+
+          <div
+            className="flex px-4"
+            style={{
+              gap: '16px',
+              width: 'max-content',
+              animation: `dealerLoop ${duration}s linear infinite`,
+            }}
+            onMouseEnter={e => e.currentTarget.style.animationPlayState = 'paused'}
+            onMouseLeave={e => e.currentTarget.style.animationPlayState = 'running'}
+          >
+            {items.map(dealer => (
+              <button
+                key={dealer._key}
+                onClick={() => navigate(`/users/${dealer.id}`)}
+                className="flex-shrink-0 flex items-center gap-3 bg-white border border-gray-200 hover:border-[#1B2B5A] hover:shadow-md rounded-2xl px-4 py-3 transition-all group"
+                style={{ minWidth: 220 }}
+              >
+                {dealer.logo ? (
+                  <img src={dealer.logo} alt={dealer.company_name}
+                    className="h-11 w-11 rounded-full object-contain flex-shrink-0 border border-gray-100"
+                    onError={e => { e.target.style.display = 'none'; }} />
                 ) : (
-                  <div className="h-12 flex items-center justify-center">
-                    <span className="text-2xl font-black text-[#12142D] group-hover:text-[#FF0026] transition-colors">
-                      {make.name.substring(0,2).toUpperCase()}
+                  <div className="h-11 w-11 rounded-full bg-[#12142D] flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-bold text-base">
+                      {dealer.company_name?.substring(0, 1)}
                     </span>
                   </div>
                 )}
-                <span className="text-xs font-semibold text-gray-600 group-hover:text-[#FF0026] transition-colors">{make.name}</span>
-                <span className="text-xs text-gray-400">{make.ads_count} oglasa</span>
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-[#12142D] group-hover:text-[#1B2B5A] line-clamp-1"
+                    style={{ fontFamily: "'Gomme Sans', sans-serif" }}>
+                    {dealer.company_name}
+                  </p>
+                  {dealer.city && <p className="text-xs text-gray-400">{dealer.city}</p>}
+                  <p className="text-xs text-gray-400">{dealer.ads_count} oglasa</p>
+                </div>
+                {dealer.featured && (
+                  <span className="ml-2 text-yellow-400 flex-shrink-0">★</span>
+                )}
               </button>
             ))}
           </div>
-        </section>
-      )}
+        </div>
+      </section>
+    </>
+  );
+})()}
 
-      {/* ══ DILERI ══ */}
-      {dealers.length > 0 && (
-        <section className="bg-gray-50 py-10">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-1 h-7 bg-[#1B2B5A] rounded-full" />
-              <h2 className="text-xl font-black text-[#12142D]">Autoplaci i dileri</h2>
-            </div>
-            <div ref={dealersRef} className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory"
-              style={{scrollbarWidth:'none',msOverflowStyle:'none'}}>
-              {dealers.map(dealer => (
-                <button key={dealer.id} onClick={() => navigate(`/users/${dealer.id}`)}
-                  className="flex-shrink-0 snap-start w-44 bg-white border border-gray-100 hover:border-[#1B2B5A] hover:shadow-md rounded-2xl p-4 flex flex-col items-center gap-2 transition-all relative">
-                  {dealer.featured && (
-                    <span className="absolute top-2 right-2 bg-[#FFEA00] text-[#12142D] text-xs font-bold px-1.5 py-0.5 rounded">★</span>
-                  )}
-                  {dealer.logo ? (
-                    <img src={dealer.logo} alt={dealer.company_name} className="h-14 w-full object-contain"
-                      onError={e => { e.target.style.display='none'; }} />
-                  ) : (
-                    <div className="h-14 w-14 rounded-full bg-[#12142D] flex items-center justify-center">
-                      <span className="text-white font-black text-lg">{dealer.company_name?.substring(0,1)}</span>
-                    </div>
-                  )}
-                  <span className="text-xs font-bold text-[#12142D] text-center line-clamp-2">{dealer.company_name}</span>
-                  <span className="text-xs text-gray-400">{dealer.ads_count} oglasa</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ══ NAJNOVIJI OGLASI ══ */}
-      <section className="max-w-6xl mx-auto px-4 py-10">
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <div className="w-1 h-7 bg-[#FF0026] rounded-full" />
-            <h2 className="text-xl font-black text-[#12142D]">Najnoviji oglasi</h2>
-          </div>
-          <button onClick={() => navigate('/search')} className="text-sm text-[#FF0026] hover:underline font-semibold">Svi oglasi →</button>
+    {/* ══ NAJNOVIJI OGLASI ══ */}
+    <div className="max-w-6xl mx-auto px-4 py-10">
+      <div className="bg-white border border-gray-200 rounded-2xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold text-[#12142D]" style={{ fontFamily: "'Gomme Sans', sans-serif" }}>Najnoviji oglasi</h2>
+          <button onClick={() => navigate('/search')}
+            className="text-sm font-semibold text-[#FF0026] hover:underline whitespace-nowrap"
+            style={{ fontFamily: "'Gomme Sans', sans-serif" }}>
+            Svi oglasi →
+          </button>
         </div>
         {latestAds.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {latestAds.slice(0,12).map(ad => <AdCard key={ad.id} ad={ad} />)}
             </div>
             <div className="text-center mt-8">
               <button onClick={() => navigate('/search')}
-                className="bg-[#FF0026] hover:bg-red-700 text-white px-10 py-3 rounded-xl font-bold transition">
+                className="bg-[#FF0026] hover:bg-red-700 text-white px-10 py-3 rounded-xl font-semibold transition"
+                style={{ fontFamily: "'Gomme Sans', sans-serif" }}>
                 Pogledaj sve oglase →
               </button>
             </div>
@@ -1154,11 +1193,23 @@ export default function Home() {
         ) : (
           <div className="text-center py-16 text-gray-400"><p className="text-lg">Nema aktivnih oglasa.</p></div>
         )}
-      </section>
+      </div>
+    </div>
+
+  </div>{/* kraj middle */}
+
+  {/* Desni baner */}
+  <div className="hidden xl:block w-[160px] flex-shrink-0">
+    <div className="sticky top-4 w-[160px] h-[600px] bg-gray-100 border border-dashed border-gray-300 rounded-l-xl flex items-center justify-center mt-10">
+      <span className="text-xs text-gray-400 rotate-90 whitespace-nowrap">Reklama 160×600</span>
+    </div>
+  </div>
+
+</div>{/* kraj flex wrapper */}
 
       {/* ══ ZASTO VOZIME ══ */}
       <section className="bg-[#12142D] py-12">
-        <div className="max-w-5xl mx-auto px-4 text-center">
+        <div className="max-w-6xl mx-auto px-4 text-center">
           <h2 className="text-2xl font-black text-white mb-2">Zašto VozimeOglasi?</h2>
           <p className="text-[#6674A3] mb-8">Najpouzdaniji oglasnik vozila u Crnoj Gori</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

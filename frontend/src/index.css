@@ -102,7 +102,7 @@
 }
 
 /* ═══════════════════════════════════════════
-   GLOBALNI FONT — primijeni Gomme Sans svuda
+   GLOBALNI FONT
 ═══════════════════════════════════════════ */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -115,7 +115,7 @@ html, body, #root {
 }
 
 /* ═══════════════════════════════════════════
-   UTILITY KLASE za Terminator font
+   UTILITY KLASE
 ═══════════════════════════════════════════ */
 .font-terminator {
   font-family: 'Terminator NTL', sans-serif;
@@ -123,4 +123,31 @@ html, body, #root {
 
 .font-gomme {
   font-family: 'Gomme Sans', sans-serif;
+}
+
+/* ═══════════════════════════════════════════
+   KOMPONENTE
+═══════════════════════════════════════════ */
+@layer components {
+  .filter-select {
+    @apply w-full border border-gray-200 rounded-xl px-3 py-2 text-sm
+           focus:outline-none focus:ring-2 focus:ring-[#FF0026] bg-white;
+  }
+  .filter-input {
+    @apply w-full border border-gray-200 rounded-xl px-3 py-2 text-sm
+           focus:outline-none focus:ring-2 focus:ring-[#FF0026];
+  }
+  .form-select {
+    @apply w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm
+           focus:outline-none focus:ring-2 focus:ring-[#FF0026] bg-white;
+  }
+  .form-input {
+    @apply w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm
+           focus:outline-none focus:ring-2 focus:ring-[#FF0026];
+  }
+}
+
+@keyframes dealerMarquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }

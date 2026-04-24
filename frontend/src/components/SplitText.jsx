@@ -46,24 +46,19 @@ const SplitText = ({
       : `+=${marginValue}${marginUnit}`;
     const start = `top ${startPct}%${sign}`;
 
-    const tween = gsap.fromTo(
-      chars,
-      { ...from },
-      {
-        ...to,
-        duration,
-        ease,
-        stagger: delay / 1000,
-        scrollTrigger: {
-          trigger: el,
-          start,
-          once: true,
-        },
-        onComplete: () => onLetterAnimationComplete?.(),
-        willChange: 'transform, opacity',
-        force3D: true,
-      }
-    );
+ const tween = gsap.fromTo(
+  chars,
+  { ...from },
+  {
+    ...to,
+    duration,
+    ease,
+    stagger: delay / 1000,
+    onComplete: () => onLetterAnimationComplete?.(),
+    willChange: 'transform, opacity',
+    force3D: true,
+  }
+);
 
     return () => {
       tween.kill();
