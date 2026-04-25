@@ -9,6 +9,7 @@ import GlassIcons from "../components/GlassIcons";
 import BorderGlow from "../components/BorderGlow";
 import SplitText from "../components/SplitText";
 import AISearchBar from "../components/AISearchBar";
+import RecentlyViewed from '../components/RecentlyViewed';
 
 // ─── Portal dropdown helper ───────────────────────────────────
 function PortalDropdown({ anchorRef, open, onClose, children }) {
@@ -1957,8 +1958,14 @@ export default function Home() {
           </div>
         </div>
 
+
         {/* Srednji sadržaj */}
         <div className="flex-1 min-w-0">
+
+
+{/* ══ NEDAVNO PREGLEDANO ══ */}
+<RecentlyViewed />
+
           {/* ══ ISTAKNUTI ══ */}
           {featuredAds.length > 0 && (
             <div className="max-w-6xl mx-auto px-4 py-10">

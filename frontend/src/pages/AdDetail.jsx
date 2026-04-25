@@ -2,7 +2,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../api/axios";
 import useAuthStore from "../store/authStore";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import AdCard from "../components/AdCard";
 
@@ -21,21 +21,39 @@ export default function AdDetail() {
   // Slični oglasi — ista marka, isključi trenutni
   const { data: similarData } = useQuery({
     queryKey: ["similar-ads", ad?.make?.id, ad?.id],
-    queryFn: () =>
-      api
-        .get(`/ads?make_id=${ad.make.id}&per_page=4`)
-        .then((r) => r.data),
+    queryFn: () => api.get(`/ads?make_id=${ad.make.id}&per_page=4`).then((r) => r.data),
     enabled: !!ad?.make?.id,
   });
   const similarAds = (similarData?.data ?? []).filter((a) => a.id !== ad?.id).slice(0, 3);
+
+  // Sačuvaj u recently viewed
+  useEffect(() => {
+    if (!ad) return;
+    const key = 'recently_viewed';
+    const existing = JSON.parse(localStorage.getItem(key) || '[]');
+    const filtered = existing.filter(item => item.id !== ad.id);
+    const updated = [
+      {
+        id: ad.id,
+        title: ad.title,
+        price: ad.price,
+        primary_image: ad.primary_image,
+        year: ad.year,
+        mileage: ad.mileage,
+        fuel_type: ad.fuel_type,
+        slug: ad.slug,
+        city: ad.city,
+      },
+      ...filtered,
+    ].slice(0, 8);
+    localStorage.setItem(key, JSON.stringify(updated));
+  }, [ad?.id]);
 
   const favMutation = useMutation({
     mutationFn: () => api.post(`/favorites/${ad.id}`),
     onSuccess: (res) => {
       queryClient.invalidateQueries(["ad", slug]);
-      toast.success(
-        res.data.favorited ? "Dodano u omiljene" : "Uklonjeno iz omiljenih"
-      );
+      toast.success(res.data.favorited ? "Dodano u omiljene" : "Uklonjeno iz omiljenih");
     },
     onError: () => toast.error("Prijavite se da biste sačuvali oglas"),
   });
@@ -69,8 +87,7 @@ export default function AdDetail() {
     : [{ url: "https://placehold.co/800x500/e5e7eb/9ca3af?text=Nema+slike" }];
 
   const getImageSrc = (img) => {
-    if (!img?.url)
-      return "https://placehold.co/800x500/e5e7eb/9ca3af?text=Nema+slike";
+    if (!img?.url) return "https://placehold.co/800x500/e5e7eb/9ca3af?text=Nema+slike";
     if (img.url.startsWith("http")) return img.url;
     return `http://localhost:8000${img.url}`;
   };
@@ -149,7 +166,6 @@ export default function AdDetail() {
                     NOVO
                   </span>
                 )}
-                {/* Navigacija slike */}
                 {images.length > 1 && (
                   <>
                     <button
@@ -217,7 +233,6 @@ export default function AdDetail() {
                 </div>
               </div>
 
-              {/* Brze specifikacije */}
               <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100">
                 {[
                   ad.year,
@@ -265,9 +280,7 @@ export default function AdDetail() {
                 {Object.entries(ad.equipment).map(([category, items]) =>
                   Array.isArray(items) && items.length > 0 ? (
                     <div key={category} className="mb-4 last:mb-0">
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                        {category}
-                      </p>
+                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{category}</p>
                       <div className="flex flex-wrap gap-2">
                         {items.map((item, i) => (
                           <span key={i} className="text-sm bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full">
@@ -324,15 +337,12 @@ export default function AdDetail() {
                 Kontakt prodavca
               </h3>
 
-              {/* Prodavac info */}
               <Link to={`/users/${ad.seller?.id}`} className="flex items-center gap-3 group mb-4">
                 <div className="w-12 h-12 rounded-full bg-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center border border-gray-200">
                   {ad.seller?.avatar ? (
                     <img src={ad.seller.avatar} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-xl font-bold text-gray-400">
-                      {ad.seller?.name?.[0]}
-                    </span>
+                    <span className="text-xl font-bold text-gray-400">{ad.seller?.name?.[0]}</span>
                   )}
                 </div>
                 <div>
@@ -353,7 +363,6 @@ export default function AdDetail() {
                 </div>
               </Link>
 
-              {/* Dealer logo */}
               {ad.seller?.company?.logo && (
                 <div className="mb-4 pb-4 border-b border-gray-100">
                   <img
@@ -365,7 +374,6 @@ export default function AdDetail() {
                 </div>
               )}
 
-              {/* Telefon */}
               {ad.seller?.phone && (
                 <a
                   href={`tel:${ad.seller.phone}`}
@@ -375,7 +383,6 @@ export default function AdDetail() {
                 </a>
               )}
 
-              {/* Sačuvaj oglas */}
               {!isOwner && (
                 <button
                   onClick={() => {
@@ -391,7 +398,6 @@ export default function AdDetail() {
                 </button>
               )}
 
-              {/* Svi oglasi prodavca */}
               <button
                 onClick={() => navigate(`/users/${ad.seller?.id}`)}
                 className="w-full border border-gray-200 hover:border-[#12142D] text-gray-600 hover:text-[#12142D] font-semibold py-2.5 rounded-xl transition text-sm"
@@ -399,26 +405,17 @@ export default function AdDetail() {
                 Svi oglasi ovog prodavca →
               </button>
 
-              {/* Dealer info */}
               {ad.seller?.company && (
                 <div className="mt-4 pt-4 border-t border-gray-100 space-y-1.5">
                   {ad.seller.company.working_hours && (
-                    <p className="text-xs text-gray-500">
-                      🕐 {ad.seller.company.working_hours}
-                    </p>
+                    <p className="text-xs text-gray-500">🕐 {ad.seller.company.working_hours}</p>
                   )}
                   {ad.seller.company.address && (
-                    <p className="text-xs text-gray-500">
-                      📍 {ad.seller.company.address}
-                    </p>
+                    <p className="text-xs text-gray-500">📍 {ad.seller.company.address}</p>
                   )}
                   {ad.seller.company.website && (
-                    <a
-                      href={ad.seller.company.website}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-xs text-[#FF0026] hover:underline block"
-                    >
+                    <a href={ad.seller.company.website} target="_blank" rel="noreferrer"
+                      className="text-xs text-[#FF0026] hover:underline block">
                       🌐 Website
                     </a>
                   )}
@@ -428,20 +425,14 @@ export default function AdDetail() {
 
             {/* Lokacija */}
             <div className="bg-white rounded-2xl p-5 shadow-sm">
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                Lokacija
-              </h3>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Lokacija</h3>
               <p className="font-semibold text-[#12142D]">📍 {ad.city?.name}</p>
-              {ad.city?.region && (
-                <p className="text-xs text-gray-400 mt-0.5">{ad.city.region}</p>
-              )}
+              {ad.city?.region && <p className="text-xs text-gray-400 mt-0.5">{ad.city.region}</p>}
             </div>
 
             {/* Info o vozilu */}
             <div className="bg-white rounded-2xl p-5 shadow-sm">
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
-                Vozilo
-              </h3>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Vozilo</h3>
               <div className="space-y-2">
                 {[
                   { label: 'Marka',      value: ad.make?.name },
@@ -457,7 +448,7 @@ export default function AdDetail() {
               </div>
             </div>
 
-            {/* Vlasnik — dugme za uređivanje */}
+            {/* Vlasnik */}
             {isOwner && (
               <div className="bg-[#FFEA00] rounded-2xl p-4">
                 <p className="text-xs font-bold text-[#12142D] mb-2">Ovo je vaš oglas</p>
