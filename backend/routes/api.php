@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\SettingController;
+use App\Http\Controllers\AiSearchController;
 
 // ═══════════════════════════════════════════
 // JAVNE RUTE (bez autentifikacije)
@@ -57,9 +58,17 @@ Route::get('/bank-settings',        [PackageController::class, 'bankSettings']);
 Route::get('/filter-options',       [FilterOptionController::class, 'index']);
 Route::get('/users/{userId}/reviews', [ReviewController::class, 'index']);
 
+
+
+Route::post('/ai-search', [AiSearchController::class, 'search'])
+    ->middleware(['throttle:ai_search_minute', 'throttle:ai_search_daily']);
+
 // ═══════════════════════════════════════════
 // ZAŠTIĆENE RUTE (potreban login)
 // ═══════════════════════════════════════════
+
+
+
 
 Route::middleware('auth:sanctum')->group(function () {
 

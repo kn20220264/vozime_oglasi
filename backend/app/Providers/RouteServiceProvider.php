@@ -34,6 +34,15 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
         });
+
+
+        RateLimiter::for('ai_search_minute', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip());
+        });
+
+        RateLimiter::for('ai_search_daily', function (Request $request) {
+            return Limit::perDay(50)->by($request->ip());
+        });
     }
 
     /**

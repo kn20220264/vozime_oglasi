@@ -33,4 +33,9 @@ return [
     //     'redirect'      => env('APPLE_REDIRECT_URI'),
     // ],
 
+
+    'anthropic' => [
+        'key' => env('ANTHROPIC_API_KEY'),
+    ],
+
 ];
