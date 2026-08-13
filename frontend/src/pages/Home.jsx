@@ -9,7 +9,7 @@ import GlassIcons from "../components/GlassIcons";
 import BorderGlow from "../components/BorderGlow";
 import SplitText from "../components/SplitText";
 import AISearchBar from "../components/AISearchBar";
-import RecentlyViewed from '../components/RecentlyViewed';
+import RecentlyViewed from "../components/RecentlyViewed";
 
 // ─── Portal dropdown helper ───────────────────────────────────
 function PortalDropdown({ anchorRef, open, onClose, children }) {
@@ -1362,7 +1362,8 @@ export default function Home() {
     queryKey: ["dealers"],
     queryFn: () => axios.get("/dealers").then((r) => r.data),
   });
-  const dealers = dealersData?.data ?? [];
+  const dealers =
+     (dealersData?.data ?? []).filter((d) => d.premium_addon === "premium2");
 
   // Najnoviji
   const { data: latestData } = useQuery({
@@ -1500,8 +1501,8 @@ export default function Home() {
         <div className="relative z-[2] max-w-6xl mx-auto px-4 pt-32 pb-40">
           {/* Hero tekst */}
           {/* Hero tekst */}
-          <div className="mb-8">
-            <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+          <div className="mb-8 text-center">
+            <div className="flex flex-wrap items-baseline justify-center gap-x-4 gap-y-2">
               <SplitText
                 text="Pretraži"
                 tag="span"
@@ -1512,7 +1513,7 @@ export default function Home() {
                 splitType="chars"
                 from={{ opacity: 0, y: 40 }}
                 to={{ opacity: 1, y: 0 }}
-                textAlign="left"
+                textAlign="center"
                 rootMargin="0px"
               />
               <SplitText
@@ -1525,7 +1526,7 @@ export default function Home() {
                 splitType="chars"
                 from={{ opacity: 0, y: 40 }}
                 to={{ opacity: 1, y: 0 }}
-                textAlign="left"
+                textAlign="center"
                 rootMargin="0px"
               />
             </div>
@@ -1539,7 +1540,7 @@ export default function Home() {
               splitType="chars"
               from={{ opacity: 0, y: 40 }}
               to={{ opacity: 1, y: 0 }}
-              textAlign="left"
+              textAlign="center"
               rootMargin="0px"
             />
           </div>
@@ -1553,7 +1554,7 @@ export default function Home() {
             glowIntensity={0.9}
             coneSpread={22}
             fillOpacity={0}
-            className="max-w-5xl rounded-2xl border border-white/20"
+            className="max-w-5xl mx-auto rounded-2xl border border-white/20"
           >
             {/* Tabovi */}
             <div className="flex border-b border-white/15">
@@ -1875,37 +1876,37 @@ export default function Home() {
             {/* p-5 */}
           </BorderGlow>{" "}
           {/* glow box */}
-
-          
           {/* ══ AI PRETRAGA ══ */}
-<div className="mt-4 max-w-5xl">
-  <BorderGlow
-    backgroundColor="#1a1f3a"
-    borderRadius={16}
-    glowColor="3 90 50"
-    colors={['#FF0026', '#FFEA00', '#1B2B5A']}
-    glowRadius={30}
-    glowIntensity={0.9}
-    coneSpread={22}
-    fillOpacity={0}
-    className="rounded-2xl border border-white/20"
-  >
-    <div className="px-5 pt-5 pb-4">
-      <p style={{
-        fontFamily: "'Gomme Sans', sans-serif",
-        fontSize: '18px',
-        fontWeight: 300,
-        letterSpacing: '0.18em',
-        color: 'rgba(255,255,255,0.65)',
-        textTransform: 'uppercase',
-        marginBottom: 12,
-      }}>
-        AI PRETRAGA — Opiši šta želiš
-      </p>
-      <AISearchBar hideMeta />
-    </div>
-  </BorderGlow>
-</div>
+          <div className="mt-4 max-w-5xl mx-auto">
+            <BorderGlow
+              backgroundColor="#1a1f3a"
+              borderRadius={16}
+              glowColor="3 90 50"
+              colors={["#FF0026", "#FFEA00", "#1B2B5A"]}
+              glowRadius={30}
+              glowIntensity={0.9}
+              coneSpread={22}
+              fillOpacity={0}
+              className="rounded-2xl border border-white/20"
+            >
+              <div className="px-5 pt-5 pb-4">
+                <p
+                  style={{
+                    fontFamily: "'Gomme Sans', sans-serif",
+                    fontSize: "18px",
+                    fontWeight: 300,
+                    letterSpacing: "0.18em",
+                    color: "rgba(255,255,255,0.65)",
+                    textTransform: "uppercase",
+                    marginBottom: 12,
+                  }}
+                >
+                  AI PRETRAGA — Opiši šta želiš
+                </p>
+                <AISearchBar hideMeta />
+              </div>
+            </BorderGlow>
+          </div>
         </div>{" "}
         {/* HERO content wrapper */}
       </section>
@@ -1958,13 +1959,10 @@ export default function Home() {
           </div>
         </div>
 
-
         {/* Srednji sadržaj */}
         <div className="flex-1 min-w-0">
-
-
-{/* ══ NEDAVNO PREGLEDANO ══ */}
-<RecentlyViewed />
+          {/* ══ NEDAVNO PREGLEDANO ══ */}
+          <RecentlyViewed />
 
           {/* ══ ISTAKNUTI ══ */}
           {featuredAds.length > 0 && (
@@ -2133,29 +2131,26 @@ export default function Home() {
           {/* ══ DILERI ══ */}
           {dealers.length > 0 &&
             (() => {
-              const CARD_W = 252; // minWidth (220) + gap (16) + malo margine
-              const copies = Math.ceil(1800 / CARD_W / dealers.length) + 2;
+              const CARD_W = 252;
+              const shouldAnimate = dealers.length > 3;
+              const copies = shouldAnimate
+                ? Math.ceil(1800 / CARD_W / dealers.length) + 2
+                : 1;
               const items = Array.from({ length: copies }).flatMap((_, ci) =>
                 dealers.map((d, di) => ({ ...d, _key: `${ci}-${di}` })),
               );
               const halfWidth =
                 dealers.length * CARD_W * Math.floor(copies / 2);
               const duration =
-                dealers.length === 1
-                  ? 25
-                  : dealers.length <= 3
-                    ? 40
-                    : dealers.length <= 6
-                      ? 55
-                      : 70;
+                dealers.length <= 4 ? 30 : dealers.length <= 6 ? 45 : 60;
 
               return (
                 <>
                   <style>{`
-        @keyframes dealerLoop {
-          0%   { transform: translateX(0px); }
-          100% { transform: translateX(-${halfWidth}px); }
-        }
+  @keyframes dealerLoop {
+    0%   { transform: translateX(0px); }
+    100% { transform: translateX(-${halfWidth}px); }
+  }
       `}</style>
                   <section className="py-10">
                     <div className="max-w-6xl mx-auto px-4 mb-6">
@@ -2189,7 +2184,9 @@ export default function Home() {
                             style={{
                               gap: "16px",
                               width: "max-content",
-                              animation: `dealerLoop ${duration}s linear infinite`,
+                              animation: shouldAnimate
+                                ? `dealerLoop ${duration}s linear infinite`
+                                : "none",
                             }}
                             onMouseEnter={(e) =>
                               (e.currentTarget.style.animationPlayState =
@@ -2241,11 +2238,9 @@ export default function Home() {
                                     {dealer.ads_count} oglasa
                                   </p>
                                 </div>
-                                {dealer.featured && (
-                                  <span className="ml-2 text-yellow-400 flex-shrink-0">
-                                    ★
-                                  </span>
-                                )}
+                                <span className="ml-auto flex-shrink-0 bg-[#FF0026] text-white text-[10px] font-black px-1.5 py-0.5 rounded">
+                                  PRO
+                                </span>
                               </button>
                             ))}
                           </div>
@@ -2313,86 +2308,195 @@ export default function Home() {
       </div>
       {/* kraj flex wrapper */}
 
-      {/* ══ ZASTO VOZIME ══ */}
-      <section className="bg-[#12142D] py-12">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <h2 className="text-2xl font-black text-white mb-2">
-            Zašto VozimeOglasi?
-          </h2>
-          <p className="text-[#6674A3] mb-8">
-            Najpouzdaniji oglasnik vozila u Crnoj Gori
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                icon: "🔒",
-                title: "Sigurno",
-                desc: "Verifikovani prodavci i zaštita od prevare",
-              },
-              {
-                icon: "⚡",
-                title: "Brzo",
-                desc: "Objavi oglas za manje od 5 minuta",
-              },
-              {
-                icon: "🎯",
-                title: "Precizno",
-                desc: "Napredni filteri za brže pronalaženje",
-              },
-            ].map((f) => (
-              <div key={f.title} className="bg-[#1B2B5A] rounded-2xl p-6">
-                <div className="text-4xl mb-3">{f.icon}</div>
-                <h3 className="font-bold text-white text-lg mb-1">{f.title}</h3>
-                <p className="text-[#6674A3] text-sm">{f.desc}</p>
+      {/* ══ CTA ══ */}
+      <section className="bg-[#12142D] py-14">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="relative overflow-hidden rounded-2xl border border-[#1B2B5A] bg-gradient-to-r from-[#1B2B5A]/60 to-[#12142D] px-8 py-10 md:px-12">
+            <div
+              className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-[#FF0026]/10 blur-3xl"
+              aria-hidden="true"
+            />
+            <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div>
+                <h2 className="text-2xl md:text-3xl font-black text-white mb-2">
+                  Prodaješ vozilo?
+                </h2>
+                <p className="text-[#6674A3]">
+                  Objavi oglas besplatno i dođi do kupca za kratko vrijeme
+                </p>
               </div>
-            ))}
+              <button
+                onClick={() => navigate("/ads/create")}
+                className="shrink-0 bg-white hover:bg-gray-100 text-[#12142D] font-bold px-8 py-3 rounded-full transition"
+              >
+                Objavi oglas besplatno
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ══ CTA ══ */}
-      <section className="bg-[#FF0026] py-10">
-        <div className="max-w-3xl mx-auto px-4 text-center">
-          <h2 className="text-2xl md:text-3xl font-black text-white mb-2">
-            Prodaješ vozilo?
-          </h2>
-          <p className="text-red-100 mb-6">
-            Objavi oglas besplatno i dođi do kupca za kratko vrijeme
-          </p>
-          <button
-            onClick={() => navigate("/ads/create")}
-            className="bg-[#FFEA00] hover:bg-yellow-300 text-[#12142D] font-black px-10 py-3.5 rounded-xl text-lg transition shadow-lg"
-          >
-            + Objavi oglas besplatno
-          </button>
-        </div>
-      </section>
-
       {/* ══ FOOTER ══ */}
-      {/* ══ FOOTER ══ */}
-      <footer className="bg-[#12142D] border-t border-[#1B2B5A] py-8">
+      <footer className="bg-[#12142D] border-t border-[#1B2B5A] py-12">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
+            {/* Left: logo + social */}
+            <div className="lg:w-64 shrink-0">
               <img
                 src="/images/bijeli.png"
                 alt="VozimeOglasi"
-                className="h-24 w-auto"
+                className="h-16 w-auto mb-5"
               />
+              <div className="flex items-center gap-4 text-[#6674A3]">
+                <a
+                  href="#"
+                  aria-label="Facebook"
+                  className="hover:text-white transition"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.9h2.54V9.85c0-2.52 1.5-3.9 3.78-3.9 1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33V22c4.78-.76 8.44-4.92 8.44-9.94Z" />
+                  </svg>
+                </a>
+                <a
+                  href="#"
+                  aria-label="YouTube"
+                  className="hover:text-white transition"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 0 0 .5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 0 0 2.12 2.14c1.88.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 0 0 2.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81ZM9.55 15.57V8.43L15.82 12l-6.27 3.57Z" />
+                  </svg>
+                </a>
+                <a
+                  href="#"
+                  aria-label="Instagram"
+                  className="hover:text-white transition"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.72 3.72 0 0 1-1.38-.9 3.72 3.72 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07ZM12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63a5.88 5.88 0 0 0-2.13 1.38A5.88 5.88 0 0 0 .63 4.14C.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.79.72 1.46 1.38 2.13a5.88 5.88 0 0 0 2.13 1.38c.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56a5.88 5.88 0 0 0 2.13-1.38 5.88 5.88 0 0 0 1.38-2.13c.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91a5.88 5.88 0 0 0-1.38-2.13A5.88 5.88 0 0 0 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0Zm0 5.84A6.16 6.16 0 1 0 12 18.16 6.16 6.16 0 0 0 12 5.84Zm0 10.16a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm7.85-10.4a1.44 1.44 0 1 1-2.88 0 1.44 1.44 0 0 1 2.88 0Z" />
+                  </svg>
+                </a>
+                <a
+                  href="#"
+                  aria-label="TikTok"
+                  className="hover:text-white transition"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.9 2.9 0 1 1-2.89-2.9c.3 0 .59.05.86.13V9.4a6.33 6.33 0 0 0-.86-.06 6.34 6.34 0 1 0 6.34 6.33V8.69a8.22 8.22 0 0 0 4.77 1.52V6.77c-.34 0-.67-.03-1-.08Z" />
+                  </svg>
+                </a>
+              </div>
             </div>
+
+            {/* Right: link columns */}
+            <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div>
+                <h4 className="text-white font-bold text-sm mb-4">
+                  Kompanija
+                </h4>
+                <ul className="space-y-3 text-sm text-[#6674A3]">
+                  <li>
+                    <button className="hover:text-white transition">
+                      O nama
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => navigate("/pitanja")}
+                      className="hover:text-white transition"
+                    >
+                      Pitanja i odgovori
+                    </button>
+                  </li>
+                  <li>
+                    <button className="hover:text-white transition">
+                      Kontakt
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-white font-bold text-sm mb-4">Pravno</h4>
+                <ul className="space-y-3 text-sm text-[#6674A3]">
+                  <li>
+                    <button className="hover:text-white transition">
+                      Uslovi korišćenja
+                    </button>
+                  </li>
+                  <li>
+                    <button className="hover:text-white transition">
+                      Privatnost
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-white font-bold text-sm mb-4">Prodavci</h4>
+                <ul className="space-y-3 text-sm text-[#6674A3]">
+                  <li>
+                    <button
+                      onClick={() => navigate("/login")}
+                      className="hover:text-white transition"
+                    >
+                      Prijava
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => navigate("/register/dealer")}
+                      className="hover:text-white transition"
+                    >
+                      Registracija
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => navigate("/autoplaci")}
+                      className="hover:text-white transition"
+                    >
+                      Auto placevi
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-white font-bold text-sm mb-4">
+                  Aplikacija
+                </h4>
+                <ul className="space-y-3 text-sm text-[#6674A3]">
+                  <li>
+                    <button className="flex items-center gap-2 hover:text-white transition">
+                      <svg
+                        className="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11Z" />
+                      </svg>
+                      VozimeOglasi iOS
+                    </button>
+                  </li>
+                  <li>
+                    <button className="flex items-center gap-2 hover:text-white transition">
+                      <svg
+                        className="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M17.52 15.81a1.04 1.04 0 1 1 0-2.08 1.04 1.04 0 0 1 0 2.08m-11.04 0a1.04 1.04 0 1 1 0-2.08 1.04 1.04 0 0 1 0 2.08m11.41-6.28 2.08-3.6a.43.43 0 1 0-.75-.43l-2.1 3.64a12.72 12.72 0 0 0-10.24 0L4.78 5.5a.43.43 0 1 0-.75.43l2.08 3.6C2.53 11.47.1 15.09-.26 19.33h24.52c-.36-4.24-2.79-7.86-6.37-9.8" />
+                      </svg>
+                      VozimeOglasi Android
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-[#1B2B5A] mt-10 pt-6">
             <p className="text-[#6674A3] text-xs text-center">
               © {new Date().getFullYear()} VozimeOglasi – Oglasnik vozila za
               Crnu Goru
             </p>
-            <div className="flex gap-4 text-xs text-[#6674A3]">
-              <button className="hover:text-white transition">
-                Uslovi korišćenja
-              </button>
-              <button className="hover:text-white transition">
-                Privatnost
-              </button>
-              <button className="hover:text-white transition">Kontakt</button>
-            </div>
           </div>
         </div>
       </footer>

@@ -16,6 +16,7 @@ use App\Models\UserPrivilege;
 use App\Models\Equipment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Models\UserProfile;
 
 class AdminController extends Controller
 {
@@ -84,7 +85,7 @@ class AdminController extends Controller
             ->when($request->status,   fn($q) => $q->where('status', $request->status))
             ->when($request->search,   fn($q) => $q->where(function ($q2) use ($request) {
                 $q2->where('title', 'like', '%' . $request->search . '%')
-                   ->orWhere('ad_code', 'like', '%' . $request->search . '%');
+                    ->orWhere('ad_code', 'like', '%' . $request->search . '%');
             }))
             ->when($request->user_id,  fn($q) => $q->where('user_id', $request->user_id))
             ->when($request->category_id, fn($q) => $q->where('category_id', $request->category_id))
@@ -115,15 +116,39 @@ class AdminController extends Controller
         $ad = Ad::findOrFail($id);
 
         $data = $request->only([
-            'title', 'description', 'price', 'currency',
-            'price_negotiable', 'year', 'mileage',
-            'fuel_type', 'transmission', 'body_type',
-            'power_kw', 'engine_cc', 'color_exterior', 'color_interior',
-            'drive_type', 'doors', 'seats', 'condition', 'damage',
-            'emission_class', 'owners_count', 'registered_until',
-            'vin', 'has_service_book', 'has_warranty',
-            'accepts_exchange', 'import', 'status',
-            'featured', 'featured_until', 'pinned', 'pinned_until', 'expires_at',
+            'title',
+            'description',
+            'price',
+            'currency',
+            'price_negotiable',
+            'year',
+            'mileage',
+            'fuel_type',
+            'transmission',
+            'body_type',
+            'power_kw',
+            'engine_cc',
+            'color_exterior',
+            'color_interior',
+            'drive_type',
+            'doors',
+            'seats',
+            'condition',
+            'damage',
+            'emission_class',
+            'owners_count',
+            'registered_until',
+            'vin',
+            'has_service_book',
+            'has_warranty',
+            'accepts_exchange',
+            'import',
+            'status',
+            'featured',
+            'featured_until',
+            'pinned',
+            'pinned_until',
+            'expires_at',
         ]);
 
         // Admin može postaviti featured bez plaćanja
@@ -147,8 +172,8 @@ class AdminController extends Controller
 
         $ad      = Ad::findOrFail($id);
         $package = Package::where('id', $request->package_id)
-                          ->where('type', 'ad_boost')
-                          ->firstOrFail();
+            ->where('type', 'ad_boost')
+            ->firstOrFail();
 
         $userPackage = UserPackage::create([
             'user_id'    => $ad->user_id,
@@ -181,42 +206,42 @@ class AdminController extends Controller
     }
 
     // Admin dodjeljuje account paket korisniku besplatno
-public function grantAccountPackage(Request $request, int $userId)
-{
-    $this->requireAdmin($request);
+    public function grantAccountPackage(Request $request, int $userId)
+    {
+        $this->requireAdmin($request);
 
-    $request->validate([
-        'package_id' => 'required|exists:packages,id',
-    ]);
+        $request->validate([
+            'package_id' => 'required|exists:packages,id',
+        ]);
 
-    $user    = User::findOrFail($userId);
-    $package = Package::where('id', $request->package_id)
-                      ->where('type', 'listing')
-                      ->firstOrFail();
+        $user    = User::findOrFail($userId);
+        $package = Package::where('id', $request->package_id)
+            ->where('type', 'listing')
+            ->firstOrFail();
 
-    $userPackage = UserPackage::create([
-        'user_id'    => $user->id,
-        'ad_id'      => null,
-        'package_id' => $package->id,
-        'paid_at'    => now(),
-        'expires_at' => now()->addDays($package->duration_days),
-    ]);
+        $userPackage = UserPackage::create([
+            'user_id'    => $user->id,
+            'ad_id'      => null,
+            'package_id' => $package->id,
+            'paid_at'    => now(),
+            'expires_at' => now()->addDays($package->duration_days),
+        ]);
 
-    Payment::create([
-        'user_id'         => $user->id,
-        'user_package_id' => $userPackage->id,
-        'amount'          => 0,
-        'currency'        => 'EUR',
-        'gateway'         => 'admin_grant',
-        'payment_method'  => 'admin_grant',
-        'reference'       => 'GRANT-' . strtoupper(Str::random(6)),
-        'status'          => 'completed',
-    ]);
+        Payment::create([
+            'user_id'         => $user->id,
+            'user_package_id' => $userPackage->id,
+            'amount'          => 0,
+            'currency'        => 'EUR',
+            'gateway'         => 'admin_grant',
+            'payment_method'  => 'admin_grant',
+            'reference'       => 'GRANT-' . strtoupper(Str::random(6)),
+            'status'          => 'completed',
+        ]);
 
-    return response()->json([
-        'message' => "Paket \"{$package->name}\" dodijeljen korisniku {$user->name}.",
-    ]);
-}
+        return response()->json([
+            'message' => "Paket \"{$package->name}\" dodijeljen korisniku {$user->name}.",
+        ]);
+    }
 
     // Admin toggle featured (brzi shortcut)
     public function toggleAdFeatured(Request $request, int $id)
@@ -276,7 +301,7 @@ public function grantAccountPackage(Request $request, int $userId)
             ->when($request->role,   fn($q) => $q->where('role', $request->role))
             ->when($request->search, fn($q) => $q->where(function ($q2) use ($request) {
                 $q2->where('name', 'like', '%' . $request->search . '%')
-                   ->orWhere('email', 'like', '%' . $request->search . '%');
+                    ->orWhere('email', 'like', '%' . $request->search . '%');
             }))
             ->when($request->is_active !== null, fn($q) => $q->where('is_active', $request->boolean('is_active')))
             ->orderByDesc('created_at')
@@ -416,7 +441,7 @@ public function grantAccountPackage(Request $request, int $userId)
     {
         $this->requireAdmin($request);
 
-        $payments = Payment::with(['userPackage.user:id,name,email', 'userPackage.package:id,name'])
+        $payments = Payment::with(['userPackage.user:id,name,email', 'userPackage.package:id,name', 'user:id,name,email'])
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->when($request->method, fn($q) => $q->where('payment_method', $request->method))
             ->when($request->search, fn($q) => $q->where('reference', 'like', '%' . $request->search . '%'))
@@ -436,12 +461,23 @@ public function grantAccountPackage(Request $request, int $userId)
             return response()->json(['message' => 'Uplata je već potvrđena.'], 422);
         }
 
+        $originalNote  = $payment->admin_note;
+        $isDealerAddon = str_starts_with($originalNote ?? '', 'dealer_addon:');
+
         $payment->update([
             'status'       => 'completed',
-            'admin_note'   => $request->note,
+            'admin_note'   => $isDealerAddon ? $originalNote : $request->note,
             'confirmed_by' => $request->user()->id,
             'confirmed_at' => now(),
         ]);
+
+        if ($isDealerAddon) {
+            $addon = str_replace('dealer_addon:', '', $originalNote);
+            \App\Models\UserProfile::where('user_id', $payment->user_id)
+                ->update(['premium_addon' => $addon]);
+
+            return response()->json(['message' => 'Dealer addon aktiviran: ' . $addon]);
+        }
 
         $userPackage = $payment->userPackage;
         $package     = $userPackage->package;
@@ -461,7 +497,6 @@ public function grantAccountPackage(Request $request, int $userId)
 
         return response()->json(['message' => 'Uplata potvrđena, paket aktiviran.']);
     }
-
     public function rejectPayment(Request $request, int $id)
     {
         $this->requireAdmin($request);
@@ -504,18 +539,18 @@ public function grantAccountPackage(Request $request, int $userId)
 
         // Kreiraj payment zapis kao "admin_grant"
         Payment::create([
-    'user_id'         => $request->user_id,
-    'user_package_id' => $userPackage->id,
-    'amount'          => 0,
-    'currency'        => 'EUR',
-    'gateway'         => 'admin_grant',
-    'payment_method'  => 'admin_grant',
-    'reference'       => 'GRANT-' . strtoupper(\Illuminate\Support\Str::random(6)),
-    'status'          => 'completed',
-    'admin_note'      => $request->note ?? 'Admin dodjela bez plaćanja.',
-    'confirmed_by'    => $request->user()->id,
-    'confirmed_at'    => now(),
-]);
+            'user_id'         => $request->user_id,
+            'user_package_id' => $userPackage->id,
+            'amount'          => 0,
+            'currency'        => 'EUR',
+            'gateway'         => 'admin_grant',
+            'payment_method'  => 'admin_grant',
+            'reference'       => 'GRANT-' . strtoupper(\Illuminate\Support\Str::random(6)),
+            'status'          => 'completed',
+            'admin_note'      => $request->note ?? 'Admin dodjela bez plaćanja.',
+            'confirmed_by'    => $request->user()->id,
+            'confirmed_at'    => now(),
+        ]);
 
         // Ako je ad_boost paket i ima ad_id
         if ($package->type === 'ad_boost' && $request->ad_id) {
@@ -564,16 +599,16 @@ public function grantAccountPackage(Request $request, int $userId)
     public function storeMake(Request $request)
     {
         $this->requireAdmin($request);
- 
+
         $request->validate([
             'name'        => 'required|string|max:100',
             'category_id' => 'required|exists:vehicle_categories,id',
             'country'     => 'nullable|string|max:100',
             'is_active'   => 'boolean',
         ]);
- 
+
         $slug = Str::slug($request->name) . '-' . $request->category_id;
- 
+
         $make = Make::create([
             'category_id' => $request->category_id,
             'name'        => $request->name,
@@ -581,24 +616,24 @@ public function grantAccountPackage(Request $request, int $userId)
             'country'     => $request->country,
             'is_active'   => $request->boolean('is_active', true),
         ]);
- 
+
         return response()->json(['message' => 'Marka dodana.', 'make' => $make->load('category:id,name')], 201);
     }
 
     public function updateMake(Request $request, int $id)
     {
         $this->requireAdmin($request);
- 
+
         $request->validate([
             'name'        => 'required|string|max:100',
             'category_id' => 'required|exists:vehicle_categories,id',
             'country'     => 'nullable|string|max:100',
             'is_active'   => 'boolean',
         ]);
- 
+
         $make = Make::findOrFail($id);
         $slug = Str::slug($request->name) . '-' . $request->category_id;
- 
+
         $make->update([
             'category_id' => $request->category_id,
             'name'        => $request->name,
@@ -606,7 +641,7 @@ public function grantAccountPackage(Request $request, int $userId)
             'country'     => $request->country,
             'is_active'   => $request->boolean('is_active', $make->is_active),
         ]);
- 
+
         return response()->json(['message' => 'Marka ažurirana.', 'make' => $make->fresh('category:id,name')]);
     }
 
@@ -614,13 +649,13 @@ public function grantAccountPackage(Request $request, int $userId)
     {
         $this->requireAdmin($request);
         $make = Make::withCount('models')->findOrFail($id);
- 
+
         if ($make->models_count > 0) {
             return response()->json([
                 'message' => 'Ne možete obrisati marku koja ima modele. Prvo obrišite sve modele.'
             ], 422);
         }
- 
+
         $make->delete();
         return response()->json(['message' => 'Marka obrisana.']);
     }
@@ -629,24 +664,24 @@ public function grantAccountPackage(Request $request, int $userId)
     // MODELI
     // ═══════════════════════════════════════
 
-     public function models(Request $request)
+    public function models(Request $request)
     {
         $this->requireAdmin($request);
- 
+
         $models = VehicleModel::with('make:id,name,category_id')
             ->when($request->make_id, fn($q) => $q->where('make_id', $request->make_id))
             ->when($request->search, fn($q) => $q->where('name', 'like', '%' . $request->search . '%'))
             ->orderByRaw('parent_id IS NULL DESC')
             ->orderBy('name')
             ->paginate(200);
- 
+
         return response()->json($models);
     }
 
     public function storeModel(Request $request)
     {
         $this->requireAdmin($request);
- 
+
         $request->validate([
             'make_id'   => 'required|exists:makes,id',
             'parent_id' => 'nullable|exists:vehicle_models,id',
@@ -655,7 +690,7 @@ public function grantAccountPackage(Request $request, int $userId)
             'year_to'   => 'nullable|integer|min:1900|max:2100',
             'is_active' => 'boolean',
         ]);
- 
+
         $model = VehicleModel::create([
             'make_id'   => $request->make_id,
             'parent_id' => $request->parent_id,
@@ -665,21 +700,21 @@ public function grantAccountPackage(Request $request, int $userId)
             'year_to'   => $request->year_to,
             'is_active' => $request->boolean('is_active', true),
         ]);
- 
+
         return response()->json(['message' => 'Model dodan.', 'model' => $model->load('make:id,name')], 201);
     }
 
-     public function updateModel(Request $request, int $id)
+    public function updateModel(Request $request, int $id)
     {
         $this->requireAdmin($request);
- 
+
         $request->validate([
             'name'      => 'required|string|max:100',
             'year_from' => 'nullable|integer|min:1900|max:2100',
             'year_to'   => 'nullable|integer|min:1900|max:2100',
             'is_active' => 'boolean',
         ]);
- 
+
         $model = VehicleModel::findOrFail($id);
         $model->update([
             'name'      => $request->name,
@@ -687,7 +722,7 @@ public function grantAccountPackage(Request $request, int $userId)
             'year_to'   => $request->year_to,
             'is_active' => $request->boolean('is_active', $model->is_active),
         ]);
- 
+
         return response()->json(['message' => 'Model ažuriran.', 'model' => $model->fresh()]);
     }
 
@@ -877,9 +912,17 @@ public function grantAccountPackage(Request $request, int $userId)
 
         $package = Package::findOrFail($id);
         $package->update($request->only([
-            'name', 'type', 'price', 'duration_days', 'max_images',
-            'max_active_ads', 'refresh_days', 'featured',
-            'premium_seller', 'description', 'is_active',
+            'name',
+            'type',
+            'price',
+            'duration_days',
+            'max_images',
+            'max_active_ads',
+            'refresh_days',
+            'featured',
+            'premium_seller',
+            'description',
+            'is_active',
         ]));
 
         return response()->json(['message' => 'Paket ažuriran.', 'package' => $package]);

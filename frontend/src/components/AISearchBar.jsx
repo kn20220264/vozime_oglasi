@@ -75,7 +75,11 @@ export default function AISearchBar({ hideMeta = false }) {
         }
       });
 
-      navigate(`/search?${params.toString()}`);
+      // "auto" filteri odgovaraju jednostavnoj /search stranici; ostale kategorije
+      // (moto/nautika/transport) nemaju rezultatsku stranicu, pa vodimo na
+      // detaljnu pretragu sa pred-popunjenim tabom da korisnik rucno pretrazi.
+      const destination = filters.tab === 'auto' ? '/search' : '/search/filters';
+      navigate(`${destination}?${params.toString()}`);
     } catch (err) {
       if (err.response?.status === 429) {
         setError('Previše zahtjeva. Pokušaj ponovo za nekoliko sekundi.');

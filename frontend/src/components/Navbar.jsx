@@ -100,20 +100,40 @@ export default function Navbar() {
              w-auto" />
           </Link>
 
-          {/* Search bar */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <input
-                type="text"
-                placeholder="Pretraži vozila..."
-                onKeyDown={(e) => e.key === "Enter" && navigate(`/search?q=${e.target.value}`)}
-                className="w-full bg-white/10 backdrop-blur-sm text-white placeholder-white/50 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] border border-white/10"
-              />
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#FF0026] hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs font-semibold transition">
-                Traži
-              </button>
-            </div>
-          </div>
+          {/* Autoplaci link */}
+          <Link
+            to="/autoplaci"
+            className="hidden md:flex items-center gap-1.5 text-white/70 hover:text-white text-sm font-medium transition px-3 py-2 rounded-lg hover:bg-white/10 flex-shrink-0 ml-4"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            Autoplaci
+          </Link>
+
+          {/* Pretraga */}
+          <Link
+            to="/search"
+            title="Pretraga"
+            className="flex items-center gap-1.5 text-white/70 hover:text-white text-sm font-medium transition px-3 py-2 rounded-lg hover:bg-white/10 flex-shrink-0"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
+            </svg>
+            <span className="hidden md:inline">Pretraga</span>
+          </Link>
+
+          {/* Pomoć / Q&A */}
+          <Link
+            to="/pitanja"
+            title="Česta pitanja"
+            className="hidden lg:flex items-center gap-1.5 text-white/70 hover:text-white text-sm font-medium transition px-3 py-2 rounded-lg hover:bg-white/10 flex-shrink-0"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Pomoć
+          </Link>
 
           {/* Desno */}
           <div className="flex items-center gap-2">

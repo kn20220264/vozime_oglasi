@@ -14,6 +14,8 @@ class Package extends Model
         'max_images',
         'max_active_ads',
         'refresh_days',
+        'refresh_count',
+        'auto_refresh',
         'featured',
         'premium_seller',
         'description',
@@ -24,6 +26,7 @@ class Package extends Model
         'featured'       => 'boolean',
         'is_active'      => 'boolean',
         'premium_seller' => 'boolean',
+        'auto_refresh'   => 'boolean',
     ];
 
     public function userPackages()

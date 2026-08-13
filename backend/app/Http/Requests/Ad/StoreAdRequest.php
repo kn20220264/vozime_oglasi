@@ -55,12 +55,17 @@ class StoreAdRequest extends FormRequest
             'accepts_exchange'    => ['boolean'],
             'import'              => ['boolean'],
 
+            // Istorija vozila + kuka za prikolicu
+            'vehicle_history'     => ['nullable', 'array'],
+            'vehicle_history.*'   => ['string', 'in:prvi_vlasnik,kupljen_nov_cg,servisna_knjiga,restauriran,oldtimer,u_garanciji,garaziran,prilagodjen_invalidima,tuning'],
+            'trailer_coupling'    => ['nullable', 'in:Fiksna,Odvojna,Okretna'],
+
             // Oprema (lista ID-jeva)
             'equipment'           => ['nullable', 'array'],
             'equipment.*'         => ['integer', 'exists:equipment,id'],
 
-            // Slike (upload)
-            'images'              => ['nullable', 'array', 'max:20'],
+            // Slike (upload) — tvrdi limit; stvarni limit po korisniku (GALERIJA paket) provjerava kontroler
+            'images'              => ['nullable', 'array', 'max:50'],
             'images.*'            => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ];
     }

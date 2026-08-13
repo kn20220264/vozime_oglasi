@@ -1,6 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
+import { useEffect } from "react";
+import useAuthStore from "./store/authStore";
+import api from "./api/axios";
 
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
@@ -25,6 +28,11 @@ import UserProfile from "./pages/UserProfile";
 import GoogleCallback from "./pages/GoogleCallback";
 import VerifyEmail from "./pages/VerifyEmail";
 import Notifications from "./pages/dashboard/Notifications";
+import DealerRegister from "./pages/DealerRegister";
+import Dealers from "./pages/Dealers";
+import Compare from "./pages/Compare";
+import QA from "./pages/QA";
+import PopupBanner from "./components/PopupBanner";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,12 +59,33 @@ function AdminRoute({ children }) {
   return children;
 }
 
+function AuthInit() {
+  const { token, setUser, logout } = useAuthStore();
+
+  useEffect(() => {
+    if (!token) {
+      setUser(null);
+      return;
+    }
+    api.get("/me")
+      .then((r) => setUser(r.data))
+      .catch(() => {
+        logout();
+        setUser(null);
+      });
+  }, []);
+
+  return null;
+}
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <AuthInit />
         <div className="min-h-screen flex flex-col">
           <Navbar />
+          <PopupBanner />
           <main className="flex-1">
             <Routes>
               {/* Javne rute */}
@@ -67,6 +96,10 @@ export default function App() {
               <Route path="/users/:id" element={<UserProfile />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/register/dealer" element={<DealerRegister />} />
+              <Route path="/autoplaci" element={<Dealers />} />
+              <Route path="/compare" element={<Compare />} />
+              <Route path="/pitanja" element={<QA />} />
 
               {/* Google OAuth callback */}
               <Route path="/auth/google/callback" element={<GoogleCallback />} />

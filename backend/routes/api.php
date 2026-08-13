@@ -20,13 +20,18 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\AiSearchController;
+use App\Http\Controllers\Api\DealerAuthController;
+use App\Http\Controllers\Api\DealerAddonController;
+use App\Http\Controllers\Api\BannerController;
 
 // ═══════════════════════════════════════════
 // JAVNE RUTE (bez autentifikacije)
 // ═══════════════════════════════════════════
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login',    [AuthController::class, 'login']);
+Route::post('/register',        [AuthController::class, 'register']);
+Route::post('/register/dealer', [DealerAuthController::class, 'register']);
+Route::get('/dealer-packages',  [DealerAuthController::class, 'packages']);
+Route::post('/login',           [AuthController::class, 'login']);
 
 Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
     ->name('verification.verify');
@@ -47,6 +52,7 @@ Route::get('/dealers', [UserController::class, 'dealers']);
 
 // Javni podaci
 Route::get('/makes/popular',        [MakeController::class, 'popular']);
+Route::get('/makes/models-multi',   [MakeController::class, 'modelsMulti']);
 Route::get('/makes',                [MakeController::class, 'index']);
 Route::get('/makes/{make}/models',  [MakeController::class, 'models']);
 Route::get('/cities',               [CityController::class, 'index']);
@@ -62,6 +68,11 @@ Route::get('/users/{userId}/reviews', [ReviewController::class, 'index']);
 
 Route::post('/ai-search', [AiSearchController::class, 'search'])
     ->middleware(['throttle:ai_search_minute', 'throttle:ai_search_daily']);
+
+// Baneri (javno)
+Route::get('/banners',             [BannerController::class, 'index']);
+Route::post('/banners/{id}/click', [BannerController::class, 'click']);
+Route::post('/banners/{id}/view',  [BannerController::class, 'view']);
 
 // ═══════════════════════════════════════════
 // ZAŠTIĆENE RUTE (potreban login)
@@ -87,6 +98,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-ads',              [AdController::class, 'myAds']);
     Route::post('/ads/{ad}/mark-sold', [AdController::class, 'markAsSold']);
     Route::get('/ads/{id}/edit',       [AdController::class, 'edit']);
+    Route::post('/ads/{ad}/refresh',      [AdController::class, 'refresh']);
+    Route::post('/ads/{ad}/pause',        [AdController::class, 'pause']);
+    Route::post('/ads/{ad}/resume',       [AdController::class, 'resume']);
+    Route::post('/ads/{ad}/auto-refresh', [AdController::class, 'toggleAutoRefresh']);
+    Route::get('/refresh-credits',        [AdController::class, 'refreshCredits']);
 
     Route::get('/favorites',              [FavoriteController::class, 'index']);
     Route::post('/favorites/{adId}',      [FavoriteController::class, 'toggle']);
@@ -104,12 +120,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/saved-searches',        [SavedSearchController::class, 'store']);
     Route::delete('/saved-searches/{id}', [SavedSearchController::class, 'destroy']);
 
-    Route::post('/packages/purchase', [PackageController::class, 'purchase']);
-    Route::get('/my-packages',        [PackageController::class, 'myPackages']);
-    Route::get('/my-payments',        [PackageController::class, 'myPayments']);
+    Route::post('/packages/purchase',      [PackageController::class, 'purchase']);
+    Route::post('/payments/{id}/cancel',   [PackageController::class, 'cancelPayment']);
+    Route::get('/my-pending-payments',     [PackageController::class, 'myPendingPayments']);
+    Route::get('/my-packages',             [PackageController::class, 'myPackages']);
+    Route::get('/my-payments',             [PackageController::class, 'myPayments']);
 
     Route::get('/users/{id}',     [UserController::class, 'show']);
     Route::get('/users/{id}/ads', [UserController::class, 'ads']);
+
+    Route::post('/dealer/addon',        [DealerAddonController::class, 'purchase']);
+    Route::get('/dealer/addon/status',  [DealerAddonController::class, 'status']);
 
     Route::get('/notifications', function (Request $request) {
         return response()->json([
@@ -198,6 +219,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/cities',        [AdminController::class, 'storeCity']);
         Route::put('/cities/{id}',    [AdminController::class, 'updateCity']);
         Route::delete('/cities/{id}', [AdminController::class, 'deleteCity']);
+
+        // Baneri (reklame)
+        Route::get('/banners',         [BannerController::class, 'adminIndex']);
+        Route::post('/banners',        [BannerController::class, 'store']);
+        Route::put('/banners/{id}',    [BannerController::class, 'update']);
+        Route::delete('/banners/{id}', [BannerController::class, 'destroy']);
 
         // Oprema
         Route::get('/equipment',         [AdminController::class, 'equipment']);

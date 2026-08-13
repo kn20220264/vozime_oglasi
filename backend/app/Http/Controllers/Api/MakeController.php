@@ -53,4 +53,28 @@ public function popular()
     ]);
 }
 
+
+// GET /makes/models-multi?make_ids=1,2,3
+public function modelsMulti(Request $request)
+{
+    $ids = collect(explode(',', $request->get('make_ids', '')))
+        ->map(fn($id) => (int) trim($id))
+        ->filter()
+        ->values();
+
+    if ($ids->isEmpty()) {
+        return response()->json(['data' => []]);
+    }
+
+    $models = VehicleModel::whereIn('make_id', $ids)
+        ->whereNull('parent_id')
+        ->with(['children' => fn($q) => $q->where('is_active', true)->orderBy('name')])
+        ->where('is_active', true)
+        ->orderBy('name')
+        ->get();
+
+    return response()->json(['data' => $models]);
+}
+
+
 }

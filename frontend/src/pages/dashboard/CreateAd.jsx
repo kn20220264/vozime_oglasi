@@ -45,7 +45,26 @@ export default function CreateAd() {
     has_warranty: false,
     accepts_exchange: false,
     import: false,
+    trailer_coupling: "",
   });
+  const [vehicleHistory, setVehicleHistory] = useState([]);
+
+  const VEHICLE_HISTORY_OPTIONS = [
+    { value: "prvi_vlasnik",           label: "Prvi vlasnik" },
+    { value: "kupljen_nov_cg",         label: "Kupljen nov u Crnoj Gori" },
+    { value: "servisna_knjiga",        label: "Servisna knjiga" },
+    { value: "restauriran",            label: "Restauriran" },
+    { value: "oldtimer",               label: "Oldtimer" },
+    { value: "u_garanciji",            label: "Garancija" },
+    { value: "garaziran",              label: "Garažiran" },
+    { value: "prilagodjen_invalidima", label: "Prilagođen invalidima" },
+    { value: "tuning",                 label: "Tuning" },
+  ];
+
+  const toggleHistory = (value) =>
+    setVehicleHistory((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    );
 
   // Kategorija slug za filter API
   const categorySlug = CATEGORY_SLUGS[form.category_id] ?? null;
@@ -95,6 +114,7 @@ export default function CreateAd() {
         if (val !== "" && val !== null) formData.append(key, val);
       });
       selectedEquipment.forEach((id) => formData.append("equipment[]", id));
+      vehicleHistory.forEach((v) => formData.append("vehicle_history[]", v));
       images.forEach((img) => formData.append("images[]", img));
       return api.post("/ads", formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -513,6 +533,43 @@ export default function CreateAd() {
                   <span className="text-sm font-medium text-gray-700">{label}</span>
                 </label>
               ))}
+            </div>
+
+            {/* Istorija vozila */}
+            <div className="pt-4">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Istorija vozila</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {VEHICLE_HISTORY_OPTIONS.map(({ value, label }) => (
+                  <label key={value} className={`flex items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition ${
+                    vehicleHistory.includes(value) ? "border-[#FF0026] bg-red-50" : "border-gray-200 hover:border-gray-300"
+                  }`}>
+                    <input type="checkbox" checked={vehicleHistory.includes(value)} onChange={() => toggleHistory(value)}
+                      className="w-4 h-4 accent-[#FF0026]" />
+                    <span className="text-sm font-medium text-gray-700">{label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Kuka za prikolicu */}
+            <div className="pt-4">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Kuka za prikolicu</p>
+              <div className="flex flex-wrap gap-2">
+                {["", "Fiksna", "Odvojna", "Okretna"].map((opt) => (
+                  <button
+                    key={opt || "none"}
+                    type="button"
+                    onClick={() => set("trailer_coupling", opt)}
+                    className={`text-sm px-4 py-2 rounded-full border-2 transition font-medium ${
+                      form.trailer_coupling === opt
+                        ? "border-[#FF0026] bg-red-50 text-[#FF0026]"
+                        : "border-gray-200 text-gray-600 hover:border-gray-300"
+                    }`}
+                  >
+                    {opt || "Nema"}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}

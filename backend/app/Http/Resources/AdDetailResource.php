@@ -56,6 +56,8 @@ class AdDetailResource extends JsonResource
             'has_warranty'     => $this->has_warranty,
             'accepts_exchange' => $this->accepts_exchange,
             'import'           => $this->import,
+            'vehicle_history'  => $this->vehicle_history ?? [],
+            'trailer_coupling' => $this->trailer_coupling,
             'vin'              => $this->vin,
  
             // ==========================================

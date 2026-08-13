@@ -49,6 +49,12 @@ const NAV_GROUPS = [
         ]
     },
     {
+        label: 'MARKETING',
+        items: [
+            { to: '/admin/banners', label: 'Baneri / Reklame', icon: '📣' },
+        ]
+    },
+    {
         label: 'SISTEM',
         items: [
             { to: '/admin/settings', label: 'Podešavanja',  icon: '🔧' },
@@ -124,6 +130,7 @@ export default function AdminPanel() {
     <Route path="payments"      element={<AdminPayments />} />
     <Route path="catalog"       element={<AdminCatalog />} />
     <Route path="settings"      element={<AdminSettings />} />
+    <Route path="banners"       element={<AdminBanners />} />
 </Routes>
             </main>
         </div>
@@ -2273,8 +2280,8 @@ function AdminPayments() {
                             {data?.data?.map(p => (
                                 <tr key={p.id} className="hover:bg-gray-50/50">
                                     <td className="px-4 py-3">
-                                        <p className="font-semibold text-[#12142D]">{p.user_package?.user?.name ?? '—'}</p>
-                                        <p className="text-xs text-gray-400">{p.user_package?.user?.email}</p>
+                                        <p className="font-semibold text-[#12142D]">{p.user_package?.user?.name ?? p.user?.name ?? '—'}</p>
+                                        <p className="text-xs text-gray-400">{p.user_package?.user?.email ?? p.user?.email}</p>
                                     </td>
                                     <td className="px-4 py-3 text-[#12142D]">{p.user_package?.package?.name ?? '—'}</td>
                                     <td className="px-4 py-3 font-semibold text-[#12142D]">{p.amount} €</td>
@@ -2681,6 +2688,146 @@ function AdminSettings() {
                     </div>
                 </div>
             )}
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════
+// BANERI / REKLAME
+// ═══════════════════════════════════════
+
+function AdminBanners() {
+    const qc = useQueryClient();
+    const [form, setForm] = useState({ title: '', link_url: '', position: 'sidebar', image: null });
+    const [showForm, setShowForm] = useState(false);
+
+    const { data, isLoading } = useQuery({
+        queryKey: ['admin-banners'],
+        queryFn: () => axios.get('/admin/banners').then(r => r.data.data),
+    });
+
+    const createMutation = useMutation({
+        mutationFn: () => {
+            const fd = new FormData();
+            fd.append('title', form.title);
+            fd.append('position', form.position);
+            if (form.link_url) fd.append('link_url', form.link_url);
+            if (form.image) fd.append('image', form.image);
+            return axios.post('/admin/banners', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+        },
+        onSuccess: () => {
+            toast.success('Baner kreiran.');
+            qc.invalidateQueries(['admin-banners']);
+            setForm({ title: '', link_url: '', position: 'sidebar', image: null });
+            setShowForm(false);
+        },
+        onError: (e) => {
+            const errors = e.response?.data?.errors;
+            if (errors) Object.values(errors).forEach(err => toast.error(err[0]));
+            else toast.error('Greška pri kreiranju banera.');
+        },
+    });
+
+    const toggleMutation = useMutation({
+        mutationFn: ({ id, is_active }) => axios.put(`/admin/banners/${id}`, { is_active: !is_active }),
+        onSuccess: () => qc.invalidateQueries(['admin-banners']),
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: (id) => axios.delete(`/admin/banners/${id}`),
+        onSuccess: () => {
+            toast.success('Baner obrisan.');
+            qc.invalidateQueries(['admin-banners']);
+        },
+    });
+
+    const banners = data ?? [];
+    const POSITION_LABELS = { popup: 'Pop-up (ulazak na sajt)', sidebar: 'Bočni (sidebar)', homepage: 'Početna stranica' };
+
+    return (
+        <div className="p-6 max-w-5xl">
+            <div className="flex items-center justify-between mb-6">
+                <div>
+                    <h1 className="text-xl font-black text-[#12142D]">Baneri / Reklame</h1>
+                    <p className="text-sm text-gray-400 mt-0.5">Pop-up reklame i bočni ad placementi za sponzore</p>
+                </div>
+                <button onClick={() => setShowForm(p => !p)}
+                    className="bg-[#FF0026] hover:bg-red-700 text-white text-sm font-bold px-4 py-2 rounded-xl transition">
+                    {showForm ? 'Zatvori' : '+ Novi baner'}
+                </button>
+            </div>
+
+            {showForm && (
+                <div className="bg-white rounded-2xl p-5 shadow-sm mb-6 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-500 mb-1">Naziv (sponzor/kampanja)</label>
+                            <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]" />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-500 mb-1">Link (opciono)</label>
+                            <input type="url" placeholder="https://..." value={form.link_url} onChange={e => setForm(f => ({ ...f, link_url: e.target.value }))}
+                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]" />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-500 mb-1">Pozicija</label>
+                            <select value={form.position} onChange={e => setForm(f => ({ ...f, position: e.target.value }))}
+                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#FF0026]">
+                                <option value="sidebar">Bočni (sidebar)</option>
+                                <option value="popup">Pop-up (ulazak na sajt)</option>
+                                <option value="homepage">Početna stranica</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-semibold text-gray-500 mb-1">Slika banera</label>
+                            <input type="file" accept="image/*" onChange={e => setForm(f => ({ ...f, image: e.target.files[0] }))}
+                                className="w-full text-sm text-gray-500 file:mr-3 file:px-3 file:py-2 file:rounded-xl file:border-0 file:bg-[#12142D] file:text-white file:text-xs file:font-bold" />
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => createMutation.mutate()}
+                        disabled={!form.title || !form.image || createMutation.isPending}
+                        className="bg-[#12142D] hover:bg-[#1B2B5A] text-white text-sm font-bold px-5 py-2.5 rounded-xl transition disabled:opacity-50">
+                        {createMutation.isPending ? 'Čuvanje...' : 'Sačuvaj baner'}
+                    </button>
+                </div>
+            )}
+
+            {isLoading && <p className="text-gray-400 py-8 text-center">Učitavanje...</p>}
+
+            {!isLoading && banners.length === 0 && (
+                <div className="bg-white rounded-2xl p-10 text-center shadow-sm">
+                    <div className="text-4xl mb-2">📣</div>
+                    <p className="text-gray-500">Nema banera. Dodajte prvi baner za sponzora.</p>
+                </div>
+            )}
+
+            <div className="space-y-3">
+                {banners.map(b => (
+                    <div key={b.id} className="bg-white rounded-2xl shadow-sm p-4 flex items-center gap-4">
+                        <img src={b.image} alt={b.title} className="w-28 h-16 object-cover rounded-xl bg-gray-100 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                            <p className="font-bold text-[#12142D] truncate">{b.title}</p>
+                            <p className="text-xs text-gray-400">{POSITION_LABELS[b.position] ?? b.position}</p>
+                            {b.link_url && <p className="text-xs text-blue-500 truncate">{b.link_url}</p>}
+                            <p className="text-xs text-gray-400 mt-0.5">👁 {b.views_count} prikaza · 🖱 {b.clicks_count} klikova</p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                            <button onClick={() => toggleMutation.mutate({ id: b.id, is_active: b.is_active })}
+                                className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition ${
+                                    b.is_active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                }`}>
+                                {b.is_active ? 'Aktivan' : 'Neaktivan'}
+                            </button>
+                            <button onClick={() => { if (window.confirm('Obrisati baner?')) deleteMutation.mutate(b.id); }}
+                                className="text-xs px-3 py-1.5 bg-red-50 hover:bg-red-100 text-[#FF0026] rounded-lg font-semibold transition">
+                                Obriši
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }

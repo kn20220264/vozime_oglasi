@@ -1,12 +1,25 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import toast from "react-hot-toast";
 
 export default function Favorites() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
+  const [compareSlugs, setCompareSlugs] = useState([]);
+
+  const toggleCompare = (slug) => {
+    setCompareSlugs((prev) => {
+      if (prev.includes(slug)) return prev.filter((s) => s !== slug);
+      if (prev.length >= 2) {
+        toast("Možete porediti najviše 2 oglasa.", { icon: "⚖️" });
+        return prev;
+      }
+      return [...prev, slug];
+    });
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ["favorites", page],
@@ -32,7 +45,27 @@ export default function Favorites() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-black text-[#12142D]">Oglasi koje pratim</h1>
-        <span className="text-sm text-gray-400">{data?.total ?? 0} oglasa</span>
+        <div className="flex items-center gap-3">
+          {compareSlugs.length > 0 && (
+            <button
+              onClick={() => {
+                if (compareSlugs.length !== 2) {
+                  toast("Odaberite tačno 2 oglasa za poređenje.", { icon: "⚖️" });
+                  return;
+                }
+                navigate(`/compare?ads=${compareSlugs.join(",")}`);
+              }}
+              className={`text-sm font-bold px-4 py-2 rounded-xl transition ${
+                compareSlugs.length === 2
+                  ? "bg-[#12142D] text-white hover:bg-[#1B2B5A]"
+                  : "bg-gray-100 text-gray-400"
+              }`}
+            >
+              ⚖️ Uporedi ({compareSlugs.length}/2)
+            </button>
+          )}
+          <span className="text-sm text-gray-400">{data?.total ?? 0} oglasa</span>
+        </div>
       </div>
 
       {isLoading && (
@@ -67,8 +100,19 @@ export default function Favorites() {
           return (
             <div
               key={fav.id}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 p-4 hover:shadow-md transition"
+              className={`bg-white rounded-2xl shadow-sm border flex items-center gap-4 p-4 hover:shadow-md transition ${
+                compareSlugs.includes(ad.slug) ? "border-[#12142D] ring-1 ring-[#12142D]" : "border-gray-100"
+              }`}
             >
+              {/* Checkbox za poređenje */}
+              <input
+                type="checkbox"
+                title="Označи za poređenje"
+                checked={compareSlugs.includes(ad.slug)}
+                onChange={() => toggleCompare(ad.slug)}
+                className="w-4 h-4 accent-[#12142D] flex-shrink-0 cursor-pointer"
+              />
+
               {/* Slika */}
               <Link
                 to={`/ads/${ad.slug}`}

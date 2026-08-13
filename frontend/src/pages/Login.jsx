@@ -19,7 +19,8 @@ export default function Login() {
   // Provjeri greške koje dolaze iz Google OAuth redirecta
   useEffect(() => {
     const error = searchParams.get("error");
-    if (error === "google_failed") toast.error("Google prijava nije uspjela. Pokušajte ponovo.");
+    if (error === "google_failed")
+      toast.error("Google prijava nije uspjela. Pokušajte ponovo.");
     if (error === "account_disabled") toast.error("Vaš nalog je deaktiviran.");
   }, []);
 
@@ -39,7 +40,9 @@ export default function Login() {
         setUnverified(true);
         setResendEmail(form.email);
       } else {
-        toast.error(err.response?.data?.message || "Pogrešan email ili lozinka.");
+        toast.error(
+          err.response?.data?.message || "Pogrešan email ili lozinka.",
+        );
       }
     },
   });
@@ -56,22 +59,12 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-[#f0f2f5] flex flex-col">
-      {/* Navbar minimal */}
-      <div className="bg-white border-b border-gray-200 px-6 py-3">
-        <Link to="/" className="inline-flex items-center gap-2">
-          <div className="bg-[#FF0026] px-2.5 py-1 rounded-md">
-            <span className="text-white font-black text-lg leading-none">VOZIME</span>
-          </div>
-          <span className="text-[#12142D] font-bold text-base">OGLASI</span>
-        </Link>
-      </div>
+      
 
       <div className="flex-1 flex items-start justify-center pt-10 px-4 pb-10">
         <div className="flex gap-12 w-full max-w-3xl">
-
           {/* Lijevo — kartica */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 w-full max-w-[460px] overflow-hidden">
-
             {/* Tabovi */}
             <div className="flex border-b border-gray-200">
               <button className="flex-1 py-4 text-sm font-bold text-[#FF0026] border-b-2 border-[#FF0026] bg-white transition">
@@ -86,7 +79,9 @@ export default function Login() {
             </div>
 
             <div className="p-7">
-              <h1 className="text-xl font-black text-[#12142D] mb-6">Dobrodošli nazad!</h1>
+              <h1 className="text-xl font-black text-[#12142D] mb-6">
+                Dobrodošli nazad!
+              </h1>
 
               {/* Google dugme — aktivno */}
               <div className="space-y-3 mb-5">
@@ -111,14 +106,17 @@ export default function Login() {
                 <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
                   <p className="font-semibold mb-1">Email nije verifikovan</p>
                   <p className="mb-3">
-                    Provjerite inbox za <strong>{resendEmail}</strong> i kliknite na link za verifikaciju.
+                    Provjerite inbox za <strong>{resendEmail}</strong> i
+                    kliknite na link za verifikaciju.
                   </p>
                   <button
                     onClick={() => resendMutation.mutate()}
                     disabled={resendMutation.isPending}
                     className="text-[#FF0026] font-semibold hover:underline text-xs"
                   >
-                    {resendMutation.isPending ? "Šaljemo..." : "Pošalji novi verifikacioni email →"}
+                    {resendMutation.isPending
+                      ? "Šaljemo..."
+                      : "Pošalji novi verifikacioni email →"}
                   </button>
                 </div>
               )}
@@ -132,7 +130,9 @@ export default function Login() {
                   <input
                     type="email"
                     value={form.email}
-                    onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, email: e.target.value }))
+                    }
                     placeholder="vase@email.com"
                     className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] focus:border-transparent transition"
                     onKeyDown={(e) => e.key === "Enter" && mutation.mutate()}
@@ -141,8 +141,13 @@ export default function Login() {
 
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-sm font-semibold text-gray-700">Lozinka</label>
-                    <span className="text-xs text-gray-400 cursor-not-allowed" title="Uskoro dostupno">
+                    <label className="block text-sm font-semibold text-gray-700">
+                      Lozinka
+                    </label>
+                    <span
+                      className="text-xs text-gray-400 cursor-not-allowed"
+                      title="Uskoro dostupno"
+                    >
                       Zaboravili ste lozinku?
                     </span>
                   </div>
@@ -150,7 +155,9 @@ export default function Login() {
                     <input
                       type={showPassword ? "text" : "password"}
                       value={form.password}
-                      onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+                      onChange={(e) =>
+                        setForm((p) => ({ ...p, password: e.target.value }))
+                      }
                       placeholder="Vaša lozinka"
                       className="w-full border border-gray-300 rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] focus:border-transparent transition"
                       onKeyDown={(e) => e.key === "Enter" && mutation.mutate()}
@@ -179,7 +186,9 @@ export default function Login() {
           {/* Desno — prednosti */}
           <div className="hidden md:flex flex-col justify-center pt-4">
             <h2 className="text-xl font-black text-[#12142D] mb-5 leading-snug">
-              Prednosti VozimeOglasi<br />naloga
+              Prednosti VozimeOglasi
+              <br />
+              naloga
             </h2>
             <ul className="space-y-3">
               {[
@@ -188,8 +197,13 @@ export default function Login() {
                 "Postavljajte oglase brzo i jednostavno",
                 "Pratite status vaših oglasa",
               ].map((item) => (
-                <li key={item} className="flex items-start gap-2.5 text-sm text-gray-700">
-                  <span className="text-green-500 mt-0.5 flex-shrink-0"><CheckIcon /></span>
+                <li
+                  key={item}
+                  className="flex items-start gap-2.5 text-sm text-gray-700"
+                >
+                  <span className="text-green-500 mt-0.5 flex-shrink-0">
+                    <CheckIcon />
+                  </span>
                   {item}
                 </li>
               ))}
@@ -201,9 +215,12 @@ export default function Login() {
       {/* Footer — dealer link */}
       <div className="text-center pb-8 text-sm text-gray-500">
         Jeste li diler?{" "}
-        <span className="text-[#FF0026] font-semibold cursor-not-allowed opacity-60" title="Uskoro dostupno">
+        <Link
+          to="/register/dealer"
+          className="text-[#FF0026] font-semibold hover:underline"
+        >
           Prijavite se kao diler
-        </span>
+        </Link>
       </div>
     </div>
   );
@@ -212,36 +229,69 @@ export default function Login() {
 function GoogleIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18">
-      <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
-      <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
-      <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
-      <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+      <path
+        fill="#4285F4"
+        d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"
+      />
+      <path
+        fill="#34A853"
+        d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"
+      />
+      <path
+        fill="#EA4335"
+        d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"
+      />
     </svg>
   );
 }
 
 function EyeIcon() {
   return (
-    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-      <circle cx="12" cy="12" r="3"/>
+    <svg
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+    >
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
     </svg>
   );
 }
 
 function EyeOffIcon() {
   return (
-    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-      <line x1="1" y1="1" x2="23" y2="23"/>
+    <svg
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+    >
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+      <line x1="1" y1="1" x2="23" y2="23" />
     </svg>
   );
 }
 
 function CheckIcon() {
   return (
-    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-      <polyline points="20 6 9 17 4 12"/>
+    <svg
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      viewBox="0 0 24 24"
+    >
+      <polyline points="20 6 9 17 4 12" />
     </svg>
   );
 }

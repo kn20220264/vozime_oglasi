@@ -9,7 +9,6 @@ use App\Models\Payment;
 use App\Models\Ad;
 use App\Models\Setting;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class PackageController extends Controller
 {
@@ -50,22 +49,12 @@ class PackageController extends Controller
         // Provjeri free_listing privilegiju
         $isFree = $user->hasPrivilege('free_listing') || $user->hasPrivilege('featured_bypass');
 
-        $ad = null;
-
         // ad_boost paket zahtijeva ad_id koji pripada korisniku
         if ($package->type === 'ad_boost') {
             if (!$request->ad_id) {
                 return response()->json(['message' => 'Morate odabrati oglas za ovaj paket.'], 422);
             }
-            $ad = Ad::where('id', $request->ad_id)->where('user_id', $user->id)->firstOrFail();
-        }
-
-        // Generiši referencu za uplatu
-        // Za ad_boost koristimo ad_code, za account generišemo ACC- kod
-        if ($package->type === 'ad_boost' && $ad && $ad->ad_code) {
-            $reference = $ad->ad_code;
-        } else {
-            $reference = 'ACC-' . strtoupper(Str::random(9));
+            Ad::where('id', $request->ad_id)->where('user_id', $user->id)->firstOrFail();
         }
 
         // Kreiraj user_package
@@ -78,7 +67,7 @@ class PackageController extends Controller
             'expires_at' => $isBankPending ? null : now()->addDays($package->duration_days),
         ]);
 
-        // Kreiraj payment zapis
+        // Kreiraj payment zapis — referenca je kratka: VM-{id uplate}
         $payment = Payment::create([
             'user_id'         => $user->id,
             'user_package_id' => $userPackage->id,
@@ -86,9 +75,11 @@ class PackageController extends Controller
             'currency'        => 'EUR',
             'gateway'         => $request->gateway,
             'payment_method'  => $isFree ? 'free' : $request->gateway,
-            'reference'       => $reference,
             'status'          => 'pending',
         ]);
+
+        $reference = 'VM-' . $payment->id;
+        $payment->update(['reference' => $reference]);
 
         // Aktivacija odmah: WSPay ili korisnik ima free privilegiju
         if ($request->gateway === 'wspay' || $isFree) {
@@ -112,12 +103,77 @@ class PackageController extends Controller
                 'banka'           => Setting::get('bank_banka', 'CKB banka'),
                 'ziro_racun'      => Setting::get('bank_racun', 'XXX-XXXX-XXXX'),
                 'iznos'           => $package->price . ' EUR',
-                'svrha_uplate'    => $reference,
+                'svrha_uplate'    => $reference . ' - ' . $package->name,
                 'info'            => Setting::get('bank_info', 'Navedite svrhu uplate kako bismo identifikovali uplatu.'),
+                'payment_id'      => $payment->id,
             ];
         }
 
         return response()->json($response, 201);
+    }
+
+    // GET /api/my-pending-payments — uplatnice na čekanju, za ponovni prikaz podataka
+    public function myPendingPayments(Request $request)
+    {
+        $payments = Payment::with(['userPackage.package'])
+            ->where('user_id', $request->user()->id)
+            ->where('status', 'pending')
+            ->where('gateway', 'bank_transfer')
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($p) {
+                $pkg     = $p->userPackage?->package;
+                $isAddon = str_starts_with($p->admin_note ?? '', 'dealer_addon:');
+                $label   = $pkg?->name
+                    ?? ($isAddon
+                        ? (DealerAddonController::ADDON_LABELS[str_replace('dealer_addon:', '', $p->admin_note)] ?? 'Premium doplata')
+                        : 'Uplata');
+
+                return [
+                    'payment_id'      => $p->id,
+                    'user_package_id' => $p->user_package_id,
+                    'reference'       => $p->reference,
+                    'amount'          => $p->amount,
+                    'package_name'    => $label,
+                    'package_type'    => $pkg?->type,
+                    'ad_id'           => $p->userPackage?->ad_id,
+                    'created_at'      => $p->created_at,
+                    'bank_details'    => [
+                        'naziv_korisnika' => Setting::get('bank_naziv', 'BEBOLD DOO BAR'),
+                        'banka'           => Setting::get('bank_banka', 'CKB banka'),
+                        'ziro_racun'      => Setting::get('bank_racun', 'XXX-XXXX-XXXX'),
+                        'iznos'           => number_format($p->amount, 2) . ' EUR',
+                        'svrha_uplate'    => $p->reference . ' - ' . $label,
+                        'info'            => Setting::get('bank_info', 'Navedite svrhu uplate kako bismo identifikovali uplatu.'),
+                        'payment_id'      => $p->id,
+                    ],
+                ];
+            });
+
+        return response()->json(['data' => $payments]);
+    }
+
+    // POST /api/payments/{id}/cancel — korisnik odustaje od uplate prije plaćanja
+    public function cancelPayment(Request $request, int $id)
+    {
+        $payment = Payment::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->firstOrFail();
+
+        if ($payment->status !== 'pending') {
+            return response()->json(['message' => 'Ova uplata se ne može poništiti.'], 422);
+        }
+
+        // Obriši i vezani user_package (nije plaćen, pa ne smije ostati)
+        if ($payment->user_package_id) {
+            UserPackage::where('id', $payment->user_package_id)
+                ->whereNull('paid_at')
+                ->delete();
+        }
+
+        $payment->delete();
+
+        return response()->json(['message' => 'Narudžba je poništena.']);
     }
 
     // GET /api/my-packages

@@ -38,6 +38,7 @@ class AdResource extends JsonResource
             'status'           => $this->status,
             'views_count'      => $this->views_count,
             'featured'         => $this->featured,
+            'featured_until'   => $this->featured_until,
             'primary_image'    => $primaryImage,
             'make'             => $this->make?->name,
             'model'            => $this->vehicleModel?->name,
@@ -48,6 +49,8 @@ class AdResource extends JsonResource
                 'premium_seller' => $this->user?->isPremiumSeller() ?? false,
             ],
             'created_at'       => $this->created_at,
+            'last_refreshed_at'=> $this->last_refreshed_at,
+            'auto_refresh'     => $this->auto_refresh,
         ];
     }
 }

@@ -52,23 +52,30 @@ class Ad extends Model
         'has_warranty',
         'accepts_exchange',
         'import',
+        'vehicle_history',
+        'trailer_coupling',
         'status',
         'views_count',
         'featured',
         'featured_until',
         'expires_at',
+        'last_refreshed_at',
+        'auto_refresh',
     ];
- 
+
     protected $casts = [
         'price_negotiable' => 'boolean',
         'has_service_book' => 'boolean',
         'has_warranty'     => 'boolean',
         'accepts_exchange' => 'boolean',
         'import'           => 'boolean',
+        'vehicle_history'  => 'array',
         'featured'         => 'boolean',
+        'auto_refresh'     => 'boolean',
         'registered_until' => 'date',
         'featured_until'   => 'datetime',
         'expires_at'       => 'datetime',
+        'last_refreshed_at'=> 'datetime',
     ];
  
     protected static function boot()

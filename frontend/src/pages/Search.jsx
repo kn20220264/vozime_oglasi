@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-hot-toast';
 import axios from '../api/axios';
+import useAuthStore from '../store/authStore';
 import AdCard from '../components/AdCard';
+import SidebarBanner from '../components/SidebarBanner';
 
 const FUEL_TYPES    = ['benzin', 'dizel', 'hibrid', 'elektro', 'plin', 'benzin+plin'];
 const TRANSMISSIONS = ['manuelni', 'automatik', 'poluautomatik'];
@@ -44,11 +47,84 @@ export default function Search() {
         city_id:      searchParams.get('city_id')      || '',
         power_kw_from:searchParams.get('power_kw_from')|| '',
         power_kw_to:  searchParams.get('power_kw_to')  || '',
+        vehicle_history: searchParams.get('vehicle_history') || '',
+        trailer_coupling: searchParams.get('trailer_coupling') || '',
         sort:         searchParams.get('sort')         || 'latest',
         page:         Number(searchParams.get('page')) || 1,
     });
 
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [savedDropdownOpen, setSavedDropdownOpen] = useState(false);
+    const [saveModalOpen, setSaveModalOpen] = useState(false);
+    const [saveName, setSaveName] = useState('');
+    const dropdownRef = useRef(null);
+    const { token } = useAuthStore();
+    const queryClient = useQueryClient();
+
+    // Zatvori dropdown klikom van
+    useEffect(() => {
+        if (!savedDropdownOpen) return;
+        const handler = (e) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setSavedDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [savedDropdownOpen]);
+
+    // Sačuvane pretrage
+    const { data: savedSearches = [] } = useQuery({
+        queryKey: ['saved-searches'],
+        queryFn: () => axios.get('/saved-searches').then(r => r.data),
+        enabled: !!token,
+        staleTime: 0,
+    });
+
+    const saveMutation = useMutation({
+        mutationFn: (payload) => axios.post('/saved-searches', payload).then(r => r.data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['saved-searches']);
+            setSaveModalOpen(false);
+            setSaveName('');
+            toast.success('Pretraga sačuvana!');
+        },
+        onError: () => toast.error('Greška pri čuvanju pretrage.'),
+    });
+
+    const deleteSavedMutation = useMutation({
+        mutationFn: (id) => axios.delete(`/saved-searches/${id}`).then(r => r.data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['saved-searches']);
+            toast.success('Pretraga obrisana.');
+        },
+        onError: () => toast.error('Greška pri brisanju.'),
+    });
+
+    const handleSaveSearch = () => {
+        if (!saveName.trim()) return;
+        const activeFilters = {};
+        Object.entries(filters).forEach(([k, v]) => {
+            if (v && !['sort', 'page'].includes(k)) activeFilters[k] = v;
+        });
+        saveMutation.mutate({ name: saveName.trim(), filters: activeFilters });
+    };
+
+    const applysavedSearch = (saved) => {
+        const base = {
+            q: '', make_id: '', model_id: '', price_from: '', price_to: '',
+            year_from: '', year_to: '', mileage_to: '', fuel_type: '',
+            transmission: '', body_type: '', drive_type: '', condition: '',
+            damage: '', city_id: '', power_kw_from: '', power_kw_to: '',
+            vehicle_history: '', trailer_coupling: '',
+            sort: 'latest', page: 1,
+        };
+        setFilters({ ...base, ...saved.filters, sort: saved.filters.sort || 'latest', page: 1 });
+        setSavedDropdownOpen(false);
+        const params = new URLSearchParams();
+        Object.entries({ ...saved.filters }).forEach(([k, v]) => v && params.set(k, v));
+        setSearchParams(params);
+    };
 
     const { data: makesRaw } = useQuery({
         queryKey: ['makes'],
@@ -108,6 +184,7 @@ export default function Search() {
             year_from: '', year_to: '', mileage_to: '', fuel_type: '',
             transmission: '', body_type: '', drive_type: '', condition: '',
             damage: '', city_id: '', power_kw_from: '', power_kw_to: '',
+            vehicle_history: '', trailer_coupling: '',
             sort: 'latest', page: 1,
         });
     };
@@ -136,6 +213,69 @@ export default function Search() {
                         className="bg-[#FF0026] hover:bg-red-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition">
                         Traži
                     </button>
+
+                    {/* Sačuvane pretrage dropdown */}
+                    {token && (
+                        <div className="relative" ref={dropdownRef}>
+                            <button
+                                onClick={() => setSavedDropdownOpen(p => !p)}
+                                title="Sačuvane pretrage"
+                                className={`bg-[#1B2B5A] hover:bg-[#243570] text-white px-3 py-2.5 rounded-xl text-sm transition flex items-center gap-1.5 relative ${savedDropdownOpen ? 'ring-2 ring-[#FFEA00]' : ''}`}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill={savedSearches.length > 0 ? '#FFEA00' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                </svg>
+                                <span className="hidden sm:inline text-xs font-semibold">Sačuvane</span>
+                                {savedSearches.length > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-[#FFEA00] text-[#12142D] text-xs font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                                        {savedSearches.length}
+                                    </span>
+                                )}
+                            </button>
+
+                            {savedDropdownOpen && (
+                                <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden">
+                                    <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                                        <span className="text-sm font-black text-[#12142D]">Sačuvane pretrage</span>
+                                        <span className="text-xs text-gray-400">{savedSearches.length} {savedSearches.length === 1 ? 'pretraga' : 'pretrage'}</span>
+                                    </div>
+                                    {savedSearches.length === 0 ? (
+                                        <div className="px-4 py-6 text-center">
+                                            <div className="text-3xl mb-2">🔖</div>
+                                            <p className="text-sm text-gray-500">Nemate sačuvanih pretraga.</p>
+                                            <p className="text-xs text-gray-400 mt-1">Postavite filtere i kliknite "Sačuvaj pretragu".</p>
+                                        </div>
+                                    ) : (
+                                        <ul className="max-h-64 overflow-y-auto">
+                                            {savedSearches.map(s => (
+                                                <li key={s.id} className="flex items-center gap-2 px-3 py-2.5 hover:bg-gray-50 group border-b border-gray-50 last:border-0">
+                                                    <button
+                                                        onClick={() => applysavedSearch(s)}
+                                                        className="flex-1 text-left"
+                                                    >
+                                                        <span className="text-sm font-semibold text-[#12142D] group-hover:text-[#FF0026] transition block truncate">{s.name}</span>
+                                                        <span className="text-xs text-gray-400">
+                                                            {Object.keys(s.filters).length} {Object.keys(s.filters).length === 1 ? 'filter' : 'filtera'}
+                                                        </span>
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); deleteSavedMutation.mutate(s.id); }}
+                                                        className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-[#FF0026] transition p-1 rounded-lg hover:bg-red-50"
+                                                        title="Obriši"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     <button
                         onClick={() => setSidebarOpen(true)}
                         className="md:hidden bg-[#1B2B5A] text-white px-4 py-2.5 rounded-xl text-sm flex items-center gap-1.5 relative"
@@ -149,6 +289,41 @@ export default function Search() {
                     </button>
                 </div>
             </div>
+
+            {/* Modal za čuvanje pretrage */}
+            {saveModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/50" onClick={() => setSaveModalOpen(false)} />
+                    <div className="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm">
+                        <h3 className="text-base font-black text-[#12142D] mb-1">Sačuvaj pretragu</h3>
+                        <p className="text-xs text-gray-500 mb-4">Dajte naziv ovoj pretrazi kako biste je lako pronašli.</p>
+                        <input
+                            type="text"
+                            value={saveName}
+                            onChange={e => setSaveName(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && handleSaveSearch()}
+                            placeholder="npr. Golf 2018-2022 do 10000€"
+                            autoFocus
+                            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] mb-4"
+                        />
+                        <div className="flex gap-2">
+                            <button
+                                onClick={handleSaveSearch}
+                                disabled={!saveName.trim() || saveMutation.isLoading}
+                                className="flex-1 bg-[#FF0026] hover:bg-red-700 text-white py-2.5 rounded-xl text-sm font-bold transition disabled:opacity-50"
+                            >
+                                {saveMutation.isLoading ? 'Čuvanje...' : 'Sačuvaj'}
+                            </button>
+                            <button
+                                onClick={() => { setSaveModalOpen(false); setSaveName(''); }}
+                                className="px-4 py-2.5 border border-gray-200 text-gray-500 hover:bg-gray-50 rounded-xl text-sm transition"
+                            >
+                                Otkaži
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="max-w-6xl mx-auto px-4 py-6 flex gap-6">
 
@@ -170,7 +345,11 @@ export default function Search() {
                             cities={cities}
                             applyFilters={applyFilters}
                             resetFilters={resetFilters}
+                            onSaveSearch={token ? () => setSaveModalOpen(true) : null}
                         />
+                    </div>
+                    <div className="mt-4">
+                        <SidebarBanner />
                     </div>
                 </aside>
 
@@ -190,6 +369,7 @@ export default function Search() {
                                 cities={cities}
                                 applyFilters={applyFilters}
                                 resetFilters={resetFilters}
+                                onSaveSearch={token ? () => { setSidebarOpen(false); setSaveModalOpen(true); } : null}
                             />
                         </div>
                     </div>
@@ -312,7 +492,7 @@ export default function Search() {
     );
 }
 
-function FilterSidebar({ filters, set, makes, models, cities, applyFilters, resetFilters }) {
+function FilterSidebar({ filters, set, makes, models, cities, applyFilters, resetFilters, onSaveSearch }) {
     return (
         <div className="space-y-5">
 
@@ -481,6 +661,17 @@ function FilterSidebar({ filters, set, makes, models, cities, applyFilters, rese
                     Reset
                 </button>
             </div>
+            {onSaveSearch && (
+                <button
+                    onClick={onSaveSearch}
+                    className="w-full flex items-center justify-center gap-2 py-2 text-sm text-[#6674A3] hover:text-[#FF0026] hover:bg-red-50 rounded-xl transition font-medium"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                    </svg>
+                    Sačuvaj ovu pretragu
+                </button>
+            )}
         </div>
     );
 }

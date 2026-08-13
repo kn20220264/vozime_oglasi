@@ -11,6 +11,9 @@ class Kernel extends ConsoleKernel
     {
         // Svaki dan u ponoć provjerava i osvježava istaknute oglase
         $schedule->command('ads:refresh-featured')->dailyAt('00:00');
+
+        // Automatsko obnavljanje oglasa (AUTO-REFRESH paket) — provjera svakih sat vremena
+        $schedule->command('ads:auto-refresh')->hourly();
     }
 
     protected function commands(): void

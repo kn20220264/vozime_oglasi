@@ -68,14 +68,7 @@ export default function Register() {
   if (registered) {
     return (
       <div className="min-h-screen bg-[#f0f2f5] flex flex-col">
-        <div className="bg-white border-b border-gray-200 px-6 py-3">
-          <Link to="/" className="inline-flex items-center gap-2">
-            <div className="bg-[#FF0026] px-2.5 py-1 rounded-md">
-              <span className="text-white font-black text-lg leading-none">VOZIME</span>
-            </div>
-            <span className="text-[#12142D] font-bold text-base">OGLASI</span>
-          </Link>
-        </div>
+        
         <div className="flex-1 flex items-center justify-center px-4">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-10 w-full max-w-md text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
@@ -114,14 +107,7 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-[#f0f2f5] flex flex-col">
-      <div className="bg-white border-b border-gray-200 px-6 py-3">
-        <Link to="/" className="inline-flex items-center gap-2">
-          <div className="bg-[#FF0026] px-2.5 py-1 rounded-md">
-            <span className="text-white font-black text-lg leading-none">VOZIME</span>
-          </div>
-          <span className="text-[#12142D] font-bold text-base">OGLASI</span>
-        </Link>
-      </div>
+      
 
       <div className="flex-1 flex items-start justify-center pt-10 px-4 pb-10">
         <div className="flex gap-12 w-full max-w-3xl">
@@ -288,10 +274,10 @@ export default function Register() {
       </div>
 
       <div className="text-center pb-8 text-sm text-gray-500">
-        Jeste li diler?{" "}
-        <span className="text-[#FF0026] font-semibold cursor-not-allowed opacity-60" title="Uskoro dostupno">
+        Jeste li diler / auto plac?{" "}
+        <Link to="/register/dealer" className="text-[#FF0026] font-semibold hover:underline">
           Registrujte se kao diler
-        </span>
+        </Link>
       </div>
     </div>
   );

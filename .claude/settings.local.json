@@ -2,7 +2,18 @@
   "permissions": {
     "allow": [
       "Bash(docker compose:*)",
-      "Bash(npx vite:*)"
+      "Bash(npx vite:*)",
+      "Bash(npx --yes vite build --mode development)",
+      "Bash(docker exec *)",
+      "Bash(npx esbuild *)",
+      "Bash(docker compose *)",
+      "Bash(curl -s -o /dev/null -w \"1. krug \\(hladan\\) /api/makes: %{time_total}s\\\\n\" http://localhost:8000/api/makes)",
+      "Bash(curl -s -o /dev/null -w \"GET /api/makes: %{time_total}s\\\\n\" http://localhost:8000/api/makes)",
+      "Bash(curl -s -o /dev/null -w \"GET /api/makes/1/models: %{time_total}s\\\\n\" http://localhost:8000/api/makes/1/models)",
+      "Bash(curl -s -o /dev/null -w \"GET /api/ads \\(1\\): %{time_total}s\\\\n\" \"http://localhost:8000/api/ads?per_page=1\")",
+      "Bash(curl -s -o /dev/null -w \"GET /api/cities: %{time_total}s\\\\n\" http://localhost:8000/api/cities)",
+      "Bash(npx eslint *)",
+      "Bash(npx vite *)"
     ]
   }
 }

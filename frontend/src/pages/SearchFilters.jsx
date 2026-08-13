@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-hot-toast';
 import { createPortal } from 'react-dom';
 import axios from '../api/axios';
 import { useMultipleFilterOptions } from '../hooks/useFilterOptions';
+import useAuthStore from '../store/authStore';
 
 // ─── Portal dropdown helper ───────────────────────────────────
 function PortalDropdown({ anchorRef, open, children }) {
@@ -59,7 +61,18 @@ const CONSUMPTION_OPTIONS = [
   {label:'do 15 l/100km',value:15},{label:'preko 15 l/100km',value:16},
 ];
 const VEHICLE_TYPES_AUTO = ['Cabrio/Roadster','SUV/Pickup/Offroad','Mali auto','Karavan','Limuzina/Sedan','Sportski/Kupe','Kombi/Minibus','Ostalo'];
-const TRAILER_COUPLING   = ['Fiksna/Odvojna/Okretna','Odvojna/Okretna','Okretna'];
+const TRAILER_COUPLING   = ['Fiksna','Odvojna','Okretna'];
+const VEHICLE_HISTORY_OPTIONS = [
+  { value: 'prvi_vlasnik',           label: 'Prvi vlasnik' },
+  { value: 'kupljen_nov_cg',         label: 'Kupljen nov u Crnoj Gori' },
+  { value: 'servisna_knjiga',        label: 'Servisna knjiga' },
+  { value: 'restauriran',            label: 'Restauriran' },
+  { value: 'oldtimer',               label: 'Oldtimer' },
+  { value: 'u_garanciji',            label: 'Garancija' },
+  { value: 'garaziran',              label: 'Garažiran' },
+  { value: 'prilagodjen_invalidima', label: 'Prilagođen invalidima' },
+  { value: 'tuning',                 label: 'Tuning' },
+];
 const CRUISE_CONTROL     = ['Tempomat','Adaptivni tempomat'];
 const PARKING_SENSORS    = ['360 kamera','Kamera','Prednji','Zadnji','Zadnji traffic alert','Samo-upravljanje'];
 const EXTERIOR_EXTRAS    = ['ABS','Zatamnjena stakla','Upozorenje na rastojanje','Adaptivni sasija','All season gume','Grijano vjetrobransko staklo','Hill-start assist','Bi-Xenon','Krovni nosac','Elektricna prtljaznica','Imobilajzer','ESP','LED farovi','LED dnevna svjetla','Senzor svjetla','Air suspension','Maglenke','Emergency brake assist','Panoramski krov','Rain sensor','Nadzor pritiska guma','Rezervna guma','Sunroof','Power steering','Start-stop sistem','Blind spot assist','Traction control','Prepoznavanje saobracajnih znakova','Xenon farovi','Centralno zakljucavanje'];
@@ -214,15 +227,21 @@ function MultiChipSelect({ label, options, selected, onChange }) {
   );
 }
 
+// mobile.de stil sekcija — bijela kartica, deblji naslov sa akcentom, tanka linija
 function Section({ title, children }) {
   const [open, setOpen] = useState(true);
   return (
-    <div className="border border-gray-100 rounded-2xl mb-4">
-      <button onClick={()=>setOpen(p=>!p)} className="w-full flex items-center justify-between px-5 py-4 bg-gray-50 hover:bg-gray-100 transition rounded-2xl">
-        <span className="font-bold text-[#12142D] text-sm">{title}</span>
-        <span className="text-gray-400 text-xs">{open?'▲':'▼'}</span>
+    <div className="bg-white border border-gray-200 rounded-xl mb-3 shadow-sm overflow-hidden">
+      <button onClick={()=>setOpen(p=>!p)} className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition border-b border-gray-100">
+        <span className="flex items-center gap-2.5 font-black text-[#12142D] text-sm uppercase tracking-wide">
+          <span className="w-1 h-4 bg-[#FF0026] rounded-full inline-block" />
+          {title}
+        </span>
+        <svg className={`w-4 h-4 text-gray-400 transition-transform ${open ? '' : '-rotate-90'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
       </button>
-      {open && <div className="p-5 bg-white rounded-b-2xl">{children}</div>}
+      {open && <div className="p-5">{children}</div>}
     </div>
   );
 }
@@ -365,6 +384,73 @@ export default function SearchFilters() {
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'auto');
   const parseIds = (str) => str ? str.split(',').map(Number).filter(Boolean) : [];
 
+  const { token } = useAuthStore();
+  const queryClient = useQueryClient();
+  const [savedDropdownOpen, setSavedDropdownOpen] = useState(false);
+  const [saveModalOpen, setSaveModalOpen] = useState(false);
+  const [saveName, setSaveName] = useState('');
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (!savedDropdownOpen) return;
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setSavedDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [savedDropdownOpen]);
+
+  const { data: savedSearches = [] } = useQuery({
+    queryKey: ['saved-searches'],
+    queryFn: () => axios.get('/saved-searches').then(r => r.data),
+    enabled: !!token,
+    staleTime: 0,
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: (payload) => axios.post('/saved-searches', payload).then(r => r.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['saved-searches']);
+      setSaveModalOpen(false);
+      setSaveName('');
+      toast.success('Pretraga sačuvana!');
+    },
+    onError: () => toast.error('Greška pri čuvanju pretrage.'),
+  });
+
+  const deleteSavedMutation = useMutation({
+    mutationFn: (id) => axios.delete(`/saved-searches/${id}`).then(r => r.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['saved-searches']);
+      toast.success('Pretraga obrisana.');
+    },
+    onError: () => toast.error('Greška pri brisanju.'),
+  });
+
+  const handleSaveSearch = () => {
+    if (!saveName.trim()) return;
+    const params = new URLSearchParams();
+    params.set('tab', activeTab);
+    const addAll = obj => Object.entries(obj).forEach(([k, v]) => {
+      if (!v || (Array.isArray(v) && !v.length) || v === false) return;
+      params.set(k, Array.isArray(v) ? v.join(',') : v);
+    });
+    if (activeTab === 'auto') addAll(auto);
+    else if (activeTab === 'moto') addAll(moto);
+    else if (activeTab === 'nautika') addAll(nautika);
+    else addAll(truck);
+    const filtersObj = {};
+    params.forEach((v, k) => { filtersObj[k] = v; });
+    saveMutation.mutate({ name: saveName.trim(), filters: filtersObj });
+  };
+
+  const applyLoadedSearch = (saved) => {
+    setSavedDropdownOpen(false);
+    navigate(`/search?${new URLSearchParams(saved.filters).toString()}`);
+  };
+
   // ─── Filter opcije iz API-ja ──────────────────────────────
   const { data: autoFilters }     = useMultipleFilterOptions(['fuel_type','body_type','transmission','drive_type','condition','damage','emission_class','color_exterior','color_interior','seat_material'], 'auto');
   const { data: motoFilters }     = useMultipleFilterOptions(['fuel_type','body_type','transmission','drive_type','color_exterior'], 'motocikl');
@@ -374,17 +460,25 @@ export default function SearchFilters() {
   // ─── State ───────────────────────────────────────────────
   const [auto, setAuto] = useState({
     make_ids:parseIds(searchParams.get('make_ids')), model_ids:parseIds(searchParams.get('model_ids')),
-    variant:searchParams.get('variant')||'', vehicle_types:[], seats_from:'', seats_to:'', doors:'',
+    variant:searchParams.get('variant')||'',
+    vehicle_types:(searchParams.get('vehicle_types')||'').split(',').filter(Boolean),
+    seats_from:searchParams.get('seats_from')||'', seats_to:searchParams.get('seats_to')||'', doors:searchParams.get('doors')||'',
     price_from:searchParams.get('price_from')||'', price_to:searchParams.get('price_to')||'',
     year_from:searchParams.get('year_from')||'', year_to:searchParams.get('year_to')||'',
     mileage_from:searchParams.get('mileage_from')||'', mileage_to:searchParams.get('mileage_to')||'',
-    condition:'', seller:'', registered_until:'', owners:'', city_id:searchParams.get('city_id')||'',
-    fuel_types:[], power_from:'', power_to:'', power_unit:'ks', cc_from:'', cc_to:'',
-    cylinders_from:'', cylinders_to:'', weight_from:'', weight_to:'', drive_type:'',
-    transmissions:[], consumption_to:'', emission:'',
-    color_exterior:[], trailer_coupling:'', trailer_assist:false,
+    condition:searchParams.get('condition')||'', seller:searchParams.get('seller')||'', registered_until:'', owners:'', city_id:searchParams.get('city_id')||'',
+    fuel_types:(searchParams.get('fuel_types')||'').split(',').filter(Boolean),
+    power_from:searchParams.get('power_from')||'', power_to:searchParams.get('power_to')||'', power_unit:searchParams.get('power_unit')||'ks',
+    cc_from:searchParams.get('cc_from')||'', cc_to:searchParams.get('cc_to')||'',
+    cylinders_from:'', cylinders_to:'', weight_from:'', weight_to:'', drive_type:searchParams.get('drive_type')||'',
+    transmissions:(searchParams.get('transmissions')||'').split(',').filter(Boolean), consumption_to:'', emission:searchParams.get('emission')||'',
+    color_exterior:(searchParams.get('color_exterior')||'').split(',').filter(Boolean),
+    trailer_coupling:searchParams.get('trailer_coupling')||'', trailer_assist:false,
+    vehicle_history:(searchParams.get('vehicle_history')||'').split(',').filter(Boolean),
     parking_sensors:[], cruise_control:'', exterior_extras:[],
-    color_interior:[], interior_material:[], airbags:'', ac:'', interior_features:[], damage:'',
+    color_interior:(searchParams.get('color_interior')||'').split(',').filter(Boolean),
+    interior_material:(searchParams.get('interior_material')||'').split(',').filter(Boolean),
+    airbags:'', ac:'', interior_features:[], damage:searchParams.get('damage')||'',
   });
   const setA = (k,v) => setAuto(p=>({...p,[k]:v}));
 
@@ -392,15 +486,17 @@ export default function SearchFilters() {
     moto_makes:(searchParams.get('moto_makes')||'').split(',').filter(Boolean),
     make_id:searchParams.get('make_id')||'', model:searchParams.get('model')||'',
     kategorije:(searchParams.get('kategorije')||'').split(',').filter(Boolean),
-    condition:'',
+    condition:searchParams.get('condition')||'',
     price_from:searchParams.get('price_from')||'', price_to:searchParams.get('price_to')||'',
     year_from:searchParams.get('year_from')||'', year_to:searchParams.get('year_to')||'',
     mileage_from:searchParams.get('mileage_from')||'', mileage_to:searchParams.get('mileage_to')||'',
     seat_height_from:'', seat_height_to:'', city_id:searchParams.get('city_id')||'',
     fuel_types:[], drive_type:'', transmissions:[],
-    power_from:'', power_to:'', power_unit:'ks', cc_from:'', cc_to:'',
+    power_from:searchParams.get('power_from')||'', power_to:searchParams.get('power_to')||'', power_unit:searchParams.get('power_unit')||'ks',
+    cc_from:searchParams.get('cc_from')||'', cc_to:searchParams.get('cc_to')||'',
     cylinders_from:'', cylinders_to:'', weight_from:'', weight_to:'',
-    color_exterior:[], cruise_control:'', extras:[], maintenance:[], seller:'', owners:'', damage:'',
+    color_exterior:(searchParams.get('color_exterior')||'').split(',').filter(Boolean),
+    cruise_control:'', extras:[], maintenance:[], seller:'', owners:'', damage:'',
   });
   const setM = (k,v) => setMoto(p=>({...p,[k]:v}));
 
@@ -409,12 +505,13 @@ export default function SearchFilters() {
     boat_types:searchParams.get('tip')&&searchParams.get('tip')!=='Svi tipovi'?[searchParams.get('tip')]:[],
     boat_makes:searchParams.get('make')?[searchParams.get('make')]:[],
     boat_type:searchParams.get('tip')||'', make:searchParams.get('make')||'',
-    model:searchParams.get('model')||'', hull_material:'', engine_type:'',
+    model:searchParams.get('model')||'', hull_material:searchParams.get('hull_material')||'', engine_type:searchParams.get('engine_type')||'',
     year_from:searchParams.get('year_from')||'', year_to:searchParams.get('year_to')||'',
     price_from:searchParams.get('price_from')||'', price_to:searchParams.get('price_to')||'',
     city_id:searchParams.get('city_id')||'',
-    hp_from:'', hp_to:'', length:'', hours_from:'', hours_to:'',
-    cabins:'', berths:'', wc:'', kitchen:'', color:[], trailer:false, extras:[], seller:'', condition:'',
+    hp_from:searchParams.get('hp_from')||'', hp_to:searchParams.get('hp_to')||'', length:searchParams.get('length')||'', hours_from:'', hours_to:'',
+    cabins:searchParams.get('cabins')||'', berths:searchParams.get('berths')||'', wc:'', kitchen:'', color:[], trailer:false,
+    extras:(searchParams.get('extras')||'').split(',').filter(Boolean), seller:'', condition:searchParams.get('condition')||'',
   });
   const setN = (k,v) => setNautika(p=>({...p,[k]:v}));
 
@@ -431,7 +528,7 @@ export default function SearchFilters() {
     trans:'', drive:'', payload_from:'', payload_to:'', total_mass:'', mass_from:'', mass_to:'',
     euro:'', axles:'', length:'', seats:'', seats_from:'', seats_to:'',
     berths_from:'', berths_to:'', sleeping:'', bed_types:[], sliding_door:'',
-    equipment:[], extras:[], heating:[], condition:'', seller:'',
+    equipment:[], extras:[], heating:[], condition:searchParams.get('condition')||'', seller:'',
   });
   const setT = (k,v) => setTruck(p=>({...p,[k]:v}));
 
@@ -455,6 +552,26 @@ export default function SearchFilters() {
 
   const { data: citiesData } = useQuery({ queryKey:['cities'], queryFn:()=>axios.get('/cities').then(r=>r.data), staleTime:Infinity });
   const cities = citiesData?.data ?? [];
+
+  // Živi broj rezultata (mobile.de stil) — samo auto tab, /ads/count podržava te filtere
+  const countParams = {
+    ...(auto.make_ids[0]  ? { make_id:  auto.make_ids[0] }  : {}),
+    ...(auto.model_ids[0] ? { model_id: auto.model_ids[0] } : {}),
+    ...(auto.city_id      ? { city_id:  auto.city_id }      : {}),
+    ...(auto.price_from   ? { price_from: auto.price_from } : {}),
+    ...(auto.price_to     ? { price_to:   auto.price_to }   : {}),
+    ...(auto.year_from    ? { year_from:  auto.year_from }  : {}),
+    ...(auto.year_to      ? { year_to:    auto.year_to }    : {}),
+    ...(auto.mileage_to   ? { mileage_to: auto.mileage_to } : {}),
+  };
+  const { data: countData } = useQuery({
+    queryKey: ['ads-count', countParams],
+    queryFn: () => axios.get(`/ads/count?${new URLSearchParams(countParams).toString()}`).then(r=>r.data),
+    enabled: activeTab === 'auto',
+    keepPreviousData: true,
+    staleTime: 10000,
+  });
+  const resultCount = activeTab === 'auto' ? countData?.count : null;
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -480,15 +597,109 @@ export default function SearchFilters() {
             <button onClick={()=>navigate(-1)} className="text-[#6674A3] hover:text-white transition text-sm">← Nazad</button>
             <h1 className="text-white font-black text-lg">Detaljna pretraga</h1>
           </div>
-          <button onClick={handleSearch} className="bg-[#FF0026] hover:bg-red-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition">Pretraži</button>
+          <div className="flex items-center gap-2">
+            {token && (
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setSavedDropdownOpen(p => !p)}
+                  title="Sačuvane pretrage"
+                  className={`bg-[#1B2B5A] hover:bg-[#243570] text-white px-3 py-2.5 rounded-xl text-sm transition flex items-center gap-1.5 relative ${savedDropdownOpen ? 'ring-2 ring-[#FFEA00]' : ''}`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill={savedSearches.length > 0 ? '#FFEA00' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                  </svg>
+                  <span className="hidden sm:inline text-xs font-semibold">Sačuvane</span>
+                  {savedSearches.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-[#FFEA00] text-[#12142D] text-xs font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                      {savedSearches.length}
+                    </span>
+                  )}
+                </button>
+                {savedDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                      <span className="text-sm font-black text-[#12142D]">Sačuvane pretrage</span>
+                      <span className="text-xs text-gray-400">{savedSearches.length} {savedSearches.length === 1 ? 'pretraga' : 'pretrage'}</span>
+                    </div>
+                    {savedSearches.length === 0 ? (
+                      <div className="px-4 py-6 text-center">
+                        <div className="text-3xl mb-2">🔖</div>
+                        <p className="text-sm text-gray-500">Nemate sačuvanih pretraga.</p>
+                        <p className="text-xs text-gray-400 mt-1">Postavite filtere i kliknite "Sačuvaj pretragu".</p>
+                      </div>
+                    ) : (
+                      <ul className="max-h-64 overflow-y-auto">
+                        {savedSearches.map(s => (
+                          <li key={s.id} className="flex items-center gap-2 px-3 py-2.5 hover:bg-gray-50 group border-b border-gray-50 last:border-0">
+                            <button onClick={() => applyLoadedSearch(s)} className="flex-1 text-left">
+                              <span className="text-sm font-semibold text-[#12142D] group-hover:text-[#FF0026] transition block truncate">{s.name}</span>
+                              <span className="text-xs text-gray-400">{Object.keys(s.filters).length} {Object.keys(s.filters).length === 1 ? 'filter' : 'filtera'}</span>
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); deleteSavedMutation.mutate(s.id); }}
+                              className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-[#FF0026] transition p-1 rounded-lg hover:bg-red-50"
+                              title="Obriši"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+            <button onClick={handleSearch} className="bg-[#FF0026] hover:bg-red-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition">
+              {resultCount != null ? `Prikaži ${Number(resultCount).toLocaleString()}` : 'Pretraži'}
+            </button>
+          </div>
         </div>
       </div>
 
+      {/* Modal za čuvanje pretrage */}
+      {saveModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setSaveModalOpen(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm">
+            <h3 className="text-base font-black text-[#12142D] mb-1">Sačuvaj pretragu</h3>
+            <p className="text-xs text-gray-500 mb-4">Dajte naziv ovoj pretrazi kako biste je lako pronašli.</p>
+            <input
+              type="text"
+              value={saveName}
+              onChange={e => setSaveName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSaveSearch()}
+              placeholder="npr. Golf 2018-2022 do 10000€"
+              autoFocus
+              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] mb-4"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={handleSaveSearch}
+                disabled={!saveName.trim() || saveMutation.isLoading}
+                className="flex-1 bg-[#FF0026] hover:bg-red-700 text-white py-2.5 rounded-xl text-sm font-bold transition disabled:opacity-50"
+              >
+                {saveMutation.isLoading ? 'Čuvanje...' : 'Sačuvaj'}
+              </button>
+              <button
+                onClick={() => { setSaveModalOpen(false); setSaveName(''); }}
+                className="px-4 py-2.5 border border-gray-200 text-gray-500 hover:bg-gray-50 rounded-xl text-sm transition"
+              >
+                Otkaži
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-5xl mx-auto px-4 py-6">
-        <div className="flex gap-2 mb-6 flex-wrap">
+        {/* mobile.de stil segmentirani tabovi */}
+        <div className="inline-flex bg-white border border-gray-200 rounded-xl p-1 mb-6 shadow-sm flex-wrap">
           {TABS.map(tab=>(
             <button key={tab.id} onClick={()=>setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-xl font-bold text-sm transition ${activeTab===tab.id?'bg-[#FF0026] text-white':'bg-white border border-gray-200 text-gray-600 hover:border-[#FF0026]'}`}>
+              className={`px-5 py-2.5 rounded-lg font-bold text-sm transition ${activeTab===tab.id?'bg-[#12142D] text-white shadow':'text-gray-500 hover:text-[#12142D]'}`}>
               {tab.label}
             </button>
           ))}
@@ -579,6 +790,21 @@ export default function SearchFilters() {
                   <Sel label="Potrosnja do (l/100km)" value={auto.consumption_to} onChange={v=>setA('consumption_to',v)} options={CONSUMPTION_OPTIONS} />
                   <Sel label="Euro norma" value={auto.emission} onChange={v=>setA('emission',v)} options={toChips(autoFilters?.emission_class)} />
                 </div>
+              </div>
+            </Section>
+
+            <Section title="Istorija vozila">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {VEHICLE_HISTORY_OPTIONS.map(({value,label})=>(
+                  <label key={value} className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 cursor-pointer transition text-sm ${
+                    auto.vehicle_history.includes(value) ? 'border-[#FF0026] bg-red-50 text-[#FF0026] font-semibold' : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                  }`}>
+                    <input type="checkbox" className="w-4 h-4 accent-[#FF0026]"
+                      checked={auto.vehicle_history.includes(value)}
+                      onChange={()=>setA('vehicle_history',toggleArr(auto.vehicle_history,value))} />
+                    {label}
+                  </label>
+                ))}
               </div>
             </Section>
 
@@ -1109,8 +1335,19 @@ export default function SearchFilters() {
 
         {/* Submit */}
         <div className="sticky bottom-0 bg-white border-t border-gray-100 px-4 py-4 -mx-4 mt-4">
+          {token && (
+            <button
+              onClick={() => setSaveModalOpen(true)}
+              className="w-full flex items-center justify-center gap-2 py-2 mb-2 text-sm text-[#6674A3] hover:text-[#FF0026] hover:bg-red-50 rounded-xl transition font-medium"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+              Sačuvaj ovu pretragu
+            </button>
+          )}
           <button onClick={handleSearch} className="w-full bg-[#FF0026] hover:bg-red-700 text-white py-3.5 rounded-xl font-black text-base transition">
-            Pretraži oglase
+            {resultCount != null ? `Prikaži ${Number(resultCount).toLocaleString()} oglasa` : 'Pretraži oglase'}
           </button>
         </div>
       </div>

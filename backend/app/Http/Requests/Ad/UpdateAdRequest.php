@@ -58,6 +58,10 @@ class UpdateAdRequest extends FormRequest
             'accepts_exchange' => ['sometimes', 'boolean'],
             'import'           => ['sometimes', 'boolean'],
 
+            'vehicle_history'   => ['sometimes', 'nullable', 'array'],
+            'vehicle_history.*' => ['string', 'in:prvi_vlasnik,kupljen_nov_cg,servisna_knjiga,restauriran,oldtimer,u_garanciji,garaziran,prilagodjen_invalidima,tuning'],
+            'trailer_coupling'  => ['sometimes', 'nullable', 'in:Fiksna,Odvojna,Okretna'],
+
             'equipment'        => ['sometimes', 'array'],
             'equipment.*'      => ['integer', 'exists:equipment,id'],
 

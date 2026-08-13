@@ -36,6 +36,8 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/var/www/html
+      # vendor u named volume (Linux FS) — Windows bind mount je prespor za hiljade PHP fajlova
+      - vendor_data:/var/www/html/vendor
     depends_on:
       - db
       - redis
@@ -85,3 +87,4 @@ networks:
 
 volumes:
   db_data:
+  vendor_data:
