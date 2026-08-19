@@ -82,8 +82,11 @@ export default function CreateAd() {
   });
 
   const { data: makes } = useQuery({
-    queryKey: ["makes"],
-    queryFn: () => api.get("/makes").then((r) => r.data.data ?? r.data),
+    queryKey: ["makes", form.category_id],
+    queryFn: () =>
+      api.get("/makes", { params: { category_id: form.category_id } })
+        .then((r) => r.data.data ?? r.data),
+    enabled: !!form.category_id,
   });
 
   const { data: models } = useQuery({
@@ -101,6 +104,12 @@ export default function CreateAd() {
     queryKey: ["equipment"],
     queryFn: () => api.get("/equipment").then((r) => r.data.data ?? r.data),
   });
+
+  const { data: imageLimitData } = useQuery({
+    queryKey: ["image-limit"],
+    queryFn: () => api.get("/image-limit").then((r) => r.data),
+  });
+  const maxImages = imageLimitData?.max_images ?? 5;
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -131,12 +140,39 @@ export default function CreateAd() {
       if (errors) {
         Object.values(errors).forEach((e) => toast.error(e[0]));
       } else {
-        toast.error("Greska pri objavljivanju oglasa");
+        toast.error(err.response?.data?.message ?? "Greska pri objavljivanju oglasa");
       }
     },
   });
 
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
+
+  // ─── Uvoz oglasa sa AutoDilera ─────────────────────────────
+  const [importUrl, setImportUrl] = useState("");
+  const [importMeta, setImportMeta] = useState(null);
+  const importMutation = useMutation({
+    mutationFn: () =>
+      api.post("/ads/import-url", { url: importUrl.trim() }).then((r) => r.data),
+    onSuccess: (data) => {
+      const f = data.form ?? {};
+      // Selecti porede vrijednosti kao stringove — kastuj ID-jeve i numeričke selecte
+      const asString = ["category_id", "make_id", "model_id", "city_id", "doors", "seats", "year"];
+      const merged = {};
+      Object.entries(f).forEach(([k, v]) => {
+        if (v === null || v === undefined || v === "") return;
+        merged[k] = asString.includes(k) ? String(v) : v;
+      });
+      setForm((prev) => ({ ...prev, ...merged }));
+      if (merged.make_id) setSelectedMakeId(merged.make_id);
+      if (Array.isArray(data.vehicle_history) && data.vehicle_history.length) setVehicleHistory(data.vehicle_history);
+      if (Array.isArray(data.equipment) && data.equipment.length) setSelectedEquipment(data.equipment);
+      setImportMeta(data.meta ?? null);
+      setStep(1);
+      toast.success("Podaci su uvezeni — provjeri polja i dodaj svoje fotografije.");
+    },
+    onError: (err) =>
+      toast.error(err.response?.data?.message ?? "Uvoz nije uspio. Provjeri link i pokušaj ponovo."),
+  });
 
   const toggleEquipment = (id) => {
     setSelectedEquipment((prev) =>
@@ -146,8 +182,8 @@ export default function CreateAd() {
 
   const handleImages = (e) => {
     const files = Array.from(e.target.files);
-    if (files.length + images.length > 10) {
-      toast.error("Maksimalno 10 slika");
+    if (files.length + images.length > maxImages) {
+      toast.error(`Vaš paket dozvoljava najviše ${maxImages} slika po oglasu`);
       return;
     }
     setImages((prev) => [...prev, ...files]);
@@ -162,7 +198,17 @@ export default function CreateAd() {
         acc[cat].push(eq);
         return acc;
       }, {})
-    : {};
+    : equipment && typeof equipment === "object"
+      ? equipment
+      : {};
+
+  const equipmentCategoryLabels = {
+    safety: "Sigurnost",
+    comfort: "Udobnost",
+    multimedia: "Multimedija",
+    exterior: "Eksterijer",
+    assistance: "Asistencija",
+  };
 
   const steps = ["Osnovno", "Detalji", "Oprema", "Slike i opis", "Promocija"];
 
@@ -275,6 +321,58 @@ export default function CreateAd() {
         <p className="text-gray-400 text-sm mt-1">Popunite podatke o vozilu</p>
       </div>
 
+      {/* Uvoz sa AutoDilera */}
+      {step <= 4 && (
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-dashed border-gray-300">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div>
+              <h2 className="text-sm font-bold text-[#12142D]">Imaš oglas na AutoDileru?</h2>
+              <p className="text-xs text-gray-400 mt-0.5">
+                Nalijepi link svog oglasa i sva polja se popunjavaju automatski.
+                Fotografije se ne prenose (imaju AutoDiler watermark) — njih dodaješ sam u koraku 4.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2 mt-3">
+            <input
+              type="url"
+              value={importUrl}
+              onChange={(e) => setImportUrl(e.target.value)}
+              placeholder="https://autodiler.me/automobili/..."
+              className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]"
+            />
+            <button
+              type="button"
+              onClick={() => importUrl.trim() && importMutation.mutate()}
+              disabled={importMutation.isPending || !importUrl.trim()}
+              className="bg-[#12142D] hover:bg-[#1B2B5A] text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition disabled:opacity-50 whitespace-nowrap"
+            >
+              {importMutation.isPending ? "Uvozim..." : "Uvezi"}
+            </button>
+          </div>
+          {importMeta && (
+            <div className="mt-3 text-xs text-gray-500 space-y-1">
+              <p className="text-green-600 font-semibold">
+                ✓ Uvezeno: {importMeta.source?.make} {importMeta.source?.model}
+                {importMeta.source?.category ? ` (${importMeta.source.category})` : ""}
+              </p>
+              {importMeta.unmapped?.length > 0 && (
+                <p>
+                  Nije prepoznato, izaberi ručno:{" "}
+                  {importMeta.unmapped.map((u) => `${u.label}: ${u.value}`).join(" · ")}
+                </p>
+              )}
+              {importMeta.unmatched_equipment?.length > 0 && (
+                <p>
+                  Oprema koju nemamo u šifarniku ({importMeta.unmatched_equipment.length}):{" "}
+                  {importMeta.unmatched_equipment.join(", ")}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Steps */}
       <div className="flex items-center gap-2">
         {steps.map((s, i) => (
@@ -312,6 +410,10 @@ export default function CreateAd() {
                   value={form.category_id}
                   onChange={(e) => {
                     set("category_id", e.target.value);
+                    // Marka i model zavise od kategorije — resetuj ih
+                    set("make_id", "");
+                    set("model_id", "");
+                    setSelectedMakeId("");
                     // Reset filter polja kad se promijeni kategorija
                     set("fuel_type", "");
                     set("body_type", "");
@@ -338,8 +440,9 @@ export default function CreateAd() {
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Marka *</label>
                 <select value={form.make_id}
                   onChange={(e) => { set("make_id", e.target.value); set("model_id", ""); setSelectedMakeId(e.target.value); }}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] bg-white">
-                  <option value="">Odaberi marku</option>
+                  disabled={!form.category_id}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] bg-white disabled:opacity-50">
+                  <option value="">{form.category_id ? "Odaberi marku" : "Prvo odaberi kategoriju"}</option>
                   {makes?.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
                 </select>
               </div>
@@ -581,7 +684,7 @@ export default function CreateAd() {
             <p className="text-sm text-gray-400">Opciono — odaberite opremu koja se nalazi u vozilu.</p>
             {Object.entries(equipmentByCategory).map(([cat, items]) => (
               <div key={cat}>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{cat}</p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{equipmentCategoryLabels[cat] ?? cat}</p>
                 <div className="flex flex-wrap gap-2">
                   {items.map((eq) => (
                     <button key={eq.id} type="button" onClick={() => toggleEquipment(eq.id)}
@@ -608,7 +711,7 @@ export default function CreateAd() {
             <h2 className="text-lg font-bold text-[#12142D] mb-4">Slike i opis</h2>
 
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">Slike (max 10)</label>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">Slike (max {maxImages})</label>
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer hover:border-[#FF0026] transition bg-gray-50">
                 <svg className="w-8 h-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />

@@ -19,13 +19,20 @@ use Illuminate\Support\Facades\Storage;
 class AdController extends Controller
 {
     // ==========================================
-    // INDEX — lista oglasa sa filterima
-    // GET /api/ads?make_id=1&city_id=2&price_to=15000
+    // ZAJEDNIČKI FILTERI — koristi ih i index i count
+    // da lista i brojač uvijek daju isti rezultat
     // ==========================================
-    public function index(Request $request): JsonResponse
+    private function applyFilters($query, Request $request): void
     {
-        $query = Ad::with(['city', 'make', 'vehicleModel', 'primaryImage', 'user'])
-            ->where('status', 'active');
+        // Tab sa početne strane → root kategorija (+ njene potkategorije)
+        $tabSlugs = ['auto' => 'automobili', 'moto' => 'motocikli', 'nautika' => 'nautika', 'truck' => 'transport'];
+        if ($request->filled('tab') && isset($tabSlugs[$request->tab])) {
+            $rootId = DB::table('vehicle_categories')->where('slug', $tabSlugs[$request->tab])->value('id');
+            if ($rootId) {
+                $catIds = DB::table('vehicle_categories')->where('parent_id', $rootId)->pluck('id')->push($rootId);
+                $query->whereIn('category_id', $catIds);
+            }
+        }
 
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
@@ -37,6 +44,46 @@ class AdController extends Controller
 
         if ($request->filled('model_id')) {
             $query->where('model_id', $request->model_id);
+        }
+
+        // Više marki odjednom (Auto tab na početnoj šalje CSV id-jeva)
+        if ($request->filled('make_ids')) {
+            $makeIds = array_filter(array_map('intval', explode(',', $request->make_ids)));
+            if (count($makeIds) > 0) {
+                $query->whereIn('make_id', $makeIds);
+            }
+        }
+
+        // Više modela — odabrana serija (root model) uključuje i svoje podmodele
+        if ($request->filled('model_ids')) {
+            $modelIds = array_filter(array_map('intval', explode(',', $request->model_ids)));
+            if (count($modelIds) > 0) {
+                $childIds = DB::table('vehicle_models')->whereIn('parent_id', $modelIds)->pluck('id')->all();
+                $query->whereIn('model_id', array_values(array_unique(array_merge($modelIds, $childIds))));
+            }
+        }
+
+        // Marke po imenu — moto/transport/nautika tabovi šalju imena, ne id-jeve
+        $makeNames = [];
+        foreach (['moto_makes', 'truck_makes'] as $namesParam) {
+            if ($request->filled($namesParam)) {
+                $makeNames = array_merge($makeNames, array_filter(array_map('trim', explode(',', $request->input($namesParam)))));
+            }
+        }
+        if ($request->filled('make')) {
+            $makeNames[] = trim($request->make);
+        }
+        if (count($makeNames) > 0) {
+            $query->whereHas('make', fn($q) => $q->whereIn('name', $makeNames));
+        }
+
+        // Slobodan unos modela (nautika/transport) — traži u nazivu modela ili naslovu
+        if ($request->filled('model')) {
+            $model = $request->model;
+            $query->where(function ($q) use ($model) {
+                $q->where('title', 'like', '%' . $model . '%')
+                    ->orWhereHas('vehicleModel', fn($qq) => $qq->where('name', 'like', '%' . $model . '%'));
+            });
         }
 
         if ($request->filled('city_id')) {
@@ -63,28 +110,14 @@ class AdController extends Controller
             $query->where('mileage', '<=', $request->mileage_to);
         }
 
-        if ($request->filled('fuel_type')) {
-            $query->where('fuel_type', $request->fuel_type);
-        }
-
-        if ($request->filled('transmission')) {
-            $query->where('transmission', $request->transmission);
-        }
-
-        if ($request->filled('body_type')) {
-            $query->where('body_type', $request->body_type);
-        }
-
-        if ($request->filled('condition')) {
-            $query->where('condition', $request->condition);
-        }
-
-        if ($request->filled('damage')) {
-            $query->where('damage', $request->damage);
-        }
-
-        if ($request->filled('drive_type')) {
-            $query->where('drive_type', $request->drive_type);
+        // Ovi filteri primaju i CSV listu (npr. fuel_type=benzin,dizel) — oglas odgovara BILO KOJOJ vrijednosti
+        foreach (['fuel_type', 'transmission', 'body_type', 'condition', 'damage', 'drive_type'] as $multiField) {
+            if ($request->filled($multiField)) {
+                $values = array_filter(array_map('trim', explode(',', $request->input($multiField))));
+                if (count($values) > 0) {
+                    $query->whereIn($multiField, $values);
+                }
+            }
         }
 
         if ($request->filled('power_kw_from')) {
@@ -124,6 +157,18 @@ class AdController extends Controller
         if ($request->filled('user_id')) {
             $query->where('user_id', $request->user_id);
         }
+    }
+
+    // ==========================================
+    // INDEX — lista oglasa sa filterima
+    // GET /api/ads?make_id=1&city_id=2&price_to=15000
+    // ==========================================
+    public function index(Request $request): JsonResponse
+    {
+        $query = Ad::with(['city', 'make', 'vehicleModel', 'primaryImage', 'user'])
+            ->where('status', 'active');
+
+        $this->applyFilters($query, $request);
 
         // SORTIRANJE
         $sortBy  = $request->get('sort', 'created_at');
@@ -132,7 +177,8 @@ class AdController extends Controller
         $allowedSorts = ['price', 'year', 'mileage', 'created_at', 'views_count'];
 
         if (in_array($sortBy, $allowedSorts)) {
-            $query->orderBy('featured', 'desc')
+            // Istaknuti (sa važećom promocijom) uvijek na vrhu, zatim odabrano sortiranje
+            $query->orderByRaw('(featured = 1 AND (featured_until IS NULL OR featured_until > NOW())) DESC')
                 ->orderBy($sortBy, $sortDir);
         }
 
@@ -159,41 +205,7 @@ class AdController extends Controller
     {
         $query = Ad::where('status', 'active');
 
-        if ($request->filled('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
-
-        if ($request->filled('make_id')) {
-            $query->where('make_id', $request->make_id);
-        }
-
-        if ($request->filled('model_id')) {
-            $query->where('model_id', $request->model_id);
-        }
-
-        if ($request->filled('city_id')) {
-            $query->where('city_id', $request->city_id);
-        }
-
-        if ($request->filled('year_from')) {
-            $query->where('year', '>=', $request->year_from);
-        }
-
-        if ($request->filled('year_to')) {
-            $query->where('year', '<=', $request->year_to);
-        }
-
-        if ($request->filled('price_from')) {
-            $query->where('price', '>=', $request->price_from);
-        }
-
-        if ($request->filled('price_to')) {
-            $query->where('price', '<=', $request->price_to);
-        }
-
-        if ($request->filled('mileage_to')) {
-            $query->where('mileage', '<=', $request->mileage_to);
-        }
+        $this->applyFilters($query, $request);
 
         return response()->json(['count' => $query->count()]);
     }
@@ -262,11 +274,12 @@ class AdController extends Controller
         $activePackage = UserPackage::with('package')
             ->where('user_id', $user->id)
             ->whereHas('package', fn($q) => $q->where('type', 'account'))
+            ->whereNotNull('paid_at')
             ->where('expires_at', '>', now())
             ->orderByDesc('created_at')
             ->first();
 
-        $maxAds = $activePackage?->package?->max_active_ads ?? 3; // default FREE = 3
+        $maxAds = $activePackage?->package?->max_active_ads ?? $this->freePackageLimit('max_active_ads', 3);
 
         $currentAds = Ad::where('user_id', $user->id)
             ->whereIn('status', ['active', 'pending'])
@@ -354,7 +367,8 @@ class AdController extends Controller
             ]));
 
             if ($request->has('equipment')) {
-                $ad->equipment()->sync($request->equipment);
+                // null = korisnik uklonio svu opremu
+                $ad->equipment()->sync($request->equipment ?? []);
             }
 
             if ($request->filled('delete_images')) {
@@ -634,8 +648,16 @@ class AdController extends Controller
         ]);
     }
 
+    // GET /api/image-limit — maksimalan broj slika po oglasu za ulogovanog korisnika
+    public function imageLimit(): JsonResponse
+    {
+        return response()->json([
+            'max_images' => $this->maxImagesForUser(auth()->id()),
+        ]);
+    }
+
     // Maksimalan broj slika po oglasu za korisnika:
-    // aktivan GALERIJA paket > account paket max_images > default 10
+    // najveći od aktivnih GALERIJA/account paketa; bez kupljenog paketa važi FREE limit
     private function maxImagesForUser(int $userId): int
     {
         $galleryMax = UserPackage::with('package')
@@ -654,7 +676,23 @@ class AdController extends Controller
             ->get()
             ->max(fn($up) => $up->package->max_images);
 
-        return max($galleryMax ?? 0, $accountMax ?? 0, 10);
+        $paidMax = max($galleryMax ?? 0, $accountMax ?? 0);
+        if ($paidMax > 0) {
+            return $paidMax;
+        }
+
+        return $this->freePackageLimit('max_images', 5);
+    }
+
+    // Limit iz FREE account paketa (price = 0) u bazi, sa fallback vrijednošću
+    private function freePackageLimit(string $column, int $fallback): int
+    {
+        $value = \App\Models\Package::where('type', 'account')
+            ->where('price', 0)
+            ->where('is_active', true)
+            ->value($column);
+
+        return (int) ($value ?? $fallback);
     }
 
     // Najveći limit obnavljanja (broj oglasa u 48h) iz aktivnih REFREŠ paketa; 0 = nema paketa

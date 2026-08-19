@@ -68,7 +68,10 @@ public function modelsMulti(Request $request)
 
     $models = VehicleModel::whereIn('make_id', $ids)
         ->whereNull('parent_id')
-        ->with(['children' => fn($q) => $q->where('is_active', true)->orderBy('name')])
+        ->with([
+            'make:id,name',
+            'children' => fn($q) => $q->where('is_active', true)->orderBy('name'),
+        ])
         ->where('is_active', true)
         ->orderBy('name')
         ->get();

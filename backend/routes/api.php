@@ -92,6 +92,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile/logo',   [ProfileController::class, 'uploadLogo']);
     Route::get('/profile/stats',   [ProfileController::class, 'stats']);
 
+    Route::post('/ads/import-url',     [\App\Http\Controllers\Api\AdImportController::class, 'parse']);
     Route::post('/ads',                [AdController::class, 'store']);
     Route::put('/ads/{ad}',            [AdController::class, 'update']);
     Route::delete('/ads/{id}',         [AdController::class, 'destroy']);
@@ -103,6 +104,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/ads/{ad}/resume',       [AdController::class, 'resume']);
     Route::post('/ads/{ad}/auto-refresh', [AdController::class, 'toggleAutoRefresh']);
     Route::get('/refresh-credits',        [AdController::class, 'refreshCredits']);
+    Route::get('/image-limit',            [AdController::class, 'imageLimit']);
 
     Route::get('/favorites',              [FavoriteController::class, 'index']);
     Route::post('/favorites/{adId}',      [FavoriteController::class, 'toggle']);

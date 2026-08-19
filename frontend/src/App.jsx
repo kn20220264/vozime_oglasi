@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 import { useEffect } from "react";
@@ -32,6 +32,8 @@ import DealerRegister from "./pages/DealerRegister";
 import Dealers from "./pages/Dealers";
 import Compare from "./pages/Compare";
 import QA from "./pages/QA";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Terms from "./pages/Terms";
 import PopupBanner from "./components/PopupBanner";
 
 const queryClient = new QueryClient({
@@ -59,6 +61,18 @@ function AdminRoute({ children }) {
   return children;
 }
 
+function Chrome() {
+  const { pathname } = useLocation();
+  // Dashboard ima svoj topbar, pa globalni navbar i popup sakrivamo na /dashboard/*
+  if (pathname.startsWith("/dashboard")) return null;
+  return (
+    <>
+      <Navbar />
+      <PopupBanner />
+    </>
+  );
+}
+
 function AuthInit() {
   const { token, setUser, logout } = useAuthStore();
 
@@ -84,8 +98,7 @@ export default function App() {
       <BrowserRouter>
         <AuthInit />
         <div className="min-h-screen flex flex-col">
-          <Navbar />
-          <PopupBanner />
+          <Chrome />
           <main className="flex-1">
             <Routes>
               {/* Javne rute */}
@@ -100,6 +113,8 @@ export default function App() {
               <Route path="/autoplaci" element={<Dealers />} />
               <Route path="/compare" element={<Compare />} />
               <Route path="/pitanja" element={<QA />} />
+              <Route path="/privatnost" element={<PrivacyPolicy />} />
+              <Route path="/uslovi" element={<Terms />} />
 
               {/* Google OAuth callback */}
               <Route path="/auth/google/callback" element={<GoogleCallback />} />

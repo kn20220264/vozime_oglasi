@@ -17,6 +17,8 @@ use App\Models\Equipment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\UserProfile;
+use App\Notifications\AdStatusChanged;
+use App\Notifications\PaymentStatusChanged;
 
 class AdminController extends Controller
 {
@@ -103,7 +105,13 @@ class AdminController extends Controller
         ]);
 
         $ad = Ad::findOrFail($id);
+        $oldStatus = $ad->status;
         $ad->update(['status' => $request->status]);
+
+        // Obavijesti vlasnika kada mu admin odobri ili odbije oglas
+        if ($oldStatus !== $request->status && in_array($request->status, ['active', 'rejected'])) {
+            $ad->user?->notify(new AdStatusChanged($ad, $request->status));
+        }
 
         return response()->json(['message' => 'Status oglasa ažuriran.', 'ad' => $ad]);
     }
@@ -476,6 +484,8 @@ class AdminController extends Controller
             \App\Models\UserProfile::where('user_id', $payment->user_id)
                 ->update(['premium_addon' => $addon]);
 
+            User::find($payment->user_id)?->notify(new PaymentStatusChanged($payment, 'completed', $addon));
+
             return response()->json(['message' => 'Dealer addon aktiviran: ' . $addon]);
         }
 
@@ -495,19 +505,25 @@ class AdminController extends Controller
             ]);
         }
 
+        User::find($payment->user_id)?->notify(new PaymentStatusChanged($payment, 'completed', $package->name));
+
         return response()->json(['message' => 'Uplata potvrđena, paket aktiviran.']);
     }
     public function rejectPayment(Request $request, int $id)
     {
         $this->requireAdmin($request);
 
-        $payment = Payment::findOrFail($id);
+        $payment = Payment::with('userPackage.package')->findOrFail($id);
         $payment->update([
             'status'       => 'failed',
             'admin_note'   => $request->note,
             'confirmed_by' => $request->user()->id,
             'confirmed_at' => now(),
         ]);
+
+        User::find($payment->user_id)?->notify(
+            new PaymentStatusChanged($payment, 'failed', $payment->userPackage?->package?->name)
+        );
 
         return response()->json(['message' => 'Plaćanje odbijeno.']);
     }

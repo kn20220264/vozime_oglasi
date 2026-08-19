@@ -3,9 +3,18 @@
 namespace App\Http\Requests\Ad;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateAdRequest extends FormRequest
 {
+    // Vrijednost mora postojati u filter_options — isti izvor iz kog se pune combo boxovi
+    private function filterOption(string $type): \Illuminate\Validation\Rules\Exists
+    {
+        return Rule::exists('filter_options', 'value')
+            ->where('filter_type', $type)
+            ->where('is_active', true);
+    }
+
     public function authorize(): bool
     {
         // Nakon što ruta postane {ad}, route model binding daje objekat
@@ -35,18 +44,18 @@ class UpdateAdRequest extends FormRequest
 
             'year'             => ['sometimes', 'integer', 'min:1900', 'max:' . date('Y')],
             'mileage'          => ['sometimes', 'integer', 'min:0'],
-            'fuel_type'        => ['sometimes', 'in:benzin,dizel,hibrid,elektro,plin,benzin+plin'],
-            'transmission'     => ['sometimes', 'in:manuelni,automatik,poluautomatik'],
-            'body_type'        => ['sometimes', 'in:sedan,karavan,suv,hatchback,coupe,kabrio,van,pickup'],
+            'fuel_type'        => ['sometimes', $this->filterOption('fuel_type')],
+            'transmission'     => ['sometimes', $this->filterOption('transmission')],
+            'body_type'        => ['sometimes', $this->filterOption('body_type')],
             'power_kw'         => ['sometimes', 'integer', 'min:1'],
             'engine_cc'        => ['sometimes', 'nullable', 'integer', 'min:0'],
-            'drive_type'       => ['sometimes', 'in:prednji,zadnji,4x4'],
+            'drive_type'       => ['sometimes', $this->filterOption('drive_type')],
             'doors'            => ['sometimes', 'integer', 'in:2,3,4,5'],
             'seats'            => ['sometimes', 'integer', 'min:1', 'max:9'],
 
-            'condition'        => ['sometimes', 'in:novo,polovnjak'],
-            'damage'           => ['sometimes', 'in:neosteceno,osteceno,nije_vozno'],
-            'emission_class'   => ['sometimes', 'nullable', 'in:euro3,euro4,euro5,euro6'],
+            'condition'        => ['sometimes', $this->filterOption('condition')],
+            'damage'           => ['sometimes', $this->filterOption('damage')],
+            'emission_class'   => ['sometimes', 'nullable', $this->filterOption('emission_class')],
             'color_exterior'   => ['sometimes', 'string', 'max:50'],
             'color_interior'   => ['sometimes', 'nullable', 'string', 'max:50'],
 
@@ -62,7 +71,7 @@ class UpdateAdRequest extends FormRequest
             'vehicle_history.*' => ['string', 'in:prvi_vlasnik,kupljen_nov_cg,servisna_knjiga,restauriran,oldtimer,u_garanciji,garaziran,prilagodjen_invalidima,tuning'],
             'trailer_coupling'  => ['sometimes', 'nullable', 'in:Fiksna,Odvojna,Okretna'],
 
-            'equipment'        => ['sometimes', 'array'],
+            'equipment'        => ['sometimes', 'nullable', 'array'],
             'equipment.*'      => ['integer', 'exists:equipment,id'],
 
             // Slike pri izmjeni — dodavanje novih
@@ -87,13 +96,14 @@ class UpdateAdRequest extends FormRequest
             'price.min'              => 'Cijena mora biti veća od 0.',
             'year.min'               => 'Godište ne može biti prije 1900.',
             'year.max'               => 'Godište ne može biti u budućnosti.',
-            'fuel_type.in'           => 'Odabrana vrsta goriva nije ispravna.',
-            'transmission.in'        => 'Odabrana vrsta mjenjača nije ispravna.',
-            'body_type.in'           => 'Odabrani tip karoserije nije ispravan.',
-            'drive_type.in'          => 'Odabrani pogon nije ispravan.',
+            'fuel_type.exists'       => 'Odabrana vrsta goriva nije ispravna.',
+            'transmission.exists'    => 'Odabrana vrsta mjenjača nije ispravna.',
+            'body_type.exists'       => 'Odabrani tip karoserije nije ispravan.',
+            'drive_type.exists'      => 'Odabrani pogon nije ispravan.',
             'doors.in'               => 'Broj vrata mora biti 2, 3, 4 ili 5.',
-            'condition.in'           => 'Stanje mora biti "novo" ili "polovnjak".',
-            'damage.in'              => 'Odabrana vrijednost oštećenja nije ispravna.',
+            'condition.exists'       => 'Odabrano stanje vozila nije ispravno.',
+            'damage.exists'          => 'Odabrana vrijednost oštećenja nije ispravna.',
+            'emission_class.exists'  => 'Odabrana emisiona klasa nije ispravna.',
             'vin.size'               => 'VIN broj mora imati tačno 17 karaktera.',
             'registered_until.after' => 'Datum registracije mora biti u budućnosti.',
             'images.*.image'         => 'Svaki fajl mora biti slika.',

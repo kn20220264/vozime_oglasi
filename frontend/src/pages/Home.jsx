@@ -10,6 +10,78 @@ import BorderGlow from "../components/BorderGlow";
 import SplitText from "../components/SplitText";
 import AISearchBar from "../components/AISearchBar";
 import RecentlyViewed from "../components/RecentlyViewed";
+import LogoLoop from "../components/LogoLoop";
+import { useMakesByCategory } from "../hooks/useMakes";
+
+// ─── Kartica autoplaca u rotirajućoj listi (PREMIUM 2) ────────
+function DealerLoopCard({ dealer, onClick }) {
+  const [logoError, setLogoError] = useState(false);
+  const showLogo = dealer.logo && !logoError;
+
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-3.5 bg-white border border-gray-100 hover:border-gray-200 hover:shadow-lg rounded-2xl px-5 py-4 transition-all duration-200 group"
+      style={{ minWidth: 280, fontSize: "1rem", lineHeight: 1.45 }}
+    >
+      {showLogo ? (
+        <img
+          src={dealer.logo}
+          alt={dealer.company_name}
+          className="rounded-full object-cover flex-shrink-0 ring-1 ring-gray-100 bg-gray-50"
+          style={{ height: 46, width: 46 }}
+          onError={() => setLogoError(true)}
+        />
+      ) : (
+        <div
+          className="rounded-full bg-[#12142D] flex items-center justify-center flex-shrink-0"
+          style={{ height: 46, width: 46 }}
+        >
+          <span className="text-white font-bold text-base">
+            {dealer.company_name?.substring(0, 1)?.toUpperCase()}
+          </span>
+        </div>
+      )}
+
+      <div className="text-left min-w-0">
+        <div className="flex items-center gap-2">
+          <p
+            className="text-[15px] font-bold text-[#12142D] group-hover:text-[#1B2B5A] truncate"
+            style={{ fontFamily: "'Gomme Sans', sans-serif" }}
+          >
+            {dealer.company_name}
+          </p>
+          <span className="flex-shrink-0 text-[9px] font-bold uppercase tracking-widest text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
+            Pro
+          </span>
+        </div>
+        {(dealer.address || dealer.city) && (
+          <p className="text-xs text-gray-400 truncate mt-0.5">
+            {[dealer.address, dealer.city].filter(Boolean).join(", ")}
+          </p>
+        )}
+        {dealer.phone && (
+          <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-0.5">
+            <svg
+              className="w-3 h-3 text-gray-400 flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+              />
+            </svg>
+            {dealer.phone}
+          </p>
+        )}
+      </div>
+    </button>
+  );
+}
 
 // ─── Portal dropdown helper ───────────────────────────────────
 function PortalDropdown({ anchorRef, open, onClose, children }) {
@@ -839,7 +911,7 @@ function ModelHierarchySelect({ series, selectedIds, onChange }) {
     if (!byMake[makeName]) byMake[makeName] = [];
     byMake[makeName].push(s);
   });
-  const makeNames = Object.keys(byMake);
+  const makeNames = Object.keys(byMake).sort((a, b) => a.localeCompare(b));
 
   return (
     <div className="relative">
@@ -1238,11 +1310,7 @@ export default function Home() {
   });
 
   // ─── API ─────────────────────────────────────────────────
-  const { data: makesData } = useQuery({
-    queryKey: ["makes"],
-    queryFn: () => axios.get("/makes").then((r) => r.data),
-  });
-  const makes = makesData?.data ?? [];
+  const makes = useMakesByCategory("automobili");
 
   const { data: multiModelsData } = useQuery({
     queryKey: ["models-multi", autoMakeIds],
@@ -1264,9 +1332,9 @@ export default function Home() {
 
   const { data: citiesData } = useQuery({
     queryKey: ["cities"],
-    queryFn: () => axios.get("/cities").then((r) => r.data),
+    queryFn: () => axios.get("/cities").then((r) => r.data.data ?? r.data),
   });
-  const cities = citiesData?.data ?? [];
+  const cities = Array.isArray(citiesData) ? citiesData : [];
 
   // Count za dugme pretrage
   const activeFilters =
@@ -1294,6 +1362,7 @@ export default function Home() {
     queryKey: ["ads-count", activeTab, activeFilters],
     queryFn: () => {
       const params = new URLSearchParams();
+      params.set("tab", activeTab);
       Object.entries(activeFilters).forEach(([k, v]) => v && params.set(k, v));
       return axios.get(`/ads/count?${params.toString()}`).then((r) => r.data);
     },
@@ -2128,129 +2197,40 @@ export default function Home() {
             </div>
           </div>
 
-          {/* ══ DILERI ══ */}
-          {dealers.length > 0 &&
-            (() => {
-              const CARD_W = 252;
-              const shouldAnimate = dealers.length > 3;
-              const copies = shouldAnimate
-                ? Math.ceil(1800 / CARD_W / dealers.length) + 2
-                : 1;
-              const items = Array.from({ length: copies }).flatMap((_, ci) =>
-                dealers.map((d, di) => ({ ...d, _key: `${ci}-${di}` })),
-              );
-              const halfWidth =
-                dealers.length * CARD_W * Math.floor(copies / 2);
-              const duration =
-                dealers.length <= 4 ? 30 : dealers.length <= 6 ? 45 : 60;
-
-              return (
-                <>
-                  <style>{`
-  @keyframes dealerLoop {
-    0%   { transform: translateX(0px); }
-    100% { transform: translateX(-${halfWidth}px); }
-  }
-      `}</style>
-                  <section className="py-10">
-                    <div className="max-w-6xl mx-auto px-4 mb-6">
-                      <h2
-                        className="text-2xl font-semibold text-[#12142D]"
-                        style={{ fontFamily: "'Gomme Sans', sans-serif" }}
-                      >
-                        Autoplacevi i dileri
-                      </h2>
-                    </div>
-                    <div className="max-w-6xl mx-auto px-4">
-                      <div className="bg-white border border-gray-200 rounded-2xl py-6 overflow-hidden">
-                        <div className="relative w-full overflow-hidden">
-                          <div
-                            className="absolute left-0 top-0 h-full w-20 z-10 pointer-events-none"
-                            style={{
-                              background:
-                                "linear-gradient(to right, white, transparent)",
-                            }}
-                          />
-                          <div
-                            className="absolute right-0 top-0 h-full w-20 z-10 pointer-events-none"
-                            style={{
-                              background:
-                                "linear-gradient(to left, white, transparent)",
-                            }}
-                          />
-
-                          <div
-                            className="flex px-4"
-                            style={{
-                              gap: "16px",
-                              width: "max-content",
-                              animation: shouldAnimate
-                                ? `dealerLoop ${duration}s linear infinite`
-                                : "none",
-                            }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.animationPlayState =
-                                "paused")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.animationPlayState =
-                                "running")
-                            }
-                          >
-                            {items.map((dealer) => (
-                              <button
-                                key={dealer._key}
-                                onClick={() => navigate(`/users/${dealer.id}`)}
-                                className="flex-shrink-0 flex items-center gap-3 bg-white border border-gray-200 hover:border-[#1B2B5A] hover:shadow-md rounded-2xl px-4 py-3 transition-all group"
-                                style={{ minWidth: 220 }}
-                              >
-                                {dealer.logo ? (
-                                  <img
-                                    src={dealer.logo}
-                                    alt={dealer.company_name}
-                                    className="h-11 w-11 rounded-full object-contain flex-shrink-0 border border-gray-100"
-                                    onError={(e) => {
-                                      e.target.style.display = "none";
-                                    }}
-                                  />
-                                ) : (
-                                  <div className="h-11 w-11 rounded-full bg-[#12142D] flex items-center justify-center flex-shrink-0">
-                                    <span className="text-white font-bold text-base">
-                                      {dealer.company_name?.substring(0, 1)}
-                                    </span>
-                                  </div>
-                                )}
-                                <div className="text-left">
-                                  <p
-                                    className="text-sm font-semibold text-[#12142D] group-hover:text-[#1B2B5A] line-clamp-1"
-                                    style={{
-                                      fontFamily: "'Gomme Sans', sans-serif",
-                                    }}
-                                  >
-                                    {dealer.company_name}
-                                  </p>
-                                  {dealer.city && (
-                                    <p className="text-xs text-gray-400">
-                                      {dealer.city}
-                                    </p>
-                                  )}
-                                  <p className="text-xs text-gray-400">
-                                    {dealer.ads_count} oglasa
-                                  </p>
-                                </div>
-                                <span className="ml-auto flex-shrink-0 bg-[#FF0026] text-white text-[10px] font-black px-1.5 py-0.5 rounded">
-                                  PRO
-                                </span>
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </section>
-                </>
-              );
-            })()}
+          {/* ══ DILERI — rotirajuća lista PREMIUM 2 autoplaceva ══ */}
+          {dealers.length > 0 && (
+            <section className="py-10">
+              <div className="max-w-6xl mx-auto px-4 mb-6">
+                <h2
+                  className="text-2xl font-semibold text-[#12142D]"
+                  style={{ fontFamily: "'Gomme Sans', sans-serif" }}
+                >
+                  Autoplacevi i dileri
+                </h2>
+              </div>
+              <div className="max-w-6xl mx-auto px-4">
+                <div className="bg-white border border-gray-200 rounded-2xl py-6 overflow-hidden">
+                  <LogoLoop
+                    logos={dealers.map((d) => ({ dealer: d }))}
+                    speed={40}
+                    direction="left"
+                    logoHeight={72}
+                    gap={16}
+                    hoverSpeed={0}
+                    fadeOut
+                    fadeOutColor="#ffffff"
+                    ariaLabel="Premium autoplacevi"
+                    renderItem={({ dealer }) => (
+                      <DealerLoopCard
+                        dealer={dealer}
+                        onClick={() => navigate(`/users/${dealer.id}`)}
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* ══ NAJNOVIJI OGLASI ══ */}
           <div className="max-w-6xl mx-auto px-4 py-10">
@@ -2418,12 +2398,18 @@ export default function Home() {
                 <h4 className="text-white font-bold text-sm mb-4">Pravno</h4>
                 <ul className="space-y-3 text-sm text-[#6674A3]">
                   <li>
-                    <button className="hover:text-white transition">
+                    <button
+                      onClick={() => navigate("/uslovi")}
+                      className="hover:text-white transition"
+                    >
                       Uslovi korišćenja
                     </button>
                   </li>
                   <li>
-                    <button className="hover:text-white transition">
+                    <button
+                      onClick={() => navigate("/privatnost")}
+                      className="hover:text-white transition"
+                    >
                       Privatnost
                     </button>
                   </li>

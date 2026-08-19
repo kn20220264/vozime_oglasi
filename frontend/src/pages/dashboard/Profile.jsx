@@ -30,9 +30,9 @@ export default function Profile() {
 
   const { data: citiesData } = useQuery({
     queryKey: ["cities"],
-    queryFn: () => api.get("/cities").then((r) => r.data),
+    queryFn: () => api.get("/cities").then((r) => r.data.data ?? r.data),
   });
-  const cities = citiesData?.data ?? [];
+  const cities = Array.isArray(citiesData) ? citiesData : [];
 
   const isDealer = profileData?.user?.role === "dealer";
 

@@ -4,8 +4,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 import axios from '../api/axios';
 import useAuthStore from '../store/authStore';
+import { useMakesByCategory } from '../hooks/useMakes';
 import AdCard from '../components/AdCard';
 import SidebarBanner from '../components/SidebarBanner';
+import AISearchBar from '../components/AISearchBar';
 
 const FUEL_TYPES    = ['benzin', 'dizel', 'hibrid', 'elektro', 'plin', 'benzin+plin'];
 const TRANSMISSIONS = ['manuelni', 'automatik', 'poluautomatik'];
@@ -17,6 +19,15 @@ const DAMAGE_TYPES  = ['neosteceno', 'osteceno', 'nije_vozno'];
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 35 }, (_, i) => currentYear - i);
 
+// Filteri koji podržavaju višestruki izbor — vrijednosti se čuvaju kao CSV (npr. "benzin,dizel")
+const MULTI_FILTER_KEYS = ['fuel_type', 'transmission', 'body_type', 'drive_type', 'condition', 'damage'];
+
+const csvToArr = (csv) => (csv ? String(csv).split(',').filter(Boolean) : []);
+const toggleCsv = (csv, val) => {
+    const arr = csvToArr(csv);
+    return (arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val]).join(',');
+};
+
 const sortMap = {
     'latest':     { sort: 'created_at', dir: 'desc' },
     'price_asc':  { sort: 'price',      dir: 'asc'  },
@@ -26,32 +37,58 @@ const sortMap = {
     'views':      { sort: 'views_count',dir: 'desc' },
 };
 
+const filtersFromParams = (sp) => {
+    // Početna strana šalje više marki kao CSV (make_ids) — ako je samo jedna,
+    // prikaži je i u sidebar dropdown-u kao običan make_id
+    let makeId  = sp.get('make_id')  || '';
+    let makeIds = sp.get('make_ids') || '';
+    if (!makeId && makeIds && !makeIds.includes(',')) {
+        makeId  = makeIds;
+        makeIds = '';
+    }
+
+    return {
+    q:            sp.get('q')            || '',
+    // Parametri sa početne strane (multi-select i ostali tabovi)
+    tab:          sp.get('tab')          || '',
+    make_ids:     makeIds,
+    model_ids:    sp.get('model_ids')    || '',
+    moto_makes:   sp.get('moto_makes')   || '',
+    truck_makes:  sp.get('truck_makes')  || '',
+    make:         sp.get('make')         || '',
+    model:        sp.get('model')        || '',
+    make_id:      makeId,
+    model_id:     sp.get('model_id')     || '',
+    price_from:   sp.get('price_from')   || '',
+    price_to:     sp.get('price_to')     || '',
+    year_from:    sp.get('year_from')    || '',
+    year_to:      sp.get('year_to')      || '',
+    mileage_to:   sp.get('mileage_to')   || '',
+    fuel_type:    sp.get('fuel_type')    || '',
+    transmission: sp.get('transmission') || '',
+    body_type:    sp.get('body_type')    || '',
+    drive_type:   sp.get('drive_type')   || '',
+    condition:    sp.get('condition')    || '',
+    damage:       sp.get('damage')       || '',
+    city_id:      sp.get('city_id')      || '',
+    power_kw_from:sp.get('power_kw_from')|| '',
+    power_kw_to:  sp.get('power_kw_to')  || '',
+    vehicle_history: sp.get('vehicle_history') || '',
+    trailer_coupling: sp.get('trailer_coupling') || '',
+    sort:         sp.get('sort')         || 'latest',
+    page:         Number(sp.get('page')) || 1,
+    };
+};
+
 export default function Search() {
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const [filters, setFilters] = useState({
-        q:            searchParams.get('q')            || '',
-        make_id:      searchParams.get('make_id')      || '',
-        model_id:     searchParams.get('model_id')     || '',
-        price_from:   searchParams.get('price_from')   || '',
-        price_to:     searchParams.get('price_to')     || '',
-        year_from:    searchParams.get('year_from')    || '',
-        year_to:      searchParams.get('year_to')      || '',
-        mileage_to:   searchParams.get('mileage_to')   || '',
-        fuel_type:    searchParams.get('fuel_type')    || '',
-        transmission: searchParams.get('transmission') || '',
-        body_type:    searchParams.get('body_type')    || '',
-        drive_type:   searchParams.get('drive_type')   || '',
-        condition:    searchParams.get('condition')    || '',
-        damage:       searchParams.get('damage')       || '',
-        city_id:      searchParams.get('city_id')      || '',
-        power_kw_from:searchParams.get('power_kw_from')|| '',
-        power_kw_to:  searchParams.get('power_kw_to')  || '',
-        vehicle_history: searchParams.get('vehicle_history') || '',
-        trailer_coupling: searchParams.get('trailer_coupling') || '',
-        sort:         searchParams.get('sort')         || 'latest',
-        page:         Number(searchParams.get('page')) || 1,
-    });
+    const [filters, setFilters] = useState(() => filtersFromParams(searchParams));
+
+    // AI pretraga (i druge navigacije) mijenjaju URL parametre dok je stranica već otvorena
+    useEffect(() => {
+        setFilters(filtersFromParams(searchParams));
+    }, [searchParams]);
 
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [savedDropdownOpen, setSavedDropdownOpen] = useState(false);
@@ -112,7 +149,9 @@ export default function Search() {
 
     const applysavedSearch = (saved) => {
         const base = {
-            q: '', make_id: '', model_id: '', price_from: '', price_to: '',
+            q: '', tab: '', make_ids: '', model_ids: '', moto_makes: '',
+            truck_makes: '', make: '', model: '',
+            make_id: '', model_id: '', price_from: '', price_to: '',
             year_from: '', year_to: '', mileage_to: '', fuel_type: '',
             transmission: '', body_type: '', drive_type: '', condition: '',
             damage: '', city_id: '', power_kw_from: '', power_kw_to: '',
@@ -126,11 +165,7 @@ export default function Search() {
         setSearchParams(params);
     };
 
-    const { data: makesRaw } = useQuery({
-        queryKey: ['makes'],
-        queryFn: () => axios.get('/makes').then(r => r.data.data),
-        staleTime: Infinity,
-    });
+    const makesRaw = useMakesByCategory('automobili');
 
     const { data: modelsRaw } = useQuery({
         queryKey: ['models', filters.make_id],
@@ -140,7 +175,7 @@ export default function Search() {
 
     const { data: citiesRaw } = useQuery({
         queryKey: ['cities'],
-        queryFn: () => axios.get('/cities').then(r => r.data.data),
+        queryFn: () => axios.get('/cities').then(r => r.data.data ?? r.data),
         staleTime: Infinity,
     });
 
@@ -168,8 +203,13 @@ export default function Search() {
 
     const set = (key, val) => setFilters(p => ({
         ...p, [key]: val, page: 1,
-        ...(key === 'make_id' ? { model_id: '' } : {})
+        // Ručna promjena marke/modela u sidebaru poništava multi-izbor sa početne
+        ...(key === 'make_id' ? { model_id: '', make_ids: '', model_ids: '' } : {}),
+        ...(key === 'model_id' ? { model_ids: '' } : {})
     }));
+
+    // Dodaj/ukloni jednu vrijednost u multi-select filteru (CSV)
+    const toggleMulti = (key, val) => set(key, toggleCsv(filters[key], val));
 
     const applyFilters = () => {
         const params = new URLSearchParams();
@@ -180,7 +220,9 @@ export default function Search() {
 
     const resetFilters = () => {
         setFilters({
-            q: '', make_id: '', model_id: '', price_from: '', price_to: '',
+            q: '', tab: '', make_ids: '', model_ids: '', moto_makes: '',
+            truck_makes: '', make: '', model: '',
+            make_id: '', model_id: '', price_from: '', price_to: '',
             year_from: '', year_to: '', mileage_to: '', fuel_type: '',
             transmission: '', body_type: '', drive_type: '', condition: '',
             damage: '', city_id: '', power_kw_from: '', power_kw_to: '',
@@ -190,7 +232,7 @@ export default function Search() {
     };
 
     const activeFiltersCount = Object.entries(filters)
-        .filter(([k, v]) => v && !['sort', 'page', 'q'].includes(k)).length;
+        .filter(([k, v]) => v && !['sort', 'page', 'q', 'tab'].includes(k)).length;
 
     const ads      = results?.data        || [];
     const total    = results?.meta?.total || 0;
@@ -200,19 +242,11 @@ export default function Search() {
         <div className="min-h-screen bg-gray-50">
 
             <div className="bg-[#12142D] py-4 sticky top-16 z-30">
-                <div className="max-w-6xl mx-auto px-4 flex gap-3">
-                    <input
-                        type="text"
-                        value={filters.q}
-                        onChange={e => set('q', e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && applyFilters()}
-                        placeholder="Pretraži vozila... (npr. VW Golf 2018)"
-                        className="flex-1 bg-[#1B2B5A] text-white placeholder-[#6674A3] px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]"
-                    />
-                    <button onClick={applyFilters}
-                        className="bg-[#FF0026] hover:bg-red-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition">
-                        Traži
-                    </button>
+                <div className="max-w-6xl mx-auto px-4 flex gap-3 items-start">
+                    {/* AI pretraga — opiši šta tražiš prirodnim jezikom */}
+                    <div className="flex-1 min-w-0">
+                        <AISearchBar hideMeta />
+                    </div>
 
                     {/* Sačuvane pretrage dropdown */}
                     {token && (
@@ -220,7 +254,7 @@ export default function Search() {
                             <button
                                 onClick={() => setSavedDropdownOpen(p => !p)}
                                 title="Sačuvane pretrage"
-                                className={`bg-[#1B2B5A] hover:bg-[#243570] text-white px-3 py-2.5 rounded-xl text-sm transition flex items-center gap-1.5 relative ${savedDropdownOpen ? 'ring-2 ring-[#FFEA00]' : ''}`}
+                                className={`bg-[#1B2B5A] hover:bg-[#243570] text-white px-3 h-[56px] rounded-xl text-sm transition flex items-center gap-1.5 relative ${savedDropdownOpen ? 'ring-2 ring-[#FFEA00]' : ''}`}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill={savedSearches.length > 0 ? '#FFEA00' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
@@ -278,7 +312,7 @@ export default function Search() {
 
                     <button
                         onClick={() => setSidebarOpen(true)}
-                        className="md:hidden bg-[#1B2B5A] text-white px-4 py-2.5 rounded-xl text-sm flex items-center gap-1.5 relative"
+                        className="md:hidden bg-[#1B2B5A] text-white px-4 h-[56px] rounded-xl text-sm flex items-center gap-1.5 relative"
                     >
                         Filteri
                         {activeFiltersCount > 0 && (
@@ -340,6 +374,7 @@ export default function Search() {
                         <FilterSidebar
                             filters={filters}
                             set={set}
+                            toggleMulti={toggleMulti}
                             makes={makes}
                             models={models}
                             cities={cities}
@@ -379,6 +414,7 @@ export default function Search() {
 
                     <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
                         <div>
+                            <h1 className="text-2xl font-black text-[#12142D] mb-0.5">Oglasi</h1>
                             <span className="font-black text-[#12142D] text-lg">{total.toLocaleString()}</span>
                             <span className="text-gray-500 text-sm ml-1">vozila pronađeno</span>
                             {filters.q && (
@@ -406,13 +442,23 @@ export default function Search() {
                         <div className="flex flex-wrap gap-2 mb-4">
                             {Object.entries(filters)
                                 .filter(([k, v]) => v && !['sort', 'page', 'q'].includes(k))
-                                .map(([k, v]) => (
-                                    <span key={k}
-                                        className="inline-flex items-center gap-1 bg-[#12142D] text-white text-xs px-3 py-1 rounded-full">
-                                        {v}
-                                        <button onClick={() => set(k, '')} className="ml-1 hover:text-[#FFEA00]">✕</button>
-                                    </span>
-                                ))}
+                                .flatMap(([k, v]) =>
+                                    MULTI_FILTER_KEYS.includes(k)
+                                        ? csvToArr(v).map(val => (
+                                            <span key={`${k}-${val}`}
+                                                className="inline-flex items-center gap-1 bg-[#12142D] text-white text-xs px-3 py-1 rounded-full capitalize">
+                                                {val.replace('_', ' ')}
+                                                <button onClick={() => toggleMulti(k, val)} className="ml-1 hover:text-[#FFEA00]">✕</button>
+                                            </span>
+                                        ))
+                                        : [(
+                                            <span key={k}
+                                                className="inline-flex items-center gap-1 bg-[#12142D] text-white text-xs px-3 py-1 rounded-full">
+                                                {v}
+                                                <button onClick={() => set(k, '')} className="ml-1 hover:text-[#FFEA00]">✕</button>
+                                            </span>
+                                        )]
+                                )}
                             <button onClick={resetFilters}
                                 className="text-xs text-[#FF0026] hover:underline px-2">
                                 Obriši sve
@@ -492,7 +538,7 @@ export default function Search() {
     );
 }
 
-function FilterSidebar({ filters, set, makes, models, cities, applyFilters, resetFilters, onSaveSearch }) {
+function FilterSidebar({ filters, set, toggleMulti, makes, models, cities, applyFilters, resetFilters, onSaveSearch }) {
     return (
         <div className="space-y-5">
 
@@ -546,9 +592,9 @@ function FilterSidebar({ filters, set, makes, models, cities, applyFilters, rese
                 <div className="flex flex-wrap gap-1.5">
                     {FUEL_TYPES.map(f => (
                         <button key={f}
-                            onClick={() => set('fuel_type', filters.fuel_type === f ? '' : f)}
+                            onClick={() => toggleMulti('fuel_type', f)}
                             className={`text-xs px-3 py-1.5 rounded-lg border font-medium capitalize transition
-                                ${filters.fuel_type === f
+                                ${csvToArr(filters.fuel_type).includes(f)
                                     ? 'bg-[#FF0026] border-[#FF0026] text-white'
                                     : 'border-gray-200 text-gray-600 hover:border-[#FF0026] hover:text-[#FF0026]'}`}>
                             {f}
@@ -561,9 +607,9 @@ function FilterSidebar({ filters, set, makes, models, cities, applyFilters, rese
                 <div className="flex flex-wrap gap-1.5">
                     {TRANSMISSIONS.map(t => (
                         <button key={t}
-                            onClick={() => set('transmission', filters.transmission === t ? '' : t)}
+                            onClick={() => toggleMulti('transmission', t)}
                             className={`text-xs px-3 py-1.5 rounded-lg border font-medium capitalize transition
-                                ${filters.transmission === t
+                                ${csvToArr(filters.transmission).includes(t)
                                     ? 'bg-[#12142D] border-[#12142D] text-white'
                                     : 'border-gray-200 text-gray-600 hover:border-[#12142D]'}`}>
                             {t}
@@ -576,9 +622,9 @@ function FilterSidebar({ filters, set, makes, models, cities, applyFilters, rese
                 <div className="flex flex-wrap gap-1.5">
                     {BODY_TYPES.map(b => (
                         <button key={b}
-                            onClick={() => set('body_type', filters.body_type === b ? '' : b)}
+                            onClick={() => toggleMulti('body_type', b)}
                             className={`text-xs px-3 py-1.5 rounded-lg border font-medium capitalize transition
-                                ${filters.body_type === b
+                                ${csvToArr(filters.body_type).includes(b)
                                     ? 'bg-[#1B2B5A] border-[#1B2B5A] text-white'
                                     : 'border-gray-200 text-gray-600 hover:border-[#1B2B5A]'}`}>
                             {b}
@@ -591,9 +637,9 @@ function FilterSidebar({ filters, set, makes, models, cities, applyFilters, rese
                 <div className="flex flex-wrap gap-1.5">
                     {DRIVE_TYPES.map(d => (
                         <button key={d}
-                            onClick={() => set('drive_type', filters.drive_type === d ? '' : d)}
+                            onClick={() => toggleMulti('drive_type', d)}
                             className={`text-xs px-3 py-1.5 rounded-lg border font-medium capitalize transition
-                                ${filters.drive_type === d
+                                ${csvToArr(filters.drive_type).includes(d)
                                     ? 'bg-[#12142D] border-[#12142D] text-white'
                                     : 'border-gray-200 text-gray-600 hover:border-gray-400'}`}>
                             {d}
@@ -617,9 +663,9 @@ function FilterSidebar({ filters, set, makes, models, cities, applyFilters, rese
                 <div className="flex gap-2">
                     {CONDITIONS.map(c => (
                         <button key={c}
-                            onClick={() => set('condition', filters.condition === c ? '' : c)}
+                            onClick={() => toggleMulti('condition', c)}
                             className={`flex-1 text-xs py-2 rounded-lg border font-medium capitalize transition
-                                ${filters.condition === c
+                                ${csvToArr(filters.condition).includes(c)
                                     ? 'bg-[#FF0026] border-[#FF0026] text-white'
                                     : 'border-gray-200 text-gray-600 hover:border-[#FF0026]'}`}>
                             {c}
@@ -632,9 +678,9 @@ function FilterSidebar({ filters, set, makes, models, cities, applyFilters, rese
                 <div className="flex flex-wrap gap-1.5">
                     {DAMAGE_TYPES.map(d => (
                         <button key={d}
-                            onClick={() => set('damage', filters.damage === d ? '' : d)}
+                            onClick={() => toggleMulti('damage', d)}
                             className={`text-xs px-3 py-1.5 rounded-lg border font-medium capitalize transition
-                                ${filters.damage === d
+                                ${csvToArr(filters.damage).includes(d)
                                     ? 'bg-[#12142D] border-[#12142D] text-white'
                                     : 'border-gray-200 text-gray-600 hover:border-gray-400'}`}>
                             {d.replace('_', ' ')}

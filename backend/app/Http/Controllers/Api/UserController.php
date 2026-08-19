@@ -114,6 +114,7 @@ class UserController extends Controller
                     'company_name'            => $user->profile?->company_name ?? $user->name,
                     'city'                    => $user->profile?->city?->name,
                     'city_id'                 => $user->profile?->city_id,
+                    'address'                 => $user->profile?->address,
                     'phone'                   => $user->phone,
                     'ads_count'               => $adsCount,
                     'premium_addon'           => $user->profile?->premium_addon ?? 'none',

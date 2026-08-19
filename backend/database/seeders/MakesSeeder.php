@@ -16,7 +16,7 @@ class MakesSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
         $cats = DB::table('vehicle_categories')->pluck('id', 'slug');
-        $autoId      = $cats['putnička-vozila'] ?? null;
+        $autoId      = $cats['automobili']      ?? null;
         $motoId      = $cats['motocikli']       ?? null;
         $nautikaId   = $cats['nautika']         ?? null;
         $transportId = $cats['transport']       ?? null;

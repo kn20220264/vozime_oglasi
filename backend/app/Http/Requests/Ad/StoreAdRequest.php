@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Ad;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreAdRequest extends FormRequest
 {
@@ -10,6 +11,14 @@ class StoreAdRequest extends FormRequest
     public function authorize(): bool
     {
         return auth()->check();
+    }
+
+    // Vrijednost mora postojati u filter_options — isti izvor iz kog se pune combo boxovi
+    private function filterOption(string $type): \Illuminate\Validation\Rules\Exists
+    {
+        return Rule::exists('filter_options', 'value')
+            ->where('filter_type', $type)
+            ->where('is_active', true);
     }
 
     public function rules(): array
@@ -30,19 +39,19 @@ class StoreAdRequest extends FormRequest
             // Tehnički podaci
             'year'             => ['required', 'integer', 'min:1900', 'max:' . date('Y')],
             'mileage'          => ['required', 'integer', 'min:0'],
-            'fuel_type'        => ['required', 'in:benzin,dizel,hibrid,elektro,plin,benzin+plin'],
-            'transmission'     => ['required', 'in:manuelni,automatik,poluautomatik'],
-            'body_type'        => ['required', 'in:sedan,karavan,suv,hatchback,coupe,kabrio,van,pickup'],
+            'fuel_type'        => ['required', $this->filterOption('fuel_type')],
+            'transmission'     => ['required', $this->filterOption('transmission')],
+            'body_type'        => ['required', $this->filterOption('body_type')],
             'power_kw'         => ['required', 'integer', 'min:1'],
             'engine_cc'        => ['nullable', 'integer', 'min:0'],
-            'drive_type'       => ['required', 'in:prednji,zadnji,4x4'],
+            'drive_type'       => ['required', $this->filterOption('drive_type')],
             'doors'            => ['required', 'integer', 'in:2,3,4,5'],
             'seats'            => ['required', 'integer', 'min:1', 'max:9'],
 
             // Stanje
-            'condition'        => ['required', 'in:novo,polovnjak'],
-            'damage'           => ['required', 'in:neosteceno,osteceno,nije_vozno'],
-            'emission_class'   => ['nullable', 'in:euro3,euro4,euro5,euro6'],
+            'condition'        => ['required', $this->filterOption('condition')],
+            'damage'           => ['required', $this->filterOption('damage')],
+            'emission_class'   => ['nullable', $this->filterOption('emission_class')],
             'color_exterior'   => ['required', 'string', 'max:50'],
             'color_interior'   => ['nullable', 'string', 'max:50'],
 
@@ -93,21 +102,22 @@ class StoreAdRequest extends FormRequest
             'year.max'               => 'Godište ne može biti u budućnosti.',
             'mileage.required'       => 'Kilometraža je obavezna.',
             'fuel_type.required'     => 'Vrsta goriva je obavezna.',
-            'fuel_type.in'           => 'Odabrana vrsta goriva nije ispravna.',
+            'fuel_type.exists'       => 'Odabrana vrsta goriva nije ispravna.',
             'transmission.required'  => 'Vrsta mjenjača je obavezna.',
-            'transmission.in'        => 'Odabrana vrsta mjenjača nije ispravna.',
+            'transmission.exists'    => 'Odabrana vrsta mjenjača nije ispravna.',
             'body_type.required'     => 'Tip karoserije je obavezan.',
-            'body_type.in'           => 'Odabrani tip karoserije nije ispravan.',
+            'body_type.exists'       => 'Odabrani tip karoserije nije ispravan.',
             'power_kw.required'      => 'Snaga motora je obavezna.',
             'drive_type.required'    => 'Pogon vozila je obavezan.',
-            'drive_type.in'          => 'Odabrani pogon nije ispravan.',
+            'drive_type.exists'      => 'Odabrani pogon nije ispravan.',
             'doors.required'         => 'Broj vrata je obavezan.',
             'doors.in'               => 'Broj vrata mora biti 2, 3, 4 ili 5.',
             'seats.required'         => 'Broj sjedišta je obavezan.',
             'condition.required'     => 'Stanje vozila je obavezno.',
-            'condition.in'           => 'Stanje mora biti "novo" ili "polovnjak".',
+            'condition.exists'       => 'Odabrano stanje vozila nije ispravno.',
             'damage.required'        => 'Oštećenje vozila je obavezno.',
-            'damage.in'              => 'Odabrana vrijednost oštećenja nije ispravna.',
+            'damage.exists'          => 'Odabrana vrijednost oštećenja nije ispravna.',
+            'emission_class.exists'  => 'Odabrana emisiona klasa nije ispravna.',
             'color_exterior.required'=> 'Boja karoserije je obavezna.',
             'vin.size'               => 'VIN broj mora imati tačno 17 karaktera.',
             'registered_until.after' => 'Datum registracije mora biti u budućnosti.',

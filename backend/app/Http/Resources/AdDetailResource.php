@@ -103,6 +103,12 @@ class AdDetailResource extends JsonResource
                     ->groupBy('category')
                     ->map(fn($items) => $items->pluck('name'))
             ),
+
+            // Za edit formu — ID-jevi opreme i datum u Y-m-d formatu za <input type="date">
+            'equipment_ids' => $this->whenLoaded('equipment', fn() =>
+                $this->equipment->pluck('id')
+            ),
+            'registered_until_raw' => $this->registered_until?->format('Y-m-d'),
  
             'seller' => $this->whenLoaded('user', fn() => [
                 'id'             => $this->user->id,

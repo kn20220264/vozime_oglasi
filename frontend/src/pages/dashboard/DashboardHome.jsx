@@ -22,15 +22,15 @@ function UserHome({ user }) {
     queryFn: () => api.get("/favorites").then((r) => r.data.data),
   });
 
-  const { data: notifications } = useQuery({
-    queryKey: ["my-notifications"],
-    queryFn: () => api.get("/notifications").then((r) => r.data.data),
+  const { data: notifData } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: () => api.get("/notifications").then((r) => r.data),
   });
 
   const activeAds           = myAds?.filter((a) => a.status === "active")?.length ?? 0;
   const pendingAds          = myAds?.filter((a) => a.status === "pending")?.length ?? 0;
   const totalFavorites      = favorites?.length ?? 0;
-  const unreadNotifications = notifications?.filter((n) => !n.read_at)?.length ?? 0;
+  const unreadNotifications = notifData?.unread_count ?? 0;
 
   const stats = [
     { label: "Aktivni oglasi", value: activeAds,           to: "/dashboard/ads",           color: "bg-green-50 text-green-700" },
@@ -126,14 +126,14 @@ function DealerHome({ user }) {
     queryFn: () => api.get("/my-packages").then((r) => r.data),
   });
 
-  const { data: notifications } = useQuery({
-    queryKey: ["my-notifications"],
-    queryFn: () => api.get("/notifications").then((r) => r.data.data),
+  const { data: notifData } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: () => api.get("/notifications").then((r) => r.data),
   });
 
   const activeAds           = myAds?.filter((a) => a.status === "active")?.length  ?? 0;
   const pendingAds          = myAds?.filter((a) => a.status === "pending")?.length ?? 0;
-  const unreadNotifications = notifications?.filter((n) => !n.read_at)?.length     ?? 0;
+  const unreadNotifications = notifData?.unread_count ?? 0;
 
   // Trenutno aktivni dealer paket
   const activePackage = myPackages?.find((p) => p.is_active && p.package?.type === "dealer");

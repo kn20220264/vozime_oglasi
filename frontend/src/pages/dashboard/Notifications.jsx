@@ -6,14 +6,17 @@ export default function Notifications() {
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["my-notifications"],
+    queryKey: ["notifications"],
     queryFn: () => api.get("/notifications").then((r) => r.data),
+    // Uvijek svjeza lista — globalni staleTime bi inace prikazao kesiranu (praznu) verziju
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   const markAllRead = useMutation({
     mutationFn: () => api.post("/notifications/read-all"),
     onSuccess: () => {
-      queryClient.invalidateQueries(["my-notifications"]);
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
       toast.success("Sva obavjestenja oznacena kao procitana");
     },
   });
@@ -21,7 +24,7 @@ export default function Notifications() {
   const markRead = useMutation({
     mutationFn: (id) => api.post(`/notifications/${id}/read`),
     onSuccess: () => {
-      queryClient.invalidateQueries(["my-notifications"]);
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
   });
 

@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import { createPortal } from 'react-dom';
 import axios from '../api/axios';
 import { useMultipleFilterOptions } from '../hooks/useFilterOptions';
+import { useMakesByCategory } from '../hooks/useMakes';
 import useAuthStore from '../store/authStore';
 
 // ─── Portal dropdown helper ───────────────────────────────────
@@ -164,7 +165,7 @@ function ModelHierarchySelect({ series, selectedIds, onChange, label = 'Model' }
   const toggleSeries = (id) => setExpandedSeries(p=>({...p,[id]:!p[id]}));
   const byMake = {};
   series.forEach(s => { const n = s.make?.name||'Ostalo'; if(!byMake[n]) byMake[n]=[]; byMake[n].push(s); });
-  const makeNames = Object.keys(byMake);
+  const makeNames = Object.keys(byMake).sort((a, b) => a.localeCompare(b));
   return (
     <div>
       <label className="block text-xs font-semibold text-gray-500 mb-1">{label}</label>
@@ -533,8 +534,7 @@ export default function SearchFilters() {
   const setT = (k,v) => setTruck(p=>({...p,[k]:v}));
 
   // ─── API data ─────────────────────────────────────────────
-  const { data: makesData } = useQuery({ queryKey:['makes'], queryFn:()=>axios.get('/makes').then(r=>r.data), staleTime:Infinity });
-  const makes = makesData?.data ?? [];
+  const makes = useMakesByCategory('automobili');
 
   const { data: autoModelsData } = useQuery({
     queryKey:['models-multi', auto.make_ids],
@@ -550,8 +550,8 @@ export default function SearchFilters() {
   });
   const motoSeries = motoModelsData?.data ?? [];
 
-  const { data: citiesData } = useQuery({ queryKey:['cities'], queryFn:()=>axios.get('/cities').then(r=>r.data), staleTime:Infinity });
-  const cities = citiesData?.data ?? [];
+  const { data: citiesData } = useQuery({ queryKey:['cities'], queryFn:()=>axios.get('/cities').then(r=>r.data.data ?? r.data), staleTime:Infinity });
+  const cities = Array.isArray(citiesData) ? citiesData : [];
 
   // Živi broj rezultata (mobile.de stil) — samo auto tab, /ads/count podržava te filtere
   const countParams = {

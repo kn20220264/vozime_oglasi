@@ -17,7 +17,7 @@ class VehicleCategoriesSeeder extends Seeder
         $now = now();
 
         $mainCats = [
-            ['name' => 'Putnička vozila', 'slug' => 'putnička-vozila', 'icon' => 'car',         'order' => 1],
+            ['name' => 'Automobili',      'slug' => 'automobili',      'icon' => 'car',         'order' => 1],
             ['name' => 'Motocikli',       'slug' => 'motocikli',       'icon' => 'motorcycle',  'order' => 2],
             ['name' => 'Nautika',         'slug' => 'nautika',         'icon' => 'boat',        'order' => 3],
             ['name' => 'Transport',       'slug' => 'transport',       'icon' => 'truck',       'order' => 4],

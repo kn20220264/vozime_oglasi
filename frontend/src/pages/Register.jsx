@@ -251,7 +251,7 @@ export default function Register() {
             </div>
           </div>
 
-          {/* Desno — prednosti */}
+          {/* Desno — prednosti + dileri */}
           <div className="hidden md:flex flex-col justify-center pt-4">
             <h2 className="text-xl font-black text-[#12142D] mb-5 leading-snug">
               Prednosti VozimeOglasi<br />naloga
@@ -269,11 +269,27 @@ export default function Register() {
                 </li>
               ))}
             </ul>
+
+            {/* Kartica za dilere / autoplaceve */}
+            <div className="mt-8 bg-[#12142D] rounded-2xl p-6 text-white">
+              <p className="text-xs font-bold uppercase tracking-widest text-white/50 mb-2">Za autoplaceve</p>
+              <h3 className="text-lg font-black mb-2 leading-snug">Imate autoplac ili ste diler?</h3>
+              <p className="text-sm text-white/70 mb-4 leading-relaxed">
+                Otvorite dilerski nalog — sopstvena stranica autoplaca, više oglasa i istaknuta pozicija.
+              </p>
+              <Link
+                to="/register/dealer"
+                className="inline-block bg-[#FF0026] hover:bg-red-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors"
+              >
+                Registrujte se kao diler
+              </Link>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="text-center pb-8 text-sm text-gray-500">
+      {/* Mobilni — link za dilere (desna kolona je skrivena) */}
+      <div className="md:hidden text-center pb-8 px-4 text-sm text-gray-500">
         Jeste li diler / auto plac?{" "}
         <Link to="/register/dealer" className="text-[#FF0026] font-semibold hover:underline">
           Registrujte se kao diler

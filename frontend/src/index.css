@@ -126,6 +126,28 @@ html, body, #root {
 }
 
 /* ═══════════════════════════════════════════
+   NATIVE SELECT — na tamnoj temi opcije nasljeđuju
+   bijelu boju teksta pa su nevidljive na bijelom
+   popup-u; forsiraj tamni tekst na bijeloj pozadini
+═══════════════════════════════════════════ */
+select {
+  color: #111827;
+}
+select option {
+  color: #111827;
+  background-color: #fff;
+}
+
+/* Isti problem za input/textarea: na tamnoj temi nasljeđuju
+   bijeli tekst pa su nevidljivi u bijelim karticama.
+   Elementi na tamnoj pozadini imaju eksplicitni text-white
+   (utility klasa pregazi ovaj selektor). */
+input,
+textarea {
+  color: #111827;
+}
+
+/* ═══════════════════════════════════════════
    KOMPONENTE
 ═══════════════════════════════════════════ */
 @layer components {

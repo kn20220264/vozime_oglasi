@@ -61,12 +61,12 @@ export default function DealerRegister() {
 
   const { data: citiesData } = useQuery({
     queryKey: ["cities"],
-    queryFn: () => axios.get("/cities").then((r) => r.data),
+    queryFn: () => axios.get("/cities").then((r) => r.data.data ?? r.data),
   });
 
   const { data: makesData } = useQuery({
     queryKey: ["makes"],
-    queryFn: () => axios.get("/makes").then((r) => r.data),
+    queryFn: () => axios.get("/makes").then((r) => r.data.data ?? r.data),
   });
 
   const { data: packagesData } = useQuery({

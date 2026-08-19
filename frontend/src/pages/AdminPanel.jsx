@@ -13,54 +13,76 @@ import AdminCatalog from './AdminCatalog';
 const NAV_GROUPS = [
     {
         label: null,
-        items: [{ to: '/admin', label: 'Pregled', icon: '📊', end: true }]
+        items: [{ to: '/admin', label: 'Pregled', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', end: true }]
     },
     {
         label: 'OGLASI',
         items: [
-            { to: '/admin/ads',     label: 'Svi oglasi', icon: '🚗' },
-            { to: '/admin/reports', label: 'Prijave',    icon: '🚩' },
+            { to: '/admin/ads',     label: 'Svi oglasi', icon: 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0' },
+            { to: '/admin/reports', label: 'Prijave',    icon: 'M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2z' },
         ]
     },
     {
         label: 'KORISNICI',
         items: [
-            { to: '/admin/users', label: 'Korisnici', icon: '👥' },
+            { to: '/admin/users', label: 'Korisnici', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
         ]
     },
-   
+
 {
   label: 'KATALOG',
   items: [
-    { to: '/admin/catalog', label: 'Katalog & Filteri', icon: '🗂️' },
+    { to: '/admin/catalog', label: 'Katalog & Filteri', icon: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z' },
   ]
 },
     {
         label: 'FILTERI',
         items: [
-            { to: '/admin/filters', label: 'Filter opcije', icon: '⚙️' },
+            { to: '/admin/filters', label: 'Filter opcije', icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4' },
         ]
     },
     {
         label: 'FINANSIJE',
         items: [
-            { to: '/admin/packages', label: 'Paketi',        icon: '📦' },
-            { to: '/admin/payments', label: 'Plaćanja',      icon: '💳' },
+            { to: '/admin/packages', label: 'Paketi',        icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
+            { to: '/admin/payments', label: 'Plaćanja',      icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z' },
         ]
     },
     {
         label: 'MARKETING',
         items: [
-            { to: '/admin/banners', label: 'Baneri / Reklame', icon: '📣' },
+            { to: '/admin/banners', label: 'Baneri / Reklame', icon: 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z' },
         ]
     },
     {
         label: 'SISTEM',
         items: [
-            { to: '/admin/settings', label: 'Podešavanja',  icon: '🔧' },
+            { to: '/admin/settings', label: 'Podešavanja',  icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z' },
         ]
     },
 ];
+
+// Mala SVG ikona za dugmad i redove (bez emojija)
+function Ic({ d, className = 'w-3.5 h-3.5' }) {
+    return (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={d} />
+        </svg>
+    );
+}
+
+const IC = {
+    check:   'M5 13l4 4L19 7',
+    x:       'M6 18L18 6M6 6l12 12',
+    eye:     'M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 4.5 12 4.5c4.478 0 8.268 3.443 9.542 7.5-1.274 4.057-5.064 7.5-9.542 7.5-4.477 0-8.268-3.443-9.542-7.5z',
+    pencil:  'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
+    trash:   'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16',
+    star:    'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z',
+    pin:     'M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z',
+    folder:  'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z',
+    chevron: 'M19 9l-7 7-7-7',
+    megaphone: 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z',
+};
 
 // ═══════════════════════════════════════
 // LAYOUT
@@ -75,16 +97,16 @@ export default function AdminPanel() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
+        <div className="min-h-screen bg-[#12142D] text-white flex">
             {/* Sidebar */}
-            <aside className="w-60 bg-[#12142D] flex-shrink-0 min-h-screen flex flex-col">
-                <div className="p-5 border-b border-[#1B2B5A]">
+            <aside className="w-60 bg-[#12142D] border-r border-white/[0.06] flex-shrink-0 min-h-screen flex flex-col">
+                <div className="p-5 border-b border-white/[0.06]">
                     <div className="bg-[#FF0026] px-2 py-0.5 rounded-lg inline-block">
                         <span className="text-white font-black text-sm">VOZIME</span>
                     </div>
                     <p className="text-[#6674A3] text-xs mt-1">Admin panel</p>
                 </div>
-                <div className="px-4 py-3 border-b border-[#1B2B5A]">
+                <div className="px-4 py-3 border-b border-white/[0.06]">
                     <p className="text-white text-sm font-semibold truncate">{user?.name}</p>
                     <p className="text-[#6674A3] text-xs capitalize">{user?.role}</p>
                 </div>
@@ -100,14 +122,21 @@ export default function AdminPanel() {
                                 {group.items.map(item => (
                                     <NavLink key={item.to} to={item.to} end={item.end}
                                         className={({ isActive }) =>
-                                            `flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition ${
+                                            `flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition border ${
                                                 isActive
-                                                    ? 'bg-[#FF0026] text-white font-semibold'
-                                                    : 'text-[#6674A3] hover:text-white hover:bg-[#1B2B5A]'
+                                                    ? 'bg-[#1A1D3A] border-white/[0.06] text-white font-semibold'
+                                                    : 'border-transparent text-[#6674A3] hover:text-white hover:bg-[#1A1D3A]'
                                             }`
                                         }>
-                                        <span>{item.icon}</span>
-                                        <span>{item.label}</span>
+                                        {({ isActive }) => (
+                                            <>
+                                                <svg className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#FF0026]' : 'text-current'}`}
+                                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+                                                </svg>
+                                                <span>{item.label}</span>
+                                            </>
+                                        )}
                                     </NavLink>
                                 ))}
                             </div>
@@ -145,8 +174,8 @@ function PageHeader({ title, subtitle, action }) {
     return (
         <div className="flex items-center justify-between mb-6">
             <div>
-                <h1 className="text-xl font-black text-[#12142D]">{title}</h1>
-                {subtitle && <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>}
+                <h1 className="text-xl font-black text-white">{title}</h1>
+                {subtitle && <p className="text-sm text-[#6674A3] mt-0.5">{subtitle}</p>}
             </div>
             {action}
         </div>
@@ -155,32 +184,32 @@ function PageHeader({ title, subtitle, action }) {
 
 function StatCard({ label, value, color = 'blue', icon }) {
     const colors = {
-        blue:   'bg-blue-50 text-blue-600',
-        yellow: 'bg-[#FFEA00]/20 text-[#12142D]',
-        green:  'bg-green-50 text-green-600',
-        red:    'bg-red-50 text-[#FF0026]',
-        purple: 'bg-purple-50 text-purple-600',
-        gray:   'bg-gray-100 text-gray-600',
+        blue:   'bg-white/[0.06] text-[#6674A3]',
+        yellow: 'bg-[#FFEA00]/10 text-[#FFEA00]',
+        green:  'bg-green-500/10 text-green-400',
+        red:    'bg-[#FF0026]/10 text-[#FF0026]',
+        purple: 'bg-white/[0.06] text-[#6674A3]',
+        gray:   'bg-white/[0.06] text-[#6674A3]',
     };
     return (
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg mb-3 ${colors[color]}`}>
-                {icon}
+        <div className="bg-[#1A1D3A] rounded-2xl p-5 border border-white/[0.06]">
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-3 ${colors[color]}`}>
+                <Ic d={icon} className="w-[18px] h-[18px]" />
             </div>
-            <div className="text-2xl font-black text-[#12142D]">{value ?? '—'}</div>
-            <div className="text-xs text-gray-500 mt-0.5">{label}</div>
+            <div className="text-2xl font-black text-white">{value ?? 0}</div>
+            <div className="text-xs text-[#6674A3] mt-0.5">{label}</div>
         </div>
     );
 }
 
 function Badge({ children, color = 'gray' }) {
     const colors = {
-        green:  'bg-green-100 text-green-700',
-        red:    'bg-red-50 text-[#FF0026]',
-        yellow: 'bg-[#FFEA00]/30 text-[#12142D]',
-        blue:   'bg-blue-100 text-blue-700',
-        gray:   'bg-gray-100 text-gray-600',
-        purple: 'bg-purple-100 text-purple-700',
+        green:  'bg-green-500/15 text-green-400',
+        red:    'bg-[#FF0026]/15 text-[#FF0026]',
+        yellow: 'bg-[#FFEA00]/15 text-[#FFEA00]',
+        blue:   'bg-white/[0.08] text-white/80',
+        gray:   'bg-white/[0.08] text-[#6674A3]',
+        purple: 'bg-white/[0.08] text-white/80',
     };
     return (
         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${colors[color]}`}>
@@ -192,9 +221,9 @@ function Badge({ children, color = 'gray' }) {
 function Input({ label, ...props }) {
     return (
         <div>
-            {label && <label className="block text-xs font-semibold text-gray-600 mb-1">{label}</label>}
+            {label && <label className="block text-xs font-semibold text-[#6674A3] mb-1">{label}</label>}
             <input {...props}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] bg-white" />
+                className="w-full border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-[#6674A3] focus:outline-none focus:border-[#FF0026] bg-[#12142D]" />
         </div>
     );
 }
@@ -202,9 +231,9 @@ function Input({ label, ...props }) {
 function Select({ label, children, ...props }) {
     return (
         <div>
-            {label && <label className="block text-xs font-semibold text-gray-600 mb-1">{label}</label>}
+            {label && <label className="block text-xs font-semibold text-[#6674A3] mb-1">{label}</label>}
             <select {...props}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] bg-white">
+                className="w-full border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#FF0026] bg-[#12142D]">
                 {children}
             </select>
         </div>
@@ -214,9 +243,9 @@ function Select({ label, children, ...props }) {
 function Btn({ children, variant = 'primary', size = 'md', disabled, onClick, type = 'button' }) {
     const variants = {
         primary:  'bg-[#FF0026] hover:bg-red-700 text-white',
-        secondary:'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200',
+        secondary:'bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/10',
         success:  'bg-green-500 hover:bg-green-600 text-white',
-        danger:   'bg-red-50 hover:bg-red-100 text-[#FF0026]',
+        danger:   'bg-[#FF0026]/10 hover:bg-[#FF0026]/25 text-[#FF0026]',
         yellow:   'bg-[#FFEA00] hover:bg-yellow-400 text-[#12142D]',
     };
     const sizes = {
@@ -237,10 +266,12 @@ function Modal({ open, onClose, title, children, width = 'max-w-lg' }) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-            <div className={`relative bg-white rounded-2xl shadow-xl w-full ${width} max-h-[90vh] overflow-y-auto`}>
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                    <h3 className="font-black text-[#12142D]">{title}</h3>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+            <div className={`relative bg-[#1A1D3A] border border-white/[0.06] rounded-2xl shadow-xl w-full ${width} max-h-[90vh] overflow-y-auto`}>
+                <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+                    <h3 className="font-black text-white">{title}</h3>
+                    <button onClick={onClose} className="text-[#6674A3] hover:text-white transition">
+                        <Ic d={IC.x} className="w-5 h-5" />
+                    </button>
                 </div>
                 <div className="p-6">{children}</div>
             </div>
@@ -251,15 +282,15 @@ function Modal({ open, onClose, title, children, width = 'max-w-lg' }) {
 function Pagination({ meta, onPage }) {
     if (!meta || meta.last_page <= 1) return null;
     return (
-        <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 text-sm text-gray-500">
-            <span>Prikazano {meta.from}–{meta.to} od {meta.total}</span>
+        <div className="flex items-center justify-between px-5 py-3 border-t border-white/[0.06] text-sm text-[#6674A3]">
+            <span>Prikazano {meta.from} do {meta.to} od {meta.total}</span>
             <div className="flex gap-1">
                 {Array.from({ length: meta.last_page }, (_, i) => i + 1).map(p => (
                     <button key={p} onClick={() => onPage(p)}
                         className={`w-8 h-8 rounded-lg text-xs font-semibold transition ${
                             p === meta.current_page
                                 ? 'bg-[#FF0026] text-white'
-                                : 'text-gray-500 hover:bg-gray-100'
+                                : 'text-[#6674A3] hover:bg-white/[0.06] hover:text-white'
                         }`}>
                         {p}
                     </button>
@@ -284,14 +315,14 @@ function AdminOverview() {
             <PageHeader title="Pregled sistema" />
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <StatCard label="Ukupno oglasa"  value={stats?.total_ads}        color="blue"   icon="🚗" />
-                <StatCard label="Na čekanju"     value={stats?.pending_ads}      color="yellow" icon="⏳" />
-                <StatCard label="Korisnika"      value={stats?.total_users}      color="green"  icon="👥" />
-                <StatCard label="Otvorene prijave" value={stats?.pending_reports} color="red"   icon="🚩" />
-                <StatCard label="Aktivnih oglasa" value={stats?.active_ads}      color="green"  icon="✅" />
-                <StatCard label="Dilera"         value={stats?.total_dealers}    color="purple" icon="🏢" />
-                <StatCard label="Moderatora"     value={stats?.total_moderators} color="blue"   icon="🛡️" />
-                <StatCard label="Čeka uplata"    value={stats?.pending_payments} color="yellow" icon="💳" />
+                <StatCard label="Ukupno oglasa"  value={stats?.total_ads}        color="blue"   icon="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+                <StatCard label="Na čekanju"     value={stats?.pending_ads}      color="yellow" icon="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <StatCard label="Korisnika"      value={stats?.total_users}      color="green"  icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                <StatCard label="Otvorene prijave" value={stats?.pending_reports} color="red"   icon="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2z" />
+                <StatCard label="Aktivnih oglasa" value={stats?.active_ads}      color="green"  icon="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <StatCard label="Dilera"         value={stats?.total_dealers}    color="purple" icon="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                <StatCard label="Moderatora"     value={stats?.total_moderators} color="blue"   icon="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                <StatCard label="Čeka uplata"    value={stats?.pending_payments} color="yellow" icon="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -319,36 +350,36 @@ function PendingAdsWidget() {
     });
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="font-black text-[#12142D]">Na čekanju</h2>
+        <div className="bg-[#1A1D3A] rounded-2xl border border-white/[0.06] overflow-hidden">
+            <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
+                <h2 className="font-black text-white">Na čekanju</h2>
                 <Badge color="yellow">{data?.total ?? 0}</Badge>
             </div>
-            {isLoading && <div className="p-8 text-center text-gray-400 text-sm">Učitavanje...</div>}
-            <div className="divide-y divide-gray-50">
+            {isLoading && <div className="p-8 text-center text-[#6674A3] text-sm">Učitavanje...</div>}
+            <div className="divide-y divide-white/[0.06]">
                 {data?.data?.map(ad => (
-                    <div key={ad.id} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50">
+                    <div key={ad.id} className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.04]">
                         <img
                             src={ad.primary_image ? `http://localhost:8000${ad.primary_image}` : '/placeholder-car.jpg'}
-                            className="w-12 h-9 object-cover rounded-lg bg-gray-100 flex-shrink-0"
+                            className="w-12 h-9 object-cover rounded-lg bg-white/[0.06] flex-shrink-0"
                             alt=""
                         />
                         <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm text-[#12142D] truncate">{ad.title}</p>
-                            <p className="text-xs text-gray-400 truncate">{ad.user?.name} · {Number(ad.price).toLocaleString()} €</p>
+                            <p className="font-semibold text-sm text-white truncate">{ad.title}</p>
+                            <p className="text-xs text-[#6674A3] truncate">{ad.user?.name}, {Number(ad.price).toLocaleString()} €</p>
                         </div>
                         <div className="flex gap-1.5 flex-shrink-0">
-                            <Btn size="sm" variant="success" onClick={() => setStatus.mutate({ id: ad.id, status: 'active' })}>✓</Btn>
-                            <Btn size="sm" variant="danger"  onClick={() => setStatus.mutate({ id: ad.id, status: 'rejected' })}>✕</Btn>
+                            <Btn size="sm" variant="success" onClick={() => setStatus.mutate({ id: ad.id, status: 'active' })}><Ic d={IC.check} /></Btn>
+                            <Btn size="sm" variant="danger"  onClick={() => setStatus.mutate({ id: ad.id, status: 'rejected' })}><Ic d={IC.x} /></Btn>
                             <a href={`/ads/${ad.slug}`} target="_blank" rel="noreferrer">
-                                <Btn size="sm" variant="secondary">👁</Btn>
+                                <Btn size="sm" variant="secondary"><Ic d={IC.eye} /></Btn>
                             </a>
                         </div>
                     </div>
                 ))}
             </div>
             {(!data?.data?.length && !isLoading) && (
-                <div className="p-8 text-center text-gray-400 text-sm">Nema oglasa na čekanju.</div>
+                <div className="p-8 text-center text-[#6674A3] text-sm">Nema oglasa na čekanju.</div>
             )}
         </div>
     );
@@ -361,25 +392,25 @@ function RecentPaymentsWidget() {
     });
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="font-black text-[#12142D]">Plaćanja na čekanju</h2>
+        <div className="bg-[#1A1D3A] rounded-2xl border border-white/[0.06] overflow-hidden">
+            <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
+                <h2 className="font-black text-white">Plaćanja na čekanju</h2>
                 <Badge color="yellow">{data?.total ?? 0}</Badge>
             </div>
-            {isLoading && <div className="p-8 text-center text-gray-400 text-sm">Učitavanje...</div>}
-            <div className="divide-y divide-gray-50">
+            {isLoading && <div className="p-8 text-center text-[#6674A3] text-sm">Učitavanje...</div>}
+            <div className="divide-y divide-white/[0.06]">
                 {data?.data?.map(p => (
-                    <div key={p.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
+                    <div key={p.id} className="flex items-center justify-between px-4 py-3 hover:bg-white/[0.04]">
                         <div>
-                            <p className="font-semibold text-sm text-[#12142D]">{p.user_package?.user?.name ?? '—'}</p>
-                            <p className="text-xs text-gray-400">{p.user_package?.package?.name} · {p.reference}</p>
+                            <p className="font-semibold text-sm text-white">{p.user_package?.user?.name ?? 'Nepoznato'}</p>
+                            <p className="text-xs text-[#6674A3]">{p.user_package?.package?.name}, {p.reference}</p>
                         </div>
                         <Badge color="yellow">{p.amount} €</Badge>
                     </div>
                 ))}
             </div>
             {(!data?.data?.length && !isLoading) && (
-                <div className="p-8 text-center text-gray-400 text-sm">Nema plaćanja na čekanju.</div>
+                <div className="p-8 text-center text-[#6674A3] text-sm">Nema plaćanja na čekanju.</div>
             )}
         </div>
     );
@@ -453,12 +484,12 @@ function AdminAds() {
             <PageHeader title="Oglasi" subtitle={`Ukupno: ${data?.total ?? 0}`} />
 
             {/* Filteri */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4 flex flex-wrap gap-3">
+            <div className="bg-[#1A1D3A] rounded-2xl border border-white/[0.06] p-4 mb-4 flex flex-wrap gap-3">
                 <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
                     placeholder="Pretraži naslov, ad_code..."
-                    className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] flex-1 min-w-48" />
+                    className="border border-white/10 rounded-xl px-3 py-2 text-sm bg-[#12142D] text-white placeholder-[#6674A3] focus:outline-none focus:border-[#FF0026] flex-1 min-w-48" />
                 <select value={status} onChange={e => { setStatus(e.target.value); setPage(1); }}
-                    className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]">
+                    className="border border-white/10 rounded-xl px-3 py-2 text-sm bg-[#12142D] text-white placeholder-[#6674A3] focus:outline-none focus:border-[#FF0026]">
                     <option value="">Svi statusi</option>
                     <option value="pending">Na čekanju</option>
                     <option value="active">Aktivan</option>
@@ -469,48 +500,48 @@ function AdminAds() {
                 </select>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                {isLoading && <div className="p-8 text-center text-gray-400">Učitavanje...</div>}
+            <div className="bg-[#1A1D3A] rounded-2xl border border-white/[0.06] overflow-hidden">
+                {isLoading && <div className="p-8 text-center text-[#6674A3]">Učitavanje...</div>}
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="border-b border-gray-100 bg-gray-50/50">
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Oglas</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Korisnik</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Cijena</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Status</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Oznake</th>
-                                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500">Akcije</th>
+                            <tr className="border-b border-white/[0.06] bg-white/[0.04]">
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Oglas</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Korisnik</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Cijena</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Status</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Oznake</th>
+                                <th className="text-right px-4 py-3 text-xs font-semibold text-[#6674A3]">Akcije</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-white/[0.06]">
                             {data?.data?.map(ad => (
-                                <tr key={ad.id} className="hover:bg-gray-50/50">
+                                <tr key={ad.id} className="hover:bg-white/[0.04]">
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-3">
                                             <img
                                                 src={ad.primary_image ? `http://localhost:8000${ad.primary_image}` : '/placeholder-car.jpg'}
-                                                className="w-12 h-9 object-cover rounded-lg bg-gray-100 flex-shrink-0"
+                                                className="w-12 h-9 object-cover rounded-lg bg-white/[0.06] flex-shrink-0"
                                                 alt=""
                                             />
                                             <div>
-                                                <p className="font-semibold text-[#12142D] truncate max-w-48">{ad.title}</p>
-                                                <p className="text-xs text-gray-400">{ad.ad_code ?? `#${ad.id}`}</p>
+                                                <p className="font-semibold text-white truncate max-w-48">{ad.title}</p>
+                                                <p className="text-xs text-[#6674A3]">{ad.ad_code ?? `#${ad.id}`}</p>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-4 py-3">
-                                        <p className="text-[#12142D]">{ad.user?.name ?? '—'}</p>
-                                        <p className="text-xs text-gray-400">{ad.city?.name}</p>
+                                        <p className="text-white">{ad.user?.name ?? 'Nepoznato'}</p>
+                                        <p className="text-xs text-[#6674A3]">{ad.city?.name}</p>
                                     </td>
-                                    <td className="px-4 py-3 font-semibold text-[#12142D]">
+                                    <td className="px-4 py-3 font-semibold text-white">
                                         {Number(ad.price).toLocaleString()} €
                                     </td>
                                     <td className="px-4 py-3">
                                         <select
                                             value={ad.status}
                                             onChange={e => setStatusMutation.mutate({ id: ad.id, st: e.target.value })}
-                                            className="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#FF0026]">
+                                            className="text-xs border border-white/10 bg-[#12142D] text-white rounded-lg px-2 py-1 focus:outline-none focus:border-[#FF0026]">
                                             {Object.entries(statusLabel).map(([v, l]) => (
                                                 <option key={v} value={v}>{l}</option>
                                             ))}
@@ -518,19 +549,19 @@ function AdminAds() {
                                     </td>
                                     <td className="px-4 py-3">
                                         <div className="flex gap-1">
-                                            {ad.featured && <Badge color="yellow">⭐ Istaknuto</Badge>}
-                                            {ad.pinned   && <Badge color="blue">📌 Prikvačen</Badge>}
+                                            {ad.featured && <Badge color="yellow">Istaknuto</Badge>}
+                                            {ad.pinned   && <Badge color="blue">Prikvačen</Badge>}
                                         </div>
                                     </td>
                                     <td className="px-4 py-3">
                                         <div className="flex gap-1.5 justify-end">
-                                            <Btn size="sm" variant="secondary" onClick={() => navigate(`/admin/ads/${ad.id}`)}>✏️</Btn>
-                                            <Btn size="sm" variant={ad.featured ? 'yellow' : 'secondary'} onClick={() => ad.featured ? removeFeatured.mutate(ad.id) : openBoostModal(ad)}>⭐</Btn>
-                                            <Btn size="sm" variant={ad.pinned   ? 'yellow' : 'secondary'} onClick={() => togglePinned.mutate(ad.id)}>📌</Btn>
+                                            <Btn size="sm" variant="secondary" onClick={() => navigate(`/admin/ads/${ad.id}`)}><Ic d={IC.pencil} /></Btn>
+                                            <Btn size="sm" variant={ad.featured ? 'yellow' : 'secondary'} onClick={() => ad.featured ? removeFeatured.mutate(ad.id) : openBoostModal(ad)}><Ic d={IC.star} /></Btn>
+                                            <Btn size="sm" variant={ad.pinned   ? 'yellow' : 'secondary'} onClick={() => togglePinned.mutate(ad.id)}><Ic d={IC.pin} /></Btn>
                                             <a href={`/ads/${ad.slug}`} target="_blank" rel="noreferrer">
-                                                <Btn size="sm" variant="secondary">👁</Btn>
+                                                <Btn size="sm" variant="secondary"><Ic d={IC.eye} /></Btn>
                                             </a>
-                                            <Btn size="sm" variant="danger" onClick={() => window.confirm('Obrisati oglas?') && deleteAd.mutate(ad.id)}>🗑</Btn>
+                                            <Btn size="sm" variant="danger" onClick={() => window.confirm('Obrisati oglas?') && deleteAd.mutate(ad.id)}><Ic d={IC.trash} /></Btn>
                                         </div>
                                     </td>
                                 </tr>
@@ -543,21 +574,21 @@ function AdminAds() {
 
             {/* Modal — dodjela boost paketa */}
             <Modal open={!!boostModal} onClose={() => { setBoostModal(null); setSelectedPackage(''); }}
-                title="⭐ Dodijeli istaknuto">
+                title="Dodijeli istaknuto">
                 <div className="space-y-4">
-                    <p className="text-sm text-gray-600">
-                        Oglas: <span className="font-semibold text-[#12142D]">{boostModal?.adTitle}</span>
+                    <p className="text-sm text-[#6674A3]">
+                        Oglas: <span className="font-semibold text-white">{boostModal?.adTitle}</span>
                     </p>
                     <div>
-                        <label className="block text-xs font-semibold text-gray-600 mb-2">Odaberi paket</label>
+                        <label className="block text-xs font-semibold text-[#6674A3] mb-2">Odaberi paket</label>
                         {boostPackages?.length ? (
                             <div className="space-y-2">
                                 {boostPackages.map(pkg => (
                                     <label key={pkg.id}
                                         className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition ${
                                             selectedPackage === pkg.id.toString()
-                                                ? 'border-[#FF0026] bg-red-50'
-                                                : 'border-gray-200 hover:border-gray-300'
+                                                ? 'border-[#FF0026] bg-[#FF0026]/10'
+                                                : 'border-white/10 hover:border-white/25'
                                         }`}>
                                         <input
                                             type="radio"
@@ -568,15 +599,15 @@ function AdminAds() {
                                             className="accent-[#FF0026]"
                                         />
                                         <div className="flex-1">
-                                            <p className="font-semibold text-[#12142D] text-sm">{pkg.name}</p>
-                                            <p className="text-xs text-gray-400">{pkg.duration_days} dana · {pkg.description || 'Istaknuto oglašavanje'}</p>
+                                            <p className="font-semibold text-white text-sm">{pkg.name}</p>
+                                            <p className="text-xs text-[#6674A3]">{pkg.duration_days} dana, {pkg.description || 'Istaknuto oglašavanje'}</p>
                                         </div>
                                         <Badge color="yellow">Besplatno</Badge>
                                     </label>
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-sm text-gray-400">Nema dostupnih boost paketa.</p>
+                            <p className="text-sm text-[#6674A3]">Nema dostupnih boost paketa.</p>
                         )}
                     </div>
                     <div className="flex gap-3 pt-2">
@@ -584,7 +615,7 @@ function AdminAds() {
                             variant="yellow"
                             disabled={!selectedPackage || grantBoost.isPending}
                             onClick={() => grantBoost.mutate({ id: boostModal.id, package_id: parseInt(selectedPackage) })}>
-                            {grantBoost.isPending ? 'Dodjeljujem...' : '⭐ Dodijeli paket'}
+                            {grantBoost.isPending ? 'Dodjeljujem...' : 'Dodijeli paket'}
                         </Btn>
                         <Btn variant="secondary" onClick={() => { setBoostModal(null); setSelectedPackage(''); }}>Otkaži</Btn>
                     </div>
@@ -634,14 +665,14 @@ function AdminAdEdit() {
 
     const f = (k) => (e) => setForm(p => ({ ...p, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
 
-    if (isLoading) return <div className="p-6 text-gray-400">Učitavanje...</div>;
+    if (isLoading) return <div className="p-6 text-[#6674A3]">Učitavanje...</div>;
 
     return (
         <div className="p-6 max-w-3xl">
             <PageHeader title="Uredi oglas" action={
-                <Btn variant="secondary" onClick={() => navigate('/admin/ads')}>← Nazad</Btn>
+                <Btn variant="secondary" onClick={() => navigate('/admin/ads')}>Nazad</Btn>
             } />
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+            <div className="bg-[#1A1D3A] rounded-2xl border border-white/[0.06] p-6 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                     <div className="col-span-2">
                         <Input label="Naslov" value={form.title ?? ''} onChange={f('title')} />
@@ -666,15 +697,15 @@ function AdminAdEdit() {
                         <option value="expired">Istekao</option>
                     </Select>
                     <div className="col-span-2">
-                        <label className="block text-xs font-semibold text-gray-600 mb-1">Opis</label>
+                        <label className="block text-xs font-semibold text-[#6674A3] mb-1">Opis</label>
                         <textarea value={form.description ?? ''} onChange={f('description')} rows={4}
-                            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] resize-none" />
+                            className="w-full border border-white/10 rounded-xl px-3 py-2 text-sm bg-[#12142D] text-white placeholder-[#6674A3] focus:outline-none focus:border-[#FF0026] resize-none" />
                     </div>
-                    <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <label className="flex items-center gap-2 text-sm text-white/80 cursor-pointer">
                         <input type="checkbox" checked={form.featured ?? false} onChange={f('featured')} className="rounded" />
                         Istaknuto (bez plaćanja)
                     </label>
-                    <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <label className="flex items-center gap-2 text-sm text-white/80 cursor-pointer">
                         <input type="checkbox" checked={form.pinned ?? false} onChange={f('pinned')} className="rounded" />
                         Prikvačen na vrh
                     </label>
@@ -722,12 +753,12 @@ function AdminUsers() {
         <div className="p-6">
             <PageHeader title="Korisnici" subtitle={`Ukupno: ${data?.total ?? 0}`} />
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4 flex flex-wrap gap-3">
+            <div className="bg-[#1A1D3A] rounded-2xl border border-white/[0.06] p-4 mb-4 flex flex-wrap gap-3">
                 <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
                     placeholder="Pretraži ime, email..."
-                    className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] flex-1 min-w-48" />
+                    className="border border-white/10 rounded-xl px-3 py-2 text-sm bg-[#12142D] text-white placeholder-[#6674A3] focus:outline-none focus:border-[#FF0026] flex-1 min-w-48" />
                 <select value={role} onChange={e => { setRole(e.target.value); setPage(1); }}
-                    className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]">
+                    className="border border-white/10 rounded-xl px-3 py-2 text-sm bg-[#12142D] text-white placeholder-[#6674A3] focus:outline-none focus:border-[#FF0026]">
                     <option value="">Sve uloge</option>
                     <option value="user">Korisnik</option>
                     <option value="dealer">Diler</option>
@@ -736,54 +767,54 @@ function AdminUsers() {
                 </select>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                {isLoading && <div className="p-8 text-center text-gray-400">Učitavanje...</div>}
+            <div className="bg-[#1A1D3A] rounded-2xl border border-white/[0.06] overflow-hidden">
+                {isLoading && <div className="p-8 text-center text-[#6674A3]">Učitavanje...</div>}
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="border-b border-gray-100 bg-gray-50/50">
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Korisnik</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Uloga</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Oglasi</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Status</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Registrovan</th>
-                                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500">Akcije</th>
+                            <tr className="border-b border-white/[0.06] bg-white/[0.04]">
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Korisnik</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Uloga</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Oglasi</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Status</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Registrovan</th>
+                                <th className="text-right px-4 py-3 text-xs font-semibold text-[#6674A3]">Akcije</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-white/[0.06]">
                             {data?.data?.map(u => (
-                                <tr key={u.id} className="hover:bg-gray-50/50">
+                                <tr key={u.id} className="hover:bg-white/[0.04]">
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                            <div className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center flex-shrink-0 overflow-hidden">
                                                 {u.avatar
                                                     ? <img src={`http://localhost:8000/storage/${u.avatar}`} className="w-full h-full object-cover" alt="" />
-                                                    : <span className="text-sm font-bold text-gray-400">{u.name?.[0]}</span>
+                                                    : <span className="text-sm font-bold text-[#6674A3]">{u.name?.[0]}</span>
                                                 }
                                             </div>
                                             <div>
-                                                <p className="font-semibold text-[#12142D]">{u.name}</p>
-                                                <p className="text-xs text-gray-400">{u.email}</p>
+                                                <p className="font-semibold text-white">{u.name}</p>
+                                                <p className="text-xs text-[#6674A3]">{u.email}</p>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-4 py-3">
                                         <select value={u.role}
                                             onChange={e => updateRole.mutate({ id: u.id, role: e.target.value })}
-                                            className="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#FF0026]">
+                                            className="text-xs border border-white/10 bg-[#12142D] text-white rounded-lg px-2 py-1 focus:outline-none focus:border-[#FF0026]">
                                             <option value="user">Korisnik</option>
                                             <option value="dealer">Diler</option>
                                             <option value="moderator">Moderator</option>
                                             <option value="admin">Admin</option>
                                         </select>
                                     </td>
-                                    <td className="px-4 py-3 text-[#12142D] font-semibold">{u.ads_count ?? 0}</td>
+                                    <td className="px-4 py-3 text-white font-semibold">{u.ads_count ?? 0}</td>
                                     <td className="px-4 py-3">
                                         <Badge color={u.is_active ? 'green' : 'red'}>
                                             {u.is_active ? 'Aktivan' : 'Blokiran'}
                                         </Badge>
                                     </td>
-                                    <td className="px-4 py-3 text-gray-400 text-xs">
+                                    <td className="px-4 py-3 text-[#6674A3] text-xs">
                                         {new Date(u.created_at).toLocaleDateString('bs')}
                                     </td>
                                     <td className="px-4 py-3">
@@ -862,25 +893,25 @@ function AdminUserDetail() {
         },
         onError: (e) => toast.error(e.response?.data?.message ?? 'Greška.')
     });
-    if (!user) return <div className="p-6 text-gray-400">Učitavanje...</div>;
+    if (!user) return <div className="p-6 text-[#6674A3]">Učitavanje...</div>;
 
     return (
         <div className="p-6 max-w-4xl">
             <PageHeader title={user.name} subtitle={user.email}
-                action={<Btn variant="secondary" onClick={() => navigate('/admin/users')}>← Nazad</Btn>} />
+                action={<Btn variant="secondary" onClick={() => navigate('/admin/users')}>Nazad</Btn>} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Info kartica */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                <div className="bg-[#1A1D3A] rounded-2xl border border-white/[0.06] p-5">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
+                        <div className="w-14 h-14 rounded-full bg-white/[0.06] flex items-center justify-center overflow-hidden">
                             {user.avatar
                                 ? <img src={`http://localhost:8000/storage/${user.avatar}`} className="w-full h-full object-cover" alt="" />
-                                : <span className="text-xl font-bold text-gray-400">{user.name?.[0]}</span>
+                                : <span className="text-xl font-bold text-[#6674A3]">{user.name?.[0]}</span>
                             }
                         </div>
                         <div>
-                            <p className="font-black text-[#12142D]">{user.name}</p>
+                            <p className="font-black text-white">{user.name}</p>
                             <Badge color={{ admin: 'red', moderator: 'purple', dealer: 'blue', user: 'gray' }[user.role] ?? 'gray'}>
                                 {user.role}
                             </Badge>
@@ -888,47 +919,47 @@ function AdminUserDetail() {
                     </div>
                     <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
-                            <span className="text-gray-500">Email</span>
-                            <span className="text-[#12142D] font-medium">{user.email}</span>
+                            <span className="text-[#6674A3]">Email</span>
+                            <span className="text-white font-medium">{user.email}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-gray-500">Oglasi</span>
-                            <span className="font-semibold text-[#12142D]">{user.ads_count ?? 0}</span>
+                            <span className="text-[#6674A3]">Oglasi</span>
+                            <span className="font-semibold text-white">{user.ads_count ?? 0}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-gray-500">Status</span>
+                            <span className="text-[#6674A3]">Status</span>
                             <Badge color={user.is_active ? 'green' : 'red'}>{user.is_active ? 'Aktivan' : 'Blokiran'}</Badge>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-gray-500">Registrovan</span>
-                            <span className="text-xs text-gray-400">{new Date(user.created_at).toLocaleDateString('bs')}</span>
+                            <span className="text-[#6674A3]">Registrovan</span>
+                            <span className="text-xs text-[#6674A3]">{new Date(user.created_at).toLocaleDateString('bs')}</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Privilegije */}
-                <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                        <h2 className="font-black text-[#12142D]">Privilegije</h2>
+                <div className="lg:col-span-2 bg-[#1A1D3A] rounded-2xl border border-white/[0.06] overflow-hidden">
+                    <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
+                        <h2 className="font-black text-white">Privilegije</h2>
                         <div className="flex gap-2">
-                            <Btn size="sm" variant="yellow" onClick={() => setPkgModal(true)}>+ Dodjeli paket</Btn>
-                            <Btn size="sm" onClick={() => setPrivModal(true)}>+ Dodaj privilegiju</Btn>
+                            <Btn size="sm" variant="yellow" onClick={() => setPkgModal(true)}>Dodjeli paket</Btn>
+                            <Btn size="sm" onClick={() => setPrivModal(true)}>Dodaj privilegiju</Btn>
                         </div>
                     </div>
-                    <div className="divide-y divide-gray-50">
+                    <div className="divide-y divide-white/[0.06]">
                         {privileges?.length === 0 && (
-                            <p className="text-center text-gray-400 text-sm py-8">Nema dodijeljenih privilegija.</p>
+                            <p className="text-center text-[#6674A3] text-sm py-8">Nema dodijeljenih privilegija.</p>
                         )}
                         {privileges?.map(priv => (
                             <div key={priv.id} className="flex items-center justify-between px-5 py-3">
                                 <div>
-                                    <p className="font-semibold text-sm text-[#12142D]">{priv.privilege_key}</p>
+                                    <p className="font-semibold text-sm text-white">{priv.privilege_key}</p>
                                     <div className="flex gap-2 mt-0.5">
-                                        {priv.privilege_value && <span className="text-xs text-gray-500">Vrijednost: {priv.privilege_value}</span>}
-                                        {priv.expires_at && <span className="text-xs text-gray-400">Ističe: {new Date(priv.expires_at).toLocaleDateString('bs')}</span>}
-                                        {priv.granted_by && <span className="text-xs text-gray-400">Od: {priv.granted_by?.name}</span>}
+                                        {priv.privilege_value && <span className="text-xs text-[#6674A3]">Vrijednost: {priv.privilege_value}</span>}
+                                        {priv.expires_at && <span className="text-xs text-[#6674A3]">Ističe: {new Date(priv.expires_at).toLocaleDateString('bs')}</span>}
+                                        {priv.granted_by && <span className="text-xs text-[#6674A3]">Od: {priv.granted_by?.name}</span>}
                                     </div>
-                                    {priv.note && <p className="text-xs text-gray-400 mt-0.5">{priv.note}</p>}
+                                    {priv.note && <p className="text-xs text-[#6674A3] mt-0.5">{priv.note}</p>}
                                 </div>
                                 <Btn size="sm" variant="danger" onClick={() => revokePriv.mutate(priv.id)}>Ukloni</Btn>
                             </div>
@@ -962,16 +993,16 @@ function AdminUserDetail() {
             </Modal>
 
             {/* Modal — paket */}
-            <Modal open={pkgModal} onClose={() => { setPkgModal(false); setPkgForm({ package_id: '', ad_id: '', note: '' }); }} title="📦 Dodjeli nalog paket">
+            <Modal open={pkgModal} onClose={() => { setPkgModal(false); setPkgForm({ package_id: '', ad_id: '', note: '' }); }} title="Dodjeli nalog paket">
                 <div className="space-y-4">
-                    <p className="text-sm text-gray-500">Odaberi paket koji želiš dodijeliti korisniku <strong className="text-[#12142D]">{user.name}</strong> besplatno.</p>
+                    <p className="text-sm text-[#6674A3]">Odaberi paket koji želiš dodijeliti korisniku <strong className="text-white">{user.name}</strong> besplatno.</p>
                     <div className="space-y-2">
                         {listingPackages?.map(pkg => (
                             <label key={pkg.id}
                                 className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition ${
                                     pkgForm.package_id === pkg.id.toString()
-                                        ? 'border-[#FF0026] bg-red-50'
-                                        : 'border-gray-200 hover:border-gray-300'
+                                        ? 'border-[#FF0026] bg-[#FF0026]/10'
+                                        : 'border-white/10 hover:border-white/25'
                                 }`}>
                                 <input
                                     type="radio"
@@ -982,10 +1013,10 @@ function AdminUserDetail() {
                                     className="accent-[#FF0026]"
                                 />
                                 <div className="flex-1">
-                                    <p className="font-semibold text-[#12142D] text-sm">{pkg.name}</p>
-                                    <p className="text-xs text-gray-400">
-                                        {pkg.duration_days} dana · max {pkg.max_active_ads ?? '∞'} oglasa
-                                        {pkg.featured ? ' · ⭐ Premium' : ''}
+                                    <p className="font-semibold text-white text-sm">{pkg.name}</p>
+                                    <p className="text-xs text-[#6674A3]">
+                                        {pkg.duration_days} dana, max {pkg.max_active_ads ?? 'neograničeno'} oglasa
+                                        {pkg.featured ? ', Premium' : ''}
                                     </p>
                                 </div>
                                 <Badge color="green">Besplatno</Badge>
@@ -994,7 +1025,7 @@ function AdminUserDetail() {
                     </div>
                     <div className="flex gap-3 pt-2">
                         <Btn variant="primary" onClick={() => grantPkg.mutate(pkgForm)} disabled={!pkgForm.package_id || grantPkg.isPending}>
-                            {grantPkg.isPending ? 'Dodjeljivanje...' : '📦 Dodjeli paket'}
+                            {grantPkg.isPending ? 'Dodjeljivanje...' : 'Dodjeli paket'}
                         </Btn>
                         <Btn variant="secondary" onClick={() => { setPkgModal(false); setPkgForm({ package_id: '', ad_id: '', note: '' }); }}>Otkaži</Btn>
                     </div>
@@ -1035,23 +1066,23 @@ function AdminReports() {
                 ))}
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                {isLoading && <div className="p-8 text-center text-gray-400">Učitavanje...</div>}
-                <div className="divide-y divide-gray-50">
+            <div className="bg-[#1A1D3A] rounded-2xl border border-white/[0.06] overflow-hidden">
+                {isLoading && <div className="p-8 text-center text-[#6674A3]">Učitavanje...</div>}
+                <div className="divide-y divide-white/[0.06]">
                     {data?.data?.map(report => (
-                        <div key={report.id} className="px-5 py-4 hover:bg-gray-50">
+                        <div key={report.id} className="px-5 py-4 hover:bg-white/[0.04]">
                             <div className="flex items-start justify-between gap-4">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-1">
                                         <Badge color={report.status === 'pending' ? 'yellow' : 'green'}>
                                             {report.status === 'pending' ? 'Na čekanju' : 'Riješeno'}
                                         </Badge>
-                                        <span className="text-xs text-gray-400">{new Date(report.created_at).toLocaleDateString('bs')}</span>
+                                        <span className="text-xs text-[#6674A3]">{new Date(report.created_at).toLocaleDateString('bs')}</span>
                                     </div>
-                                    <p className="font-semibold text-sm text-[#12142D]">{report.reason ?? 'Bez razloga'}</p>
-                                    {report.description && <p className="text-xs text-gray-500 mt-1">{report.description}</p>}
-                                    <div className="flex gap-3 mt-2 text-xs text-gray-400">
-                                        <span>Korisnik: <strong className="text-[#12142D]">{report.user?.name}</strong></span>
+                                    <p className="font-semibold text-sm text-white">{report.reason ?? 'Bez razloga'}</p>
+                                    {report.description && <p className="text-xs text-[#6674A3] mt-1">{report.description}</p>}
+                                    <div className="flex gap-3 mt-2 text-xs text-[#6674A3]">
+                                        <span>Korisnik: <strong className="text-white">{report.user?.name}</strong></span>
                                         {report.ad && (
                                             <a href={`/ads/${report.ad.slug}`} target="_blank" rel="noreferrer"
                                                 className="text-[#FF0026] hover:underline">
@@ -1062,7 +1093,7 @@ function AdminReports() {
                                 </div>
                                 {report.status === 'pending' && (
                                     <Btn size="sm" variant="success" onClick={() => resolve.mutate(report.id)}>
-                                        ✓ Riješi
+                                        Riješi
                                     </Btn>
                                 )}
                             </div>
@@ -1070,7 +1101,7 @@ function AdminReports() {
                     ))}
                 </div>
                 {(!data?.data?.length && !isLoading) && (
-                    <div className="p-8 text-center text-gray-400 text-sm">Nema prijava.</div>
+                    <div className="p-8 text-center text-[#6674A3] text-sm">Nema prijava.</div>
                 )}
                 <Pagination meta={data?.meta} onPage={setPage} />
             </div>
@@ -1221,14 +1252,14 @@ function AdminMakes() {
     );
 
     const catColors = { 1: 'blue', 2: 'purple', 3: 'green', 4: 'yellow' };
-    const catColor = (id) => ({ blue: 'bg-blue-100 text-blue-700', purple: 'bg-purple-100 text-purple-700', green: 'bg-green-100 text-green-700', yellow: 'bg-yellow-100 text-yellow-700' }[catColors[id]] ?? 'bg-gray-100 text-gray-600');
+    const catColor = (id) => ({ blue: 'bg-blue-100 text-blue-700', purple: 'bg-purple-100 text-purple-700', green: 'bg-green-500/15 text-green-400', yellow: 'bg-yellow-100 text-yellow-700' }[catColors[id]] ?? 'bg-white/[0.06] text-[#6674A3]');
 
     return (
         <div className="p-6">
             <PageHeader
                 title="Marke & Modeli"
                 subtitle="Odvojeno po kategoriji vozila"
-                action={<Btn onClick={openAddMake}>+ Dodaj marku</Btn>}
+                action={<Btn onClick={openAddMake}>Dodaj marku</Btn>}
             />
 
             {/* Kategorija filter tabovi */}
@@ -1248,37 +1279,37 @@ function AdminMakes() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 {/* ── Lista marki ── */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="p-4 border-b border-gray-100">
+                <div className="bg-[#1A1D3A] rounded-2xl border border-white/[0.06] overflow-hidden">
+                    <div className="p-4 border-b border-white/[0.06]">
                         <input value={makeSearch} onChange={e => setMakeSearch(e.target.value)}
                             placeholder="Pretraži marku..."
-                            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]" />
+                            className="w-full border border-white/10 rounded-xl px-3 py-2 text-sm bg-[#12142D] text-white placeholder-[#6674A3] focus:outline-none focus:border-[#FF0026]" />
                     </div>
-                    {makesLoading && <div className="p-8 text-center text-gray-400 text-sm">Učitavanje...</div>}
-                    <div className="divide-y divide-gray-50 max-h-[600px] overflow-y-auto">
+                    {makesLoading && <div className="p-8 text-center text-[#6674A3] text-sm">Učitavanje...</div>}
+                    <div className="divide-y divide-white/[0.06] max-h-[600px] overflow-y-auto">
                         {filteredMakes.map(m => (
                             <div key={m.id}
                                 onClick={() => setSelectedMake(m)}
                                 className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition ${
                                     selectedMake?.id === m.id
                                         ? 'bg-[#FF0026]/5 border-l-2 border-[#FF0026]'
-                                        : 'hover:bg-gray-50'
+                                        : 'hover:bg-white/[0.04]'
                                 }`}>
                                 {/* Logo placeholder */}
-                                <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 text-xs font-bold text-gray-400">
+                                <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center flex-shrink-0 text-xs font-bold text-[#6674A3]">
                                     {m.name[0]}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                        <p className="font-semibold text-sm text-[#12142D]">{m.name}</p>
-                                        {!m.is_active && <span className="text-xs bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded">Neaktivna</span>}
+                                        <p className="font-semibold text-sm text-white">{m.name}</p>
+                                        {!m.is_active && <span className="text-xs bg-white/[0.06] text-[#6674A3] px-1.5 py-0.5 rounded">Neaktivna</span>}
                                     </div>
                                     <div className="flex items-center gap-2 mt-0.5">
                                         <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${catColor(m.category_id)}`}>
                                             {catLabel(m.category_id)}
                                         </span>
-                                        {m.country && <span className="text-xs text-gray-400">{m.country}</span>}
-                                        <span className="text-xs text-gray-400">{m.models_count ?? 0} modela</span>
+                                        {m.country && <span className="text-xs text-[#6674A3]">{m.country}</span>}
+                                        <span className="text-xs text-[#6674A3]">{m.models_count ?? 0} modela</span>
                                     </div>
                                 </div>
                                 <div className="flex gap-1.5 flex-shrink-0" onClick={e => e.stopPropagation()}>
@@ -1291,44 +1322,44 @@ function AdminMakes() {
                             </div>
                         ))}
                         {!makesLoading && filteredMakes.length === 0 && (
-                            <div className="p-8 text-center text-gray-400 text-sm">Nema marki.</div>
+                            <div className="p-8 text-center text-[#6674A3] text-sm">Nema marki.</div>
                         )}
                     </div>
                 </div>
 
                 {/* ── Modeli sa hijerarhijom ── */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                <div className="bg-[#1A1D3A] rounded-2xl border border-white/[0.06] overflow-hidden">
+                    <div className="px-5 py-4 border-b border-white/[0.06] flex items-center justify-between">
                         <div>
-                            <h2 className="font-black text-[#12142D]">
+                            <h2 className="font-black text-white">
                                 {selectedMake ? selectedMake.name : 'Odaberi marku →'}
                             </h2>
                             {selectedMake && (
-                                <p className="text-xs text-gray-400 mt-0.5">{catLabel(selectedMake.category_id)}</p>
+                                <p className="text-xs text-[#6674A3] mt-0.5">{catLabel(selectedMake.category_id)}</p>
                             )}
                         </div>
                         {selectedMake && (
-                            <Btn size="sm" onClick={() => openAddModel(null)}>+ Dodaj seriju/model</Btn>
+                            <Btn size="sm" onClick={() => openAddModel(null)}>Dodaj seriju/model</Btn>
                         )}
                     </div>
 
                     {!selectedMake && (
-                        <div className="p-8 text-center text-gray-400 text-sm">← Klikni na marku da vidiš modele</div>
+                        <div className="p-8 text-center text-[#6674A3] text-sm">← Klikni na marku da vidiš modele</div>
                     )}
 
-                    <div className="divide-y divide-gray-50 max-h-[600px] overflow-y-auto">
+                    <div className="divide-y divide-white/[0.06] max-h-[600px] overflow-y-auto">
                         {rootModels.map(rootModel => (
                             <div key={rootModel.id}>
                                 {/* Root model / Serija */}
-                                <div className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50/50">
+                                <div className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.04]">
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
                                             {childrenMap[rootModel.id]?.length > 0 && (
-                                                <span className="text-gray-400 text-xs">📁</span>
+                                                <span className="text-[#6674A3] text-xs">📁</span>
                                             )}
-                                            <p className="font-semibold text-sm text-[#12142D]">{rootModel.name}</p>
+                                            <p className="font-semibold text-sm text-white">{rootModel.name}</p>
                                             {!rootModel.is_active && (
-                                                <span className="text-xs bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded">Neaktivan</span>
+                                                <span className="text-xs bg-white/[0.06] text-[#6674A3] px-1.5 py-0.5 rounded">Neaktivan</span>
                                             )}
                                             {childrenMap[rootModel.id]?.length > 0 && (
                                                 <span className="text-xs text-[#6674A3]">
@@ -1337,7 +1368,7 @@ function AdminMakes() {
                                             )}
                                         </div>
                                         {(rootModel.year_from || rootModel.year_to) && (
-                                            <p className="text-xs text-gray-400 mt-0.5">
+                                            <p className="text-xs text-[#6674A3] mt-0.5">
                                                 {rootModel.year_from && rootModel.year_to
                                                     ? `${rootModel.year_from}–${rootModel.year_to}`
                                                     : rootModel.year_from
@@ -1350,7 +1381,7 @@ function AdminMakes() {
                                         <Btn size="sm" variant="secondary"
                                             onClick={() => openAddModel(rootModel)}
                                             title="Dodaj podmodel">
-                                            + Pod
+                                            Podmodel
                                         </Btn>
                                         <Btn size="sm" variant="secondary" onClick={() => openEditModel(rootModel)}>✏️</Btn>
                                         <Btn size="sm" variant="danger"
@@ -1363,12 +1394,12 @@ function AdminMakes() {
                                 {/* Podmodeli (npr. 318d, 320d unutar Serije 3) */}
                                 {childrenMap[rootModel.id]?.map(child => (
                                     <div key={child.id}
-                                        className={`flex items-center gap-3 pl-10 pr-4 py-2.5 hover:bg-blue-50/30 ${!child.is_active ? 'opacity-50' : ''}`}>
-                                        <div className="w-3 h-3 border-l-2 border-b-2 border-gray-200 flex-shrink-0 -mt-1" />
+                                        className={`flex items-center gap-3 pl-10 pr-4 py-2.5 hover:bg-white/[0.04] ${!child.is_active ? 'opacity-50' : ''}`}>
+                                        <div className="w-3 h-3 border-l-2 border-b-2 border-white/10 flex-shrink-0 -mt-1" />
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm text-[#12142D]">{child.name}</p>
+                                            <p className="text-sm text-white">{child.name}</p>
                                             {(child.year_from || child.year_to) && (
-                                                <p className="text-xs text-gray-400">
+                                                <p className="text-xs text-[#6674A3]">
                                                     {child.year_from && child.year_to
                                                         ? `${child.year_from}–${child.year_to}`
                                                         : child.year_from ? `od ${child.year_from}` : `do ${child.year_to}`}
@@ -1379,7 +1410,7 @@ function AdminMakes() {
                                             <button
                                                 onClick={() => toggleModelActive.mutate(child)}
                                                 className={`text-xs px-2 py-0.5 rounded-full font-medium transition ${
-                                                    child.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                                                    child.is_active ? 'bg-green-500/15 text-green-400' : 'bg-white/[0.06] text-[#6674A3]'
                                                 }`}>
                                                 {child.is_active ? '✓' : '✗'}
                                             </button>
@@ -1394,7 +1425,7 @@ function AdminMakes() {
                             </div>
                         ))}
                         {selectedMake && rootModels.length === 0 && (
-                            <div className="p-8 text-center text-gray-400 text-sm">
+                            <div className="p-8 text-center text-[#6674A3] text-sm">
                                 Nema modela. <button onClick={() => openAddModel(null)} className="text-[#FF0026] hover:underline">Dodaj prvi →</button>
                             </div>
                         )}
@@ -1443,12 +1474,12 @@ function AdminMakes() {
                 }>
                 <div className="space-y-4">
                     {selectedParent && !editingModel && (
-                        <div className="bg-blue-50 text-blue-700 text-xs px-3 py-2 rounded-lg">
+                        <div className="bg-white/[0.06] text-[#6674A3] text-xs px-3 py-2 rounded-lg">
                             Podmodel unutar serije: <strong>{selectedParent.name}</strong>
                         </div>
                     )}
                     {!selectedParent && !editingModel && (
-                        <div className="bg-gray-50 text-gray-600 text-xs px-3 py-2 rounded-lg">
+                        <div className="bg-white/[0.04] text-[#6674A3] text-xs px-3 py-2 rounded-lg">
                             Dodaješ root model ili seriju. Seriji možeš naknadno dodati podmodele.
                         </div>
                     )}
@@ -1513,31 +1544,31 @@ function AdminCities() {
     return (
         <div className="p-6">
             <PageHeader title="Gradovi" subtitle={`${cities?.length ?? 0} gradova`}
-                action={<Btn onClick={() => { setEditing(null); setForm({ name: '', region: '', latitude: '', longitude: '' }); setModal(true); }}>+ Dodaj grad</Btn>} />
+                action={<Btn onClick={() => { setEditing(null); setForm({ name: '', region: '', latitude: '', longitude: '' }); setModal(true); }}>Dodaj grad</Btn>} />
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="p-4 border-b border-gray-100">
+            <div className="bg-[#1A1D3A] rounded-2xl border border-white/[0.06] overflow-hidden">
+                <div className="p-4 border-b border-white/[0.06]">
                     <input value={search} onChange={e => setSearch(e.target.value)}
                         placeholder="Pretraži grad..."
-                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]" />
+                        className="w-full border border-white/10 rounded-xl px-3 py-2 text-sm bg-[#12142D] text-white placeholder-[#6674A3] focus:outline-none focus:border-[#FF0026]" />
                 </div>
-                {isLoading && <div className="p-8 text-center text-gray-400">Učitavanje...</div>}
+                {isLoading && <div className="p-8 text-center text-[#6674A3]">Učitavanje...</div>}
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="border-b border-gray-100 bg-gray-50/50">
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Naziv</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Regija</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Koordinate</th>
-                                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500">Akcije</th>
+                            <tr className="border-b border-white/[0.06] bg-white/[0.04]">
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Naziv</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Regija</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Koordinate</th>
+                                <th className="text-right px-4 py-3 text-xs font-semibold text-[#6674A3]">Akcije</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-white/[0.06]">
                             {filtered.map(c => (
-                                <tr key={c.id} className="hover:bg-gray-50/50">
-                                    <td className="px-4 py-3 font-semibold text-[#12142D]">{c.name}</td>
-                                    <td className="px-4 py-3 text-gray-500">{c.region ?? '—'}</td>
-                                    <td className="px-4 py-3 text-xs text-gray-400 font-mono">{c.latitude}, {c.longitude}</td>
+                                <tr key={c.id} className="hover:bg-white/[0.04]">
+                                    <td className="px-4 py-3 font-semibold text-white">{c.name}</td>
+                                    <td className="px-4 py-3 text-[#6674A3]">{c.region ?? '—'}</td>
+                                    <td className="px-4 py-3 text-xs text-[#6674A3] font-mono">{c.latitude}, {c.longitude}</td>
                                     <td className="px-4 py-3">
                                         <div className="flex gap-1.5 justify-end">
                                             <Btn size="sm" variant="secondary" onClick={() => openEdit(c)}>✏️</Btn>
@@ -1616,7 +1647,7 @@ function AdminEquipment() {
     return (
         <div className="p-6">
             <PageHeader title="Oprema" subtitle={`${equipment?.length ?? 0} stavki`}
-                action={<Btn onClick={() => { setEditing(null); setForm({ name: '', category: '' }); setModal(true); }}>+ Dodaj opremu</Btn>} />
+                action={<Btn onClick={() => { setEditing(null); setForm({ name: '', category: '' }); setModal(true); }}>Dodaj opremu</Btn>} />
 
             <div className="flex gap-2 mb-4 flex-wrap">
                 <Btn size="sm" variant={catFilter === '' ? 'primary' : 'secondary'} onClick={() => setCatFilter('')}>Sve</Btn>
@@ -1625,18 +1656,18 @@ function AdminEquipment() {
                 ))}
             </div>
 
-            {isLoading && <div className="p-8 text-center text-gray-400">Učitavanje...</div>}
+            {isLoading && <div className="p-8 text-center text-[#6674A3]">Učitavanje...</div>}
 
             <div className="space-y-4">
                 {grouped && Object.entries(grouped).map(([cat, items]) => (
-                    <div key={cat} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50">
-                            <h3 className="font-bold text-sm text-[#12142D]">{cat} <span className="text-gray-400 font-normal">({items.length})</span></h3>
+                    <div key={cat} className="bg-[#1A1D3A] rounded-2xl border border-white/[0.06] overflow-hidden">
+                        <div className="px-5 py-3 border-b border-white/[0.06] bg-white/[0.04]">
+                            <h3 className="font-bold text-sm text-white">{cat} <span className="text-[#6674A3] font-normal">({items.length})</span></h3>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0 divide-y sm:divide-y-0">
                             {items.map(eq => (
-                                <div key={eq.id} className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 border-b border-gray-50">
-                                    <span className="text-sm text-[#12142D]">{eq.name}</span>
+                                <div key={eq.id} className="flex items-center justify-between px-4 py-2.5 hover:bg-white/[0.04] border-b border-white/[0.06]">
+                                    <span className="text-sm text-white">{eq.name}</span>
                                     <div className="flex gap-1.5">
                                         <Btn size="sm" variant="secondary" onClick={() => openEdit(eq)}>✏️</Btn>
                                         <Btn size="sm" variant="danger" onClick={() => window.confirm('Obrisati?') && remove.mutate(eq.id)}>🗑</Btn>
@@ -1696,24 +1727,24 @@ function EditableChipGroup({ opts = [], onAdd, onEdit, onDelete, isColor = false
             {opts.map(opt => (
                 <div key={opt.id}
                     className={`group flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border font-medium transition
-                        ${opt.is_active ? 'border-gray-200 bg-white text-gray-700' : 'border-gray-100 bg-gray-50 text-gray-300 line-through'}`}>
+                        ${opt.is_active ? 'border-white/10 bg-[#12142D] text-white/80' : 'border-white/[0.06] bg-white/[0.02] text-[#6674A3]/60 line-through'}`}>
                     {isColor && opt.metadata?.hex && (
-                        <span className="w-3.5 h-3.5 rounded-full flex-shrink-0 border border-gray-200"
+                        <span className="w-3.5 h-3.5 rounded-full flex-shrink-0 border border-white/20"
                             style={{ backgroundColor: opt.metadata.hex }} />
                     )}
                     <span>{opt.label}</span>
-                    <span className="text-gray-300 text-[10px] font-mono ml-0.5">({opt.value})</span>
-                    <div className="hidden group-hover:flex items-center gap-0.5 ml-1 pl-1.5 border-l border-gray-200">
+                    <span className="text-[#6674A3]/70 text-[10px] font-mono ml-0.5">({opt.value})</span>
+                    <div className="hidden group-hover:flex items-center gap-1 ml-1 pl-1.5 border-l border-white/10">
                         <button onClick={() => onEdit(opt)} title="Uredi"
-                            className="text-gray-400 hover:text-blue-500 transition text-[11px]">✏️</button>
+                            className="text-[#6674A3] hover:text-white transition"><Ic d={IC.pencil} className="w-3 h-3" /></button>
                         <button onClick={() => onDelete(opt.id)} title="Obriši"
-                            className="text-gray-400 hover:text-[#FF0026] transition text-[11px] font-black leading-none">✕</button>
+                            className="text-[#6674A3] hover:text-[#FF0026] transition"><Ic d={IC.x} className="w-3 h-3" /></button>
                     </div>
                 </div>
             ))}
             <button onClick={onAdd}
-                className="text-xs px-3 py-1.5 rounded-lg border border-dashed border-[#FF0026]/40 text-[#FF0026] font-medium hover:bg-red-50 hover:border-[#FF0026] transition">
-                + Dodaj
+                className="text-xs px-3 py-1.5 rounded-lg border border-dashed border-[#FF0026]/40 text-[#FF0026] font-medium hover:bg-[#FF0026]/10 hover:border-[#FF0026] transition">
+                Dodaj
             </button>
         </div>
     );
@@ -1722,11 +1753,11 @@ function EditableChipGroup({ opts = [], onAdd, onEdit, onDelete, isColor = false
 function FilterSection({ title, children }) {
     const [open, setOpen] = useState(true);
     return (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm mb-4 overflow-hidden">
+        <div className="bg-[#1A1D3A] rounded-2xl border border-white/[0.06] mb-4 overflow-hidden">
             <button onClick={() => setOpen(p => !p)}
-                className="w-full flex items-center justify-between px-5 py-4 bg-gray-50/50 hover:bg-gray-50 transition">
-                <span className="font-bold text-[#12142D] text-sm">{title}</span>
-                <span className="text-gray-400 text-xs">{open ? '▲' : '▼'}</span>
+                className="w-full flex items-center justify-between px-5 py-4 bg-white/[0.02] hover:bg-white/[0.04] transition">
+                <span className="font-bold text-white text-sm">{title}</span>
+                <Ic d={IC.chevron} className={`w-4 h-4 text-[#6674A3] transition-transform ${open ? 'rotate-180' : ''}`} />
             </button>
             {open && <div className="px-5 pb-5 pt-4 space-y-5">{children}</div>}
         </div>
@@ -1821,10 +1852,10 @@ function AdminFilters() {
     );
 
     const TABS = [
-        { id: 'auto',      label: '🚗 Auto' },
-        { id: 'motocikl',  label: '🏍 Motocikl' },
-        { id: 'nautika',   label: '⛵ Nautika' },
-        { id: 'transport', label: '🚛 Transport' },
+        { id: 'auto',      label: 'Auto' },
+        { id: 'motocikl',  label: 'Motocikl' },
+        { id: 'nautika',   label: 'Nautika' },
+        { id: 'transport', label: 'Transport' },
     ];
 
     return (
@@ -1841,13 +1872,13 @@ function AdminFilters() {
                         className={`px-4 py-2 rounded-xl font-bold text-sm transition
                             ${activeTab === tab.id
                                 ? 'bg-[#FF0026] text-white'
-                                : 'bg-white border border-gray-200 text-gray-600 hover:border-[#FF0026]'}`}>
+                                : 'bg-[#1A1D3A] border border-white/10 text-[#6674A3] hover:border-[#FF0026] hover:text-white'}`}>
                         {tab.label}
                     </button>
                 ))}
             </div>
 
-            {isLoading && <div className="p-8 text-center text-gray-400">Učitavanje...</div>}
+            {isLoading && <div className="p-8 text-center text-[#6674A3]">Učitavanje...</div>}
 
             {!isLoading && (
                 <>
@@ -1856,52 +1887,52 @@ function AdminFilters() {
                         <>
                             <FilterSection title="Stanje / Istorija vozila">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Stanje vozila</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Stanje vozila</label>
                                     <Chips ft="condition" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Oštećenje</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Oštećenje</label>
                                     <Chips ft="damage" />
                                 </div>
                             </FilterSection>
 
                             <FilterSection title="Tehnički podaci">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Gorivo</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Gorivo</label>
                                     <Chips ft="fuel_type" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Mjenjač</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Mjenjač</label>
                                     <Chips ft="transmission" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Pogon</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Pogon</label>
                                     <Chips ft="drive_type" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Euro norma</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Euro norma</label>
                                     <Chips ft="emission_class" />
                                 </div>
                             </FilterSection>
 
                             <FilterSection title="Eksterijer">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Karoserija</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Karoserija</label>
                                     <Chips ft="body_type" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Boja eksterijera</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Boja eksterijera</label>
                                     <Chips ft="color_exterior" isColor />
                                 </div>
                             </FilterSection>
 
                             <FilterSection title="Interijer">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Boja interijera</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Boja interijera</label>
                                     <Chips ft="color_interior" isColor />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Materijal sjedišta</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Materijal sjedišta</label>
                                     <Chips ft="seat_material" />
                                 </div>
                             </FilterSection>
@@ -1913,40 +1944,40 @@ function AdminFilters() {
                         <>
                             <FilterSection title="Osnovi podaci">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Kategorija (tip motocikla)</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Kategorija (tip motocikla)</label>
                                     <Chips ft="body_type" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Stanje vozila</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Stanje vozila</label>
                                     <Chips ft="condition" />
                                 </div>
                             </FilterSection>
 
                             <FilterSection title="Tehnički podaci">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Gorivo</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Gorivo</label>
                                     <Chips ft="fuel_type" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Mjenjač</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Mjenjač</label>
                                     <Chips ft="transmission" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Pogon</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Pogon</label>
                                     <Chips ft="drive_type" />
                                 </div>
                             </FilterSection>
 
                             <FilterSection title="Oprema">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Boja eksterijera</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Boja eksterijera</label>
                                     <Chips ft="color_exterior" isColor />
                                 </div>
                             </FilterSection>
 
                             <FilterSection title="Istorija vozila">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Oštećenje</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Oštećenje</label>
                                     <Chips ft="damage" />
                                 </div>
                             </FilterSection>
@@ -1958,22 +1989,22 @@ function AdminFilters() {
                         <>
                             <FilterSection title="Osnovi podaci">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Gorivo / Vrsta motora</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Gorivo / Vrsta motora</label>
                                     <Chips ft="fuel_type" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Stanje</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Stanje</label>
                                     <Chips ft="condition" />
                                 </div>
                             </FilterSection>
 
                             <FilterSection title="Oprema">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Boja</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Boja</label>
                                     <Chips ft="color_exterior" isColor />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Oštećenje</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Oštećenje</label>
                                     <Chips ft="damage" />
                                 </div>
                             </FilterSection>
@@ -1985,40 +2016,40 @@ function AdminFilters() {
                         <>
                             <FilterSection title="Osnovi podaci">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Stanje vozila</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Stanje vozila</label>
                                     <Chips ft="condition" />
                                 </div>
                             </FilterSection>
 
                             <FilterSection title="Tehnički podaci">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Gorivo</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Gorivo</label>
                                     <Chips ft="fuel_type" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Mjenjač</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Mjenjač</label>
                                     <Chips ft="transmission" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Pogon</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Pogon</label>
                                     <Chips ft="drive_type" />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Euro norma</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Euro norma</label>
                                     <Chips ft="emission_class" />
                                 </div>
                             </FilterSection>
 
                             <FilterSection title="Eksterijer">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Boja eksterijera</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Boja eksterijera</label>
                                     <Chips ft="color_exterior" isColor />
                                 </div>
                             </FilterSection>
 
                             <FilterSection title="Istorija vozila">
                                 <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-2">Oštećenje</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-2">Oštećenje</label>
                                     <Chips ft="damage" />
                                 </div>
                             </FilterSection>
@@ -2033,9 +2064,9 @@ function AdminFilters() {
                     ? `Uredi: ${FILTER_TYPE_LABELS[addCtx.filter_type] ?? addCtx.filter_type}`
                     : `Dodaj: ${FILTER_TYPE_LABELS[addCtx.filter_type] ?? addCtx.filter_type}`}>
                 <div className="space-y-4">
-                    <div className="bg-gray-50 rounded-xl px-4 py-2.5 text-xs text-gray-500 flex gap-4">
-                        <span>Tip: <strong className="text-[#12142D]">{addCtx.filter_type}</strong></span>
-                        <span>Kategorija: <strong className="text-[#12142D]">{addCtx.category || 'sve'}</strong></span>
+                    <div className="bg-white/[0.04] rounded-xl px-4 py-2.5 text-xs text-[#6674A3] flex gap-4">
+                        <span>Tip: <strong className="text-white">{addCtx.filter_type}</strong></span>
+                        <span>Kategorija: <strong className="text-white">{addCtx.category || 'sve'}</strong></span>
                     </div>
                     <Input label="Label (prikaz korisniku)" value={form.label}
                         onChange={e => setForm(p => ({ ...p, label: e.target.value }))}
@@ -2047,17 +2078,17 @@ function AdminFilters() {
                         onChange={e => setForm(p => ({ ...p, sort_order: parseInt(e.target.value) || 0 }))} />
                     {(addCtx.filter_type === 'color_exterior' || addCtx.filter_type === 'color_interior') && (
                         <div>
-                            <label className="block text-xs font-semibold text-gray-600 mb-1">Hex boja</label>
+                            <label className="block text-xs font-semibold text-[#6674A3] mb-1">Hex boja</label>
                             <div className="flex items-center gap-3">
                                 <input type="color" value={hexColor || '#000000'} onChange={e => setHexColor(e.target.value)}
-                                    className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer" />
+                                    className="w-10 h-10 rounded-lg border border-white/10 cursor-pointer" />
                                 <input value={hexColor} onChange={e => setHexColor(e.target.value)}
                                     placeholder="#FF0000"
-                                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]" />
+                                    className="flex-1 border border-white/10 rounded-xl px-3 py-2 text-sm bg-[#12142D] text-white placeholder-[#6674A3] focus:outline-none focus:border-[#FF0026]" />
                             </div>
                         </div>
                     )}
-                    <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <label className="flex items-center gap-2 text-sm text-white/80 cursor-pointer">
                         <input type="checkbox" checked={form.is_active}
                             onChange={e => setForm(p => ({ ...p, is_active: e.target.checked }))} className="rounded" />
                         Aktivna opcija
@@ -2119,20 +2150,20 @@ function AdminPackages() {
     return (
         <div className="p-6">
             <PageHeader title="Paketi"
-                action={<Btn onClick={() => { setEditing(null); setForm(emptyForm); setModal(true); }}>+ Novi paket</Btn>} />
+                action={<Btn onClick={() => { setEditing(null); setForm(emptyForm); setModal(true); }}>Novi paket</Btn>} />
 
-            {isLoading && <div className="p-8 text-center text-gray-400">Učitavanje...</div>}
+            {isLoading && <div className="p-8 text-center text-[#6674A3]">Učitavanje...</div>}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {packages?.map(pkg => (
-                    <div key={pkg.id} className={`bg-white rounded-2xl shadow-sm border overflow-hidden ${!pkg.is_active ? 'opacity-60 border-gray-100' : 'border-gray-100'}`}>
-                        <div className="px-5 py-4 border-b border-gray-50">
+                    <div key={pkg.id} className={`bg-[#1A1D3A] border border-white/[0.06] rounded-2xl overflow-hidden ${!pkg.is_active ? 'opacity-60' : ''}`}>
+                        <div className="px-5 py-4 border-b border-white/[0.06]">
                             <div className="flex items-start justify-between gap-2">
                                 <div>
-                                    <p className="font-black text-[#12142D]">{pkg.name}</p>
+                                    <p className="font-black text-white">{pkg.name}</p>
                                     <div className="flex gap-1.5 mt-1">
                                         <Badge color={typeColor[pkg.type] ?? 'gray'}>{typeLabel[pkg.type] ?? pkg.type}</Badge>
-                                        {pkg.featured && <Badge color="yellow">⭐ Featured</Badge>}
+                                        {pkg.featured && <Badge color="yellow">Featured</Badge>}
                                         {!pkg.is_active && <Badge color="gray">Neaktivan</Badge>}
                                     </div>
                                 </div>
@@ -2141,16 +2172,16 @@ function AdminPackages() {
                                 </div>
                             </div>
                         </div>
-                        <div className="px-5 py-3 space-y-1 text-xs text-gray-500">
-                            <div className="flex justify-between"><span>Trajanje</span><span className="font-semibold text-[#12142D]">{pkg.duration_days} dana</span></div>
-                            <div className="flex justify-between"><span>Max slika</span><span className="font-semibold text-[#12142D]">{pkg.max_images}</span></div>
-                            {pkg.max_active_ads && <div className="flex justify-between"><span>Max aktivnih oglasa</span><span className="font-semibold text-[#12142D]">{pkg.max_active_ads}</span></div>}
-                            {pkg.refresh_days && <div className="flex justify-between"><span>Osvježi svakih</span><span className="font-semibold text-[#12142D]">{pkg.refresh_days} dana</span></div>}
-                            {pkg.description && <p className="text-gray-400 pt-1">{pkg.description}</p>}
+                        <div className="px-5 py-3 space-y-1 text-xs text-[#6674A3]">
+                            <div className="flex justify-between"><span>Trajanje</span><span className="font-semibold text-white">{pkg.duration_days} dana</span></div>
+                            <div className="flex justify-between"><span>Max slika</span><span className="font-semibold text-white">{pkg.max_images}</span></div>
+                            {pkg.max_active_ads && <div className="flex justify-between"><span>Max aktivnih oglasa</span><span className="font-semibold text-white">{pkg.max_active_ads}</span></div>}
+                            {pkg.refresh_days && <div className="flex justify-between"><span>Osvježi svakih</span><span className="font-semibold text-white">{pkg.refresh_days} dana</span></div>}
+                            {pkg.description && <p className="text-[#6674A3] pt-1">{pkg.description}</p>}
                         </div>
-                        <div className="px-5 py-3 border-t border-gray-50 flex gap-2">
-                            <Btn size="sm" variant="secondary" onClick={() => openEdit(pkg)}>✏️ Uredi</Btn>
-                            <Btn size="sm" variant="danger" onClick={() => window.confirm('Obrisati paket?') && remove.mutate(pkg.id)}>🗑 Obriši</Btn>
+                        <div className="px-5 py-3 border-t border-white/[0.06] flex gap-2">
+                            <Btn size="sm" variant="secondary" onClick={() => openEdit(pkg)}>Uredi</Btn>
+                            <Btn size="sm" variant="danger" onClick={() => window.confirm('Obrisati paket?') && remove.mutate(pkg.id)}>Obriši</Btn>
                         </div>
                     </div>
                 ))}
@@ -2172,9 +2203,9 @@ function AdminPackages() {
                         <Input label="Osvježi svakih (dana)" type="number" value={form.refresh_days} onChange={f('refresh_days')} placeholder="opciono" />
                     </div>
                     <div>
-                        <label className="block text-xs font-semibold text-gray-600 mb-1">Opis</label>
+                        <label className="block text-xs font-semibold text-[#6674A3] mb-1">Opis</label>
                         <textarea value={form.description} onChange={f('description')} rows={2} placeholder="Kratak opis paketa..."
-                            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] resize-none" />
+                            className="w-full border border-white/10 rounded-xl px-3 py-2 text-sm bg-[#12142D] text-white placeholder-[#6674A3] focus:outline-none focus:border-[#FF0026] resize-none" />
                     </div>
                     <div className="flex gap-6">
                         <label className="flex items-center gap-2 text-sm cursor-pointer">
@@ -2247,12 +2278,12 @@ function AdminPayments() {
         <div className="p-6">
             <PageHeader title="Plaćanja" subtitle={`Ukupno: ${data?.total ?? 0}`} />
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-4 flex flex-wrap gap-3">
+            <div className="bg-[#1A1D3A] rounded-2xl border border-white/[0.06] p-4 mb-4 flex flex-wrap gap-3">
                 <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
                     placeholder="Pretraži po referenci..."
-                    className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] flex-1 min-w-48" />
+                    className="border border-white/10 rounded-xl px-3 py-2 text-sm bg-[#12142D] text-white placeholder-[#6674A3] focus:outline-none focus:border-[#FF0026] flex-1 min-w-48" />
                 <select value={status} onChange={e => { setStatus(e.target.value); setPage(1); }}
-                    className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]">
+                    className="border border-white/10 rounded-xl px-3 py-2 text-sm bg-[#12142D] text-white placeholder-[#6674A3] focus:outline-none focus:border-[#FF0026]">
                     <option value="">Svi statusi</option>
                     <option value="pending">Na čekanju</option>
                     <option value="completed">Potvrđeno</option>
@@ -2260,50 +2291,50 @@ function AdminPayments() {
                 </select>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                {isLoading && <div className="p-8 text-center text-gray-400">Učitavanje...</div>}
+            <div className="bg-[#1A1D3A] rounded-2xl border border-white/[0.06] overflow-hidden">
+                {isLoading && <div className="p-8 text-center text-[#6674A3]">Učitavanje...</div>}
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="border-b border-gray-100 bg-gray-50/50">
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Korisnik</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Paket</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Iznos</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Metoda</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Referenca</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Status</th>
-                                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500">Datum</th>
-                                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500">Akcije</th>
+                            <tr className="border-b border-white/[0.06] bg-white/[0.04]">
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Korisnik</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Paket</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Iznos</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Metoda</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Referenca</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Status</th>
+                                <th className="text-left px-4 py-3 text-xs font-semibold text-[#6674A3]">Datum</th>
+                                <th className="text-right px-4 py-3 text-xs font-semibold text-[#6674A3]">Akcije</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-white/[0.06]">
                             {data?.data?.map(p => (
-                                <tr key={p.id} className="hover:bg-gray-50/50">
+                                <tr key={p.id} className="hover:bg-white/[0.04]">
                                     <td className="px-4 py-3">
-                                        <p className="font-semibold text-[#12142D]">{p.user_package?.user?.name ?? p.user?.name ?? '—'}</p>
-                                        <p className="text-xs text-gray-400">{p.user_package?.user?.email ?? p.user?.email}</p>
+                                        <p className="font-semibold text-white">{p.user_package?.user?.name ?? p.user?.name ?? 'Nepoznato'}</p>
+                                        <p className="text-xs text-[#6674A3]">{p.user_package?.user?.email ?? p.user?.email}</p>
                                     </td>
-                                    <td className="px-4 py-3 text-[#12142D]">{p.user_package?.package?.name ?? '—'}</td>
-                                    <td className="px-4 py-3 font-semibold text-[#12142D]">{p.amount} €</td>
+                                    <td className="px-4 py-3 text-white">{p.user_package?.package?.name ?? 'Bez paketa'}</td>
+                                    <td className="px-4 py-3 font-semibold text-white">{p.amount} €</td>
                                     <td className="px-4 py-3">
                                         <Badge color={p.payment_method === 'bank_transfer' ? 'blue' : p.payment_method === 'admin_grant' ? 'purple' : 'gray'}>
                                             {methodLabel[p.payment_method] ?? p.payment_method}
                                         </Badge>
                                     </td>
-                                    <td className="px-4 py-3 font-mono text-xs text-gray-500">{p.reference ?? '—'}</td>
+                                    <td className="px-4 py-3 font-mono text-xs text-[#6674A3]">{p.reference ?? 'Bez reference'}</td>
                                     <td className="px-4 py-3">
                                         <Badge color={statusColor[p.status] ?? 'gray'}>{statusLabel[p.status] ?? p.status}</Badge>
-                                        {p.admin_note && <p className="text-xs text-gray-400 mt-0.5">{p.admin_note}</p>}
+                                        {p.admin_note && <p className="text-xs text-[#6674A3] mt-0.5">{p.admin_note}</p>}
                                     </td>
-                                    <td className="px-4 py-3 text-xs text-gray-400">{new Date(p.created_at).toLocaleDateString('bs')}</td>
+                                    <td className="px-4 py-3 text-xs text-[#6674A3]">{new Date(p.created_at).toLocaleDateString('bs')}</td>
                                     <td className="px-4 py-3">
                                         {p.status === 'pending' && (
                                             <div className="flex gap-1.5 justify-end">
                                                 <Btn size="sm" variant="success" onClick={() => setNoteModal({ id: p.id, action: 'confirm' })}>
-                                                    ✓ Potvrdi
+                                                    Potvrdi
                                                 </Btn>
                                                 <Btn size="sm" variant="danger" onClick={() => setNoteModal({ id: p.id, action: 'reject' })}>
-                                                    ✕ Odbij
+                                                    Odbij
                                                 </Btn>
                                             </div>
                                         )}
@@ -2314,28 +2345,28 @@ function AdminPayments() {
                     </table>
                 </div>
                 {(!data?.data?.length && !isLoading) && (
-                    <div className="p-8 text-center text-gray-400 text-sm">Nema plaćanja.</div>
+                    <div className="p-8 text-center text-[#6674A3] text-sm">Nema plaćanja.</div>
                 )}
                 <Pagination meta={data?.meta} onPage={setPage} />
             </div>
 
             {/* Modal za napomenu pri potvrdi/odbijanju */}
             <Modal open={!!noteModal} onClose={() => { setNoteModal(null); setNote(''); }}
-                title={noteModal?.action === 'confirm' ? '✓ Potvrdi uplatu' : '✕ Odbij uplatu'}>
+                title={noteModal?.action === 'confirm' ? 'Potvrdi uplatu' : 'Odbij uplatu'}>
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-xs font-semibold text-gray-600 mb-1">Napomena (opciono)</label>
+                        <label className="block text-xs font-semibold text-[#6674A3] mb-1">Napomena (opciono)</label>
                         <textarea value={note} onChange={e => setNote(e.target.value)} rows={3}
                             placeholder="npr. Uplata primljena na račun 15.04.2026."
-                            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] resize-none" />
+                            className="w-full border border-white/10 rounded-xl px-3 py-2 text-sm bg-[#12142D] text-white placeholder-[#6674A3] focus:outline-none focus:border-[#FF0026] resize-none" />
                     </div>
                     <div className="flex gap-3">
                         {noteModal?.action === 'confirm'
                             ? <Btn variant="success" onClick={() => confirm.mutate({ id: noteModal.id, n: note })} disabled={confirm.isPending}>
-                                {confirm.isPending ? 'Potvrđivanje...' : '✓ Potvrdi uplatu'}
+                                {confirm.isPending ? 'Potvrđivanje...' : 'Potvrdi uplatu'}
                               </Btn>
                             : <Btn variant="danger" onClick={() => reject.mutate({ id: noteModal.id, n: note })} disabled={reject.isPending}>
-                                {reject.isPending ? 'Odbijanje...' : '✕ Odbij uplatu'}
+                                {reject.isPending ? 'Odbijanje...' : 'Odbij uplatu'}
                               </Btn>
                         }
                         <Btn variant="secondary" onClick={() => { setNoteModal(null); setNote(''); }}>Otkaži</Btn>
@@ -2443,34 +2474,34 @@ function AdminCategories() {
             <PageHeader
                 title="Kategorije vozila"
                 subtitle="Upravljaj hijerarhijom kategorija i podkategorija"
-                action={<Btn onClick={() => openAdd(null)}>+ Dodaj kategoriju</Btn>}
+                action={<Btn onClick={() => openAdd(null)}>Dodaj kategoriju</Btn>}
             />
 
-            {isLoading && <div className="text-center text-gray-400 py-8">Učitavanje...</div>}
+            {isLoading && <div className="text-center text-[#6674A3] py-8">Učitavanje...</div>}
 
             <div className="space-y-3">
                 {categories?.map(cat => (
-                    <div key={cat.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div key={cat.id} className="bg-[#1A1D3A] rounded-2xl border border-white/[0.06] overflow-hidden">
 
                         {/* Root kategorija */}
-                        <div className="flex items-center gap-3 px-5 py-4 bg-gray-50/50">
+                        <div className="flex items-center gap-3 px-5 py-4 bg-white/[0.04]">
                             <div className="flex flex-col gap-0.5">
-                                <button onClick={() => moveUp(cat, categories)} className="text-gray-300 hover:text-gray-500 text-xs leading-none">▲</button>
-                                <button onClick={() => moveDown(cat, categories)} className="text-gray-300 hover:text-gray-500 text-xs leading-none">▼</button>
+                                <button onClick={() => moveUp(cat, categories)} className="text-[#6674A3]/50 hover:text-[#6674A3] text-xs leading-none">▲</button>
+                                <button onClick={() => moveDown(cat, categories)} className="text-[#6674A3]/50 hover:text-[#6674A3] text-xs leading-none">▼</button>
                             </div>
                             <span className="text-xl">{cat.icon ?? '📁'}</span>
                             <div className="flex-1">
                                 <div className="flex items-center gap-2">
-                                    <p className="font-black text-[#12142D]">{cat.name}</p>
+                                    <p className="font-black text-white">{cat.name}</p>
                                     {!cat.is_active && <Badge color="gray">Neaktivna</Badge>}
-                                    <span className="text-xs text-gray-400">
+                                    <span className="text-xs text-[#6674A3]">
                                         {cat.children?.length ?? 0} podkategorija · {cat.makes_count ?? 0} marki
                                     </span>
                                 </div>
-                                <p className="text-xs text-gray-400 font-mono">{cat.slug}</p>
+                                <p className="text-xs text-[#6674A3] font-mono">{cat.slug}</p>
                             </div>
                             <div className="flex gap-2">
-                                <Btn size="sm" variant="secondary" onClick={() => openAdd(cat)}>+ Podkategorija</Btn>
+                                <Btn size="sm" variant="secondary" onClick={() => openAdd(cat)}>Podkategorija</Btn>
                                 <Btn size="sm" variant="secondary" onClick={() => openEdit(cat)}>✏️</Btn>
                                 <Btn size="sm" variant="danger"
                                     onClick={() => window.confirm(`Obrisati "${cat.name}"?`) && remove.mutate(cat.id)}>
@@ -2481,21 +2512,21 @@ function AdminCategories() {
 
                         {/* Podkategorije */}
                         {cat.children?.length > 0 && (
-                            <div className="divide-y divide-gray-50">
+                            <div className="divide-y divide-white/[0.06]">
                                 {cat.children.map(sub => (
-                                    <div key={sub.id} className={`flex items-center gap-3 pl-14 pr-5 py-3 hover:bg-gray-50 ${!sub.is_active ? 'opacity-50' : ''}`}>
+                                    <div key={sub.id} className={`flex items-center gap-3 pl-14 pr-5 py-3 hover:bg-white/[0.04] ${!sub.is_active ? 'opacity-50' : ''}`}>
                                         <div className="flex flex-col gap-0.5">
-                                            <button onClick={() => moveUp(sub, cat.children)} className="text-gray-300 hover:text-gray-500 text-xs leading-none">▲</button>
-                                            <button onClick={() => moveDown(sub, cat.children)} className="text-gray-300 hover:text-gray-500 text-xs leading-none">▼</button>
+                                            <button onClick={() => moveUp(sub, cat.children)} className="text-[#6674A3]/50 hover:text-[#6674A3] text-xs leading-none">▲</button>
+                                            <button onClick={() => moveDown(sub, cat.children)} className="text-[#6674A3]/50 hover:text-[#6674A3] text-xs leading-none">▼</button>
                                         </div>
-                                        <div className="w-1.5 h-1.5 rounded-full bg-gray-300 flex-shrink-0" />
+                                        <div className="w-1.5 h-1.5 rounded-full bg-[#6674A3]/50 flex-shrink-0" />
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2">
-                                                <p className="text-sm font-semibold text-[#12142D]">{sub.name}</p>
+                                                <p className="text-sm font-semibold text-white">{sub.name}</p>
                                                 {!sub.is_active && <Badge color="gray">Neaktivna</Badge>}
-                                                <span className="text-xs text-gray-400">{sub.makes_count ?? 0} marki</span>
+                                                <span className="text-xs text-[#6674A3]">{sub.makes_count ?? 0} marki</span>
                                             </div>
-                                            <p className="text-xs text-gray-400 font-mono">{sub.slug}</p>
+                                            <p className="text-xs text-[#6674A3] font-mono">{sub.slug}</p>
                                         </div>
                                         <div className="flex gap-1.5">
                                             <Btn size="sm" variant="secondary" onClick={() => openEdit(sub)}>✏️</Btn>
@@ -2511,9 +2542,9 @@ function AdminCategories() {
 
                         {/* Dodaj prvu podkategoriju */}
                         {cat.children?.length === 0 && (
-                            <div className="px-14 py-3 border-t border-gray-50">
+                            <div className="px-14 py-3 border-t border-white/[0.06]">
                                 <button onClick={() => openAdd(cat)}
-                                    className="text-xs text-gray-400 hover:text-[#FF0026] transition">
+                                    className="text-xs text-[#6674A3] hover:text-[#FF0026] transition">
                                     + Dodaj podkategoriju
                                 </button>
                             </div>
@@ -2535,7 +2566,7 @@ function AdminCategories() {
                 }>
                 <div className="space-y-4">
                     {parentForNew && !editing && (
-                        <div className="bg-blue-50 text-blue-700 text-xs px-3 py-2 rounded-lg">
+                        <div className="bg-white/[0.06] text-[#6674A3] text-xs px-3 py-2 rounded-lg">
                             Podkategorija unutar: <strong>{parentForNew.name}</strong>
                         </div>
                     )}
@@ -2547,12 +2578,12 @@ function AdminCategories() {
                     />
                     <div className="grid grid-cols-2 gap-3">
                         <div>
-                            <label className="block text-xs font-semibold text-gray-600 mb-1">Ikonica (emoji)</label>
+                            <label className="block text-xs font-semibold text-[#6674A3] mb-1">Ikonica (emoji)</label>
                             <input
                                 value={form.icon}
                                 onChange={f('icon')}
                                 placeholder="npr. 🏍"
-                                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]"
+                                className="w-full border border-white/10 rounded-xl px-3 py-2 text-sm bg-[#12142D] text-white placeholder-[#6674A3] focus:outline-none focus:border-[#FF0026]"
                             />
                         </div>
                         <Input
@@ -2623,14 +2654,14 @@ function AdminSettings() {
         <div className="p-6 max-w-2xl">
             <PageHeader title="Podešavanja" subtitle="Konfiguracija podataka za uplatnicu i sistem" />
 
-            {isLoading && <div className="p-8 text-center text-gray-400">Učitavanje...</div>}
+            {isLoading && <div className="p-8 text-center text-[#6674A3]">Učitavanje...</div>}
 
             {!isLoading && (
                 <div className="space-y-6">
                     {/* Uplatnica podaci */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                        <h2 className="font-black text-[#12142D] mb-1">Podaci za uplatnicu</h2>
-                        <p className="text-xs text-gray-400 mb-5">
+                    <div className="bg-[#1A1D3A] rounded-2xl border border-white/[0.06] p-6">
+                        <h2 className="font-black text-white mb-1">Podaci za uplatnicu</h2>
+                        <p className="text-xs text-[#6674A3] mb-5">
                             Ovi podaci se prikazuju korisnicima kada odaberu plaćanje uplatnicom.
                         </p>
 
@@ -2643,9 +2674,9 @@ function AdminSettings() {
                                 {[
                                     { l: 'Iznos za uplatu',  v: 'IZNOS PAKETA' },
                                     { l: 'Svrha uplate',     v: 'AD384226... (auto-generisan)', highlight: true },
-                                    { l: 'Naziv korisnika',  v: form.bank_naziv || '—' },
-                                    { l: 'Banka',            v: form.bank_banka || '—' },
-                                    { l: 'Žiro račun',       v: form.bank_racun || '—', mono: true },
+                                    { l: 'Naziv korisnika',  v: form.bank_naziv || 'Nije unijeto' },
+                                    { l: 'Banka',            v: form.bank_banka || 'Nije unijeto' },
+                                    { l: 'Žiro račun',       v: form.bank_racun || 'Nije unijeto', mono: true },
                                 ].map(row => (
                                     <div key={row.l} className={`rounded-xl p-3 ${row.highlight ? 'bg-[#FFEA00]/20' : 'bg-white/5'}`}>
                                         <p className="text-[#6674A3] text-[10px] mb-0.5">{row.l}</p>
@@ -2659,21 +2690,21 @@ function AdminSettings() {
                         <div className="space-y-4">
                             {FIELDS.map(field => (
                                 <div key={field.key}>
-                                    <label className="block text-xs font-semibold text-gray-600 mb-1">{field.label}</label>
+                                    <label className="block text-xs font-semibold text-[#6674A3] mb-1">{field.label}</label>
                                     {field.textarea ? (
                                         <textarea
                                             value={form[field.key] ?? ''}
                                             onChange={f(field.key)}
                                             placeholder={field.placeholder}
                                             rows={3}
-                                            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] resize-none bg-white"
+                                            className="w-full border border-white/10 rounded-xl px-3 py-2 text-sm bg-[#12142D] text-white placeholder-[#6674A3] focus:outline-none focus:border-[#FF0026] resize-none"
                                         />
                                     ) : (
                                         <input
                                             value={form[field.key] ?? ''}
                                             onChange={f(field.key)}
                                             placeholder={field.placeholder}
-                                            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026] bg-white"
+                                            className="w-full border border-white/10 rounded-xl px-3 py-2 text-sm bg-[#12142D] text-white placeholder-[#6674A3] focus:outline-none focus:border-[#FF0026]"
                                         />
                                     )}
                                 </div>
@@ -2748,80 +2779,82 @@ function AdminBanners() {
         <div className="p-6 max-w-5xl">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-xl font-black text-[#12142D]">Baneri / Reklame</h1>
-                    <p className="text-sm text-gray-400 mt-0.5">Pop-up reklame i bočni ad placementi za sponzore</p>
+                    <h1 className="text-xl font-black text-white">Baneri / Reklame</h1>
+                    <p className="text-sm text-[#6674A3] mt-0.5">Pop-up reklame i bočni ad placementi za sponzore</p>
                 </div>
                 <button onClick={() => setShowForm(p => !p)}
                     className="bg-[#FF0026] hover:bg-red-700 text-white text-sm font-bold px-4 py-2 rounded-xl transition">
-                    {showForm ? 'Zatvori' : '+ Novi baner'}
+                    {showForm ? 'Zatvori' : 'Novi baner'}
                 </button>
             </div>
 
             {showForm && (
-                <div className="bg-white rounded-2xl p-5 shadow-sm mb-6 space-y-4">
+                <div className="bg-[#1A1D3A] border border-white/[0.06] rounded-2xl p-5 shadow-sm mb-6 space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1">Naziv (sponzor/kampanja)</label>
+                            <label className="block text-xs font-semibold text-[#6674A3] mb-1">Naziv (sponzor/kampanja)</label>
                             <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]" />
+                                className="w-full border border-white/10 rounded-xl px-3 py-2.5 text-sm bg-[#12142D] text-white placeholder-[#6674A3] focus:outline-none focus:border-[#FF0026]" />
                         </div>
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1">Link (opciono)</label>
+                            <label className="block text-xs font-semibold text-[#6674A3] mb-1">Link (opciono)</label>
                             <input type="url" placeholder="https://..." value={form.link_url} onChange={e => setForm(f => ({ ...f, link_url: e.target.value }))}
-                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0026]" />
+                                className="w-full border border-white/10 rounded-xl px-3 py-2.5 text-sm bg-[#12142D] text-white placeholder-[#6674A3] focus:outline-none focus:border-[#FF0026]" />
                         </div>
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1">Pozicija</label>
+                            <label className="block text-xs font-semibold text-[#6674A3] mb-1">Pozicija</label>
                             <select value={form.position} onChange={e => setForm(f => ({ ...f, position: e.target.value }))}
-                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#FF0026]">
+                                className="w-full border border-white/10 rounded-xl px-3 py-2.5 text-sm bg-[#12142D] text-white focus:outline-none focus:border-[#FF0026]">
                                 <option value="sidebar">Bočni (sidebar)</option>
                                 <option value="popup">Pop-up (ulazak na sajt)</option>
                                 <option value="homepage">Početna stranica</option>
                             </select>
                         </div>
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1">Slika banera</label>
+                            <label className="block text-xs font-semibold text-[#6674A3] mb-1">Slika banera</label>
                             <input type="file" accept="image/*" onChange={e => setForm(f => ({ ...f, image: e.target.files[0] }))}
-                                className="w-full text-sm text-gray-500 file:mr-3 file:px-3 file:py-2 file:rounded-xl file:border-0 file:bg-[#12142D] file:text-white file:text-xs file:font-bold" />
+                                className="w-full text-sm text-[#6674A3] file:mr-3 file:px-3 file:py-2 file:rounded-xl file:border-0 file:bg-[#FF0026] file:text-white file:text-xs file:font-bold file:cursor-pointer" />
                         </div>
                     </div>
                     <button
                         onClick={() => createMutation.mutate()}
                         disabled={!form.title || !form.image || createMutation.isPending}
-                        className="bg-[#12142D] hover:bg-[#1B2B5A] text-white text-sm font-bold px-5 py-2.5 rounded-xl transition disabled:opacity-50">
+                        className="bg-[#FF0026] hover:bg-red-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition disabled:opacity-50">
                         {createMutation.isPending ? 'Čuvanje...' : 'Sačuvaj baner'}
                     </button>
                 </div>
             )}
 
-            {isLoading && <p className="text-gray-400 py-8 text-center">Učitavanje...</p>}
+            {isLoading && <p className="text-[#6674A3] py-8 text-center">Učitavanje...</p>}
 
             {!isLoading && banners.length === 0 && (
-                <div className="bg-white rounded-2xl p-10 text-center shadow-sm">
-                    <div className="text-4xl mb-2">📣</div>
-                    <p className="text-gray-500">Nema banera. Dodajte prvi baner za sponzora.</p>
+                <div className="bg-[#1A1D3A] border border-white/[0.06] rounded-2xl p-10 text-center shadow-sm">
+                    <div className="w-12 h-12 rounded-2xl bg-white/[0.06] flex items-center justify-center mx-auto mb-3 text-[#6674A3]">
+                        <Ic d={IC.megaphone} className="w-6 h-6" />
+                    </div>
+                    <p className="text-[#6674A3]">Nema banera. Dodajte prvi baner za sponzora.</p>
                 </div>
             )}
 
             <div className="space-y-3">
                 {banners.map(b => (
-                    <div key={b.id} className="bg-white rounded-2xl shadow-sm p-4 flex items-center gap-4">
-                        <img src={b.image} alt={b.title} className="w-28 h-16 object-cover rounded-xl bg-gray-100 flex-shrink-0" />
+                    <div key={b.id} className="bg-[#1A1D3A] border border-white/[0.06] rounded-2xl shadow-sm p-4 flex items-center gap-4">
+                        <img src={b.image} alt={b.title} className="w-28 h-16 object-cover rounded-xl bg-white/[0.06] flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                            <p className="font-bold text-[#12142D] truncate">{b.title}</p>
-                            <p className="text-xs text-gray-400">{POSITION_LABELS[b.position] ?? b.position}</p>
-                            {b.link_url && <p className="text-xs text-blue-500 truncate">{b.link_url}</p>}
-                            <p className="text-xs text-gray-400 mt-0.5">👁 {b.views_count} prikaza · 🖱 {b.clicks_count} klikova</p>
+                            <p className="font-bold text-white truncate">{b.title}</p>
+                            <p className="text-xs text-[#6674A3]">{POSITION_LABELS[b.position] ?? b.position}</p>
+                            {b.link_url && <p className="text-xs text-[#6674A3] truncate">{b.link_url}</p>}
+                            <p className="text-xs text-[#6674A3] mt-0.5">{b.views_count} prikaza, {b.clicks_count} klikova</p>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
                             <button onClick={() => toggleMutation.mutate({ id: b.id, is_active: b.is_active })}
                                 className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition ${
-                                    b.is_active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                    b.is_active ? 'bg-green-500/15 text-green-400 hover:bg-green-500/25' : 'bg-white/[0.06] text-[#6674A3] hover:bg-white/[0.1]'
                                 }`}>
                                 {b.is_active ? 'Aktivan' : 'Neaktivan'}
                             </button>
                             <button onClick={() => { if (window.confirm('Obrisati baner?')) deleteMutation.mutate(b.id); }}
-                                className="text-xs px-3 py-1.5 bg-red-50 hover:bg-red-100 text-[#FF0026] rounded-lg font-semibold transition">
+                                className="text-xs px-3 py-1.5 bg-[#FF0026]/10 hover:bg-[#FF0026]/20 text-[#FF0026] rounded-lg font-semibold transition">
                                 Obriši
                             </button>
                         </div>
